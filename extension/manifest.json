@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "LoadAgent AI - Dispatch Copilot",
+  "version": "1.0.0",
+  "description": "Parse broker emails and generate instant profit-maximized counter-offers.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["https://mail.google.com/*", "https://loadagent-ai-mpv.vercel.app/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
