@@ -6,7 +6,7 @@
   <title>LoadAgent AI - Autonomous Dispatcher Control</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Clerk Script -->
+  <!-- Clerk SDK -->
   <script
     async
     crossorigin="anonymous"
@@ -15,27 +15,38 @@
     type="text/javascript"
   ></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
-  <div class="max-w-4xl mx-auto space-y-6">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-6">
 
+  <!-- 1. Signed Out View: Pehle sirf yeh Login/Signup screen dikhegi -->
+  <div id="signed-out-view" class="max-w-md w-full bg-slate-800/80 border border-slate-700/60 p-8 rounded-2xl text-center space-y-6 shadow-2xl" style="display: none;">
+    <div>
+      <h1 class="text-3xl font-bold text-emerald-400 mb-2">LoadAgent AI</h1>
+      <p class="text-sm text-slate-400">Autonomous Email Negotiation for US Fleets</p>
+    </div>
+    <div class="py-4">
+      <p class="text-slate-300 text-sm mb-6">Please sign in or create an account to access the AI Dispatcher dashboard.</p>
+      <button id="main-sign-in-btn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl transition shadow-lg text-base">
+        Sign In / Sign Up
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Signed In View: Login karne ke baad yeh poora Dashboard dikhega -->
+  <div id="signed-in-view" class="max-w-4xl w-full mx-auto space-y-6" style="display: none;">
+    
     <!-- Header -->
     <header class="flex justify-between items-center border-b border-slate-800 pb-4">
       <div>
         <h1 class="text-2xl font-bold text-emerald-400">LoadAgent AI</h1>
         <p class="text-sm text-slate-400">Autonomous Email Negotiation for US Fleets</p>
       </div>
-      
-      <!-- Auth Section -->
-      <div class="flex items-center gap-4">
-        <span class="bg-emerald-500/10 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/20">
+
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-500/10 text-emerald-400 text-xs px-3 py-1.5 rounded-full border border-emerald-500/20 font-medium">
           Live AI Engine Active
         </span>
+        <!-- User Profile Button -->
         <div id="user-button"></div>
-        <div id="auth-buttons">
-          <button id="sign-in-btn" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-4 py-2 rounded-lg font-semibold text-sm transition">
-            Sign In / Sign Up
-          </button>
-        </div>
       </div>
     </header>
 
@@ -43,14 +54,14 @@
     <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-xl space-y-4">
       <h2 class="text-lg font-semibold text-slate-200">1. Paste Broker Load Email</h2>
       <textarea class="w-full h-32 bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm focus:outline-none focus:border-emerald-500" placeholder="Paste incoming broker email text here..."></textarea>
-      <button class="bg-emerald-500 text-slate-950 font-bold px-5 py-2.5 rounded-lg hover:bg-emerald-400 transition">
+      <button class="bg-emerald-500 text-slate-950 font-bold px-5 py-2 rounded-lg hover:bg-emerald-400 text-sm transition">
         Parse & Negotiate Load
       </button>
     </div>
 
   </div>
 
-  <!-- Clerk Initialization Script -->
+  <!-- Clerk Authentication Logic Script -->
   <script>
     window.addEventListener('load', async () => {
       const clerkPubKey = "pk_test_dG91Y2hpbmctb3J5eC02OTI0LmNsZXJrLmFjY291bnRzLmRldiQ";
@@ -58,12 +69,20 @@
       if (window.Clerk) {
         await Clerk.load({ publishableKey: clerkPubKey });
         
+        const signedOutView = document.getElementById('signed-out-view');
+        const signedInView = document.getElementById('signed-in-view');
+        
         if (Clerk.user) {
-          document.getElementById('auth-buttons').style.display = 'none';
+          // User logged in hai -> Dashboard dikhao, Login screen chhupa do
+          signedOutView.style.display = 'none';
+          signedInView.style.display = 'block';
           Clerk.mountUserButton(document.getElementById('user-button'));
         } else {
-          document.getElementById('auth-buttons').style.display = 'block';
-          document.getElementById('sign-in-btn').addEventListener('click', () => {
+          // User logged out hai -> Sirf Login screen dikhao, Dashboard chhupa do
+          signedInView.style.display = 'none';
+          signedOutView.style.display = 'block';
+          
+          document.getElementById('main-sign-in-btn').addEventListener('click', () => {
             Clerk.openSignIn();
           });
         }
