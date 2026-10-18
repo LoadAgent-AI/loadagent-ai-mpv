@@ -82,28 +82,42 @@
   <!-- ========================================== -->
   <!-- 2. SIGNED-IN VIEW (Dashboard & Optimizer) -->
   <!-- ========================================== -->
-  <div id="signed-in-view" class="max-w-xl w-full mx-auto space-y-6 hidden py-6">
-  <!-- Logo & Tagline Header Block -->
-<div class="w-full text-center py-6 px-4 bg-slate-800/60 border border-slate-700/60 rounded-xl mb-6">
-  <!-- Logo -->
-  <img src="logo.png" alt="LoadAgent AI Logo" class="h-16 mx-auto mb-3 object-contain" />
+  <!-- SIGNED-IN VIEW CONTAINER -->
+<div id="signed-in-view" class="hidden max-w-xl w-full mx-auto">
 
-  <!-- Main Tagline -->
-  <h1 class="text-xl md:text-2xl font-extrabold text-white leading-tight">
-    The Next Generation of AI-Powered <span class="text-emerald-400">LoadAgent-AI</span>
-  </h1>
+  <!-- 1. DEDICATED WELCOME / SPLASH SCREEN (Initial State) -->
+  <div id="welcome-screen" class="min-h-[70vh] flex flex-col items-center justify-center text-center p-8 bg-slate-800/90 border border-slate-700/60 rounded-2xl shadow-2xl my-auto">
+    <!-- Logo -->
+    <img src="Screenshot_20261018-110940.jpg" alt="LoadAgent AI Logo" class="h-28 mx-auto mb-6 object-contain rounded-xl shadow-md" />
 
-  <!-- Sub-Tagline -->
-  <p class="text-emerald-300/80 text-xs uppercase tracking-widest font-semibold mt-2 mb-3">
-    • Trucking & Freight Dispatchers Industry •
-  </p>
+    <!-- Main Tagline -->
+    <h1 class="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">
+      The Next Generation of AI-Powered <span class="text-emerald-400">LoadAgent-AI</span>
+    </h1>
 
-  <!-- Status -->
-  <div class="inline-flex items-center space-x-2 px-3 py-1 bg-slate-900/80 rounded-full border border-slate-700 text-slate-300 text-xs">
-    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-    <span>Logged In Successfully</span>
+    <!-- Sub-Tagline -->
+    <p class="text-emerald-300/90 text-xs uppercase tracking-widest font-semibold mb-8">
+      • Trucking & Freight Dispatchers Industry •
+    </p>
+
+    <!-- Go to Dashboard Button -->
+    <button id="enter-dash-btn" type="button" class="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold text-sm rounded-xl shadow-lg transition duration-200 cursor-pointer">
+      Go to Dashboard &rarr;
+    </button>
   </div>
-</div>
+
+  <!-- 2. MAIN DASHBOARD CONTENT (Hidden until Enter Button Clicked) -->
+  <div id="main-dashboard-content" class="hidden space-y-6">
+    <!-- Top Bar with Small Logo & Logout -->
+    <div class="flex justify-between items-center py-3 border-b border-slate-800 mb-4">
+      <div class="flex items-center gap-3">
+        <img src="Screenshot_20261018-110940.jpg" alt="LoadAgent AI" class="h-8 object-contain rounded" />
+        <span class="text-sm font-bold text-emerald-400">LoadAgent AI</span>
+      </div>
+      <button id="logout-btn" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300">
+        Logout
+      </button>
+    </div>
   <!-- Paste Box -->
     <div class="bg-slate-800/60 border border-slate-700/60 p-5 rounded-2xl space-y-3 shadow-lg">
       <div class="flex justify-between items-center">
@@ -181,6 +195,13 @@ LoadAgent Dispatcher Copilot</div>
     const signedOutView = document.getElementById('signed-out-view');
     const signedInView = document.getElementById('signed-in-view');
     const logoutBtn = document.getElementById('logout-btn');
+    // Enter Dashboard Toggle Logic
+  document.addEventListener("click", function(e) {
+    if (e.target && e.target.id === "enter-dash-btn") {
+      document.getElementById("welcome-screen").classList.add("hidden");
+      document.getElementById("main-dashboard-content").classList.remove("hidden");
+    }
+  });
 
     // Tab Switching Logic
     tabSignin.addEventListener('click', () => {
