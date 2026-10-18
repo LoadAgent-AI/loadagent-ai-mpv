@@ -83,18 +83,28 @@
   <!-- 2. SIGNED-IN VIEW (Dashboard & Optimizer) -->
   <!-- ========================================== -->
   <div id="signed-in-view" class="max-w-xl w-full mx-auto space-y-6 hidden py-6">
-    <header class="flex justify-between items-center border-b border-slate-800 pb-4">
-      <div>
-        <h1 class="text-xl font-bold text-emerald-400">LoadAgent AI</h1>
-        <p class="text-xs text-slate-400">Autonomous Email Negotiation for US Fleets</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="bg-emerald-500/10 text-emerald-400 text-[10px] px-2.5 py-1 rounded-full border border-emerald-500/20 font-medium">Live AI Engine Active</span>
-        <button id="logout-btn" class="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700">Sign Out</button>
-      </div>
-    </header>
+  <!-- Logo & Tagline Header Block -->
+<div class="w-full text-center py-6 px-4 bg-slate-800/60 border border-slate-700/60 rounded-xl mb-6">
+  <!-- Logo -->
+  <img src="logo.png" alt="LoadAgent AI Logo" class="h-16 mx-auto mb-3 object-contain" />
 
-    <!-- Paste Box -->
+  <!-- Main Tagline -->
+  <h1 class="text-xl md:text-2xl font-extrabold text-white leading-tight">
+    The Next Generation of AI-Powered <span class="text-emerald-400">LoadAgent-AI</span>
+  </h1>
+
+  <!-- Sub-Tagline -->
+  <p class="text-emerald-300/80 text-xs uppercase tracking-widest font-semibold mt-2 mb-3">
+    • Trucking & Freight Dispatchers Industry •
+  </p>
+
+  <!-- Status -->
+  <div class="inline-flex items-center space-x-2 px-3 py-1 bg-slate-900/80 rounded-full border border-slate-700 text-slate-300 text-xs">
+    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+    <span>Logged In Successfully</span>
+  </div>
+</div>
+  <!-- Paste Box -->
     <div class="bg-slate-800/60 border border-slate-700/60 p-5 rounded-2xl space-y-3 shadow-lg">
       <div class="flex justify-between items-center">
         <h2 class="text-sm font-semibold text-slate-200">1. Paste Broker Load Email</h2>
