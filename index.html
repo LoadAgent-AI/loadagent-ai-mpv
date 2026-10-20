@@ -309,88 +309,154 @@
   <!-- ========================================== -->
   <!-- 3. JAVASCRIPT LOGIC -->
   <!-- ========================================== -->
-  <script>
-    // Sidebar Drawer Toggle Function
+    <script>
+    // 1. Sidebar Toggle Functionality
     function toggleSidebar() {
       const sidebar = document.getElementById('app-sidebar');
       const overlay = document.getElementById('sidebar-overlay');
-      if (sidebar && overlay) {
-        sidebar.classList.toggle('-translate-x-full');
-        overlay.classList.toggle('hidden');
-      }
+      if (sidebar) sidebar.classList.toggle('-translate-x-full');
+      if (overlay) overlay.classList.toggle('hidden');
     }
 
-    const tabSignin = document.getElementById('tab-signin');
-    const tabSignup = document.getElementById('tab-signup');
-    const signinForm = document.getElementById('signin-form');
-    const signupForm = document.getElementById('signup-form');
-    const signedOutView = document.getElementById('signed-out-view');
-    const signedInView = document.getElementById('signed-in-view');
-    const logoutBtn = document.getElementById('logout-btn');
+    document.addEventListener('DOMContentLoaded', () => {
+      // Elements Assignment
+      const tabSignin = document.getElementById('tab-signin');
+      const tabSignup = document.getElementById('tab-signup');
+      const signinForm = document.getElementById('signin-form');
+      const signupForm = document.getElementById('signup-form');
+      const signedOutView = document.getElementById('signed-out-view');
+      const signedInView = document.getElementById('signed-in-view');
+      const mainContent = document.getElementById('main-dashboard-content');
+      const logoutBtn = document.getElementById('logout-btn');
 
-    // Enter Dashboard Toggle Logic
-    document.addEventListener("click", function(e) {
-      if (e.target && e.target.id === "enter-dash-btn") {
-        document.getElementById("welcome-screen").classList.add("hidden");
-        document.getElementById("main-dashboard-content").classList.remove("hidden");
+      // Check Session Storage on Page Load
+      if (localStorage.getItem('isLoggedIn') === 'true') {
+        if (signedOutView) signedOutView.classList.add('hidden');
+        if (signedInView) signedInView.classList.remove('hidden');
+        if (mainContent) mainContent.classList.remove('hidden');
+      }
+
+      // Enter Dashboard Bypass Button Logic
+      const enterDashBtn = document.getElementById('enter-dash-btn');
+      if (enterDashBtn) {
+        enterDashBtn.addEventListener('click', () => {
+          localStorage.setItem('isLoggedIn', 'true');
+          if (signedOutView) signedOutView.classList.add('hidden');
+          if (signedInView) signedInView.classList.remove('hidden');
+          if (mainContent) mainContent.classList.remove('hidden');
+        });
+      }
+
+      // Tab Switching Logic
+      if (tabSignin && tabSignup && signinForm && signupForm) {
+        tabSignin.addEventListener('click', () => {
+          tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-teal-400 font-semibold text-slate-100";
+          tabSignup.className = "w-1/2 py-2 text-center text-slate-400 font-semibold";
+          signinForm.classList.remove('hidden');
+          signupForm.classList.add('hidden');
+        });
+
+        tabSignup.addEventListener('click', () => {
+          tabSignup.className = "w-1/2 py-2 text-center border-b-2 border-teal-400 font-semibold text-slate-100";
+          tabSignin.className = "w-1/2 py-2 text-center text-slate-400 font-semibold";
+          signupForm.classList.remove('hidden');
+          signinForm.classList.add('hidden');
+        });
+      }
+
+      // Forms Submission Logic
+      if (signinForm) {
+        signinForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          localStorage.setItem('isLoggedIn', 'true');
+          if (signedOutView) signedOutView.classList.add('hidden');
+          if (signedInView) signedInView.classList.remove('hidden');
+          if (mainContent) mainContent.classList.remove('hidden');
+        });
+      }
+
+      if (signupForm) {
+        signupForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          localStorage.setItem('isLoggedIn', 'true');
+          if (signedOutView) signedOutView.classList.add('hidden');
+          if (signedInView) signedInView.classList.remove('hidden');
+          if (mainContent) mainContent.classList.remove('hidden');
+        });
+      }
+
+      // Logout Logic
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('isLoggedIn');
+          if (signedInView) signedInView.classList.add('hidden');
+          if (mainContent) mainContent.classList.add('hidden');
+          if (signedOutView) signedOutView.classList.remove('hidden');
+          if (signinForm) signinForm.reset();
+          if (signupForm) signupForm.reset();
+        });
+      }
+
+      // 2. Email Parser & Rate Optimization Logic
+      const sampleBtn = document.getElementById('sample-btn');
+      const emailText = document.getElementById('email-text');
+      const parseBtn = document.getElementById('parse-btn');
+      const outputContainer = document.getElementById('output-container');
+      const offeredRateEl = document.getElementById('offered-rate');
+      const targetRateEl = document.getElementById('target-rate');
+      const generatedDraftEl = document.getElementById('generated-email-draft');
+      const copyBtn = document.getElementById('copy-btn');
+
+      if (sampleBtn && emailText) {
+        sampleBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          emailText.value = "Subject: Load Confirmation - Flatbed Load from Chicago, IL to Omaha, NE\n\nHi Team,\n\nWe have an urgent load available for pickup today in Chicago, IL delivering to Omaha, NE tomorrow morning.\n\nLoad Details:\n- Equipment: 53ft Flatbed\n- Commodity: Construction Steel (42,000 lbs)\n- Miles: 470 miles\n- Rate: $1,200 All-In\n\nPlease let me know if your truck can cover this today.\n\nBest regards,\nMark Spencer";
+        });
+      }
+
+      if (parseBtn && emailText && outputContainer) {
+        parseBtn.addEventListener('click', () => {
+          const text = emailText.value.trim();
+          if (!text) {
+            alert("Kripya pehle email text paste karein!");
+            return;
+          }
+
+          let rate = 0;
+          // Regex to search for $ amount
+          const match = text.match(/\$\s*([0-9,]+)/);
+          if (match && match[1]) {
+            rate = parseInt(match[1].replace(/,/g, ''), 10);
+          }
+
+          if (rate === 0) {
+            alert("Email text mein '$' amount nahi mili! Kripya 'Rate: $1200' jaisa text shamil karein.");
+            return;
+          }
+
+          const targetRate = Math.round(rate * 1.15); // 15% increase
+
+          if (offeredRateEl) offeredRateEl.textContent = `$${rate.toLocaleString()}`;
+          if (targetRateEl) targetRateEl.textContent = `$${targetRate.toLocaleString()}`;
+          
+          if (generatedDraftEl) {
+            generatedDraftEl.textContent = `Hi Mark,\n\nThanks for reaching out. Given the current market conditions and lane requirements to Omaha, NE, our best rate for this load is $${targetRate.toLocaleString()}.\n\nLet me know if we can lock this in and I will send over driver details right away.\n\nBest,\nLoadAgent AI Dispatch Team`;
+          }
+
+          outputContainer.classList.remove('hidden');
+        });
+      }
+
+      if (copyBtn && generatedDraftEl) {
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(generatedDraftEl.textContent);
+          copyBtn.textContent = "✅ Copied to Clipboard!";
+          setTimeout(() => {
+            copyBtn.textContent = "📋 Copy Draft to Clipboard";
+          }, 2000);
+        });
       }
     });
-    // Tab Switching Logic
-    tabSignin.addEventListener('click', () => {
-      tabSignin.className = "w-1/2 py-2 text-center text-sm font-semibold border-b-2 border-emerald-400 text-emerald-400";
-      tabSignup.className = "w-1/2 py-2 text-center text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200";
-      signinForm.classList.remove('hidden');
-      signupForm.classList.add('hidden');
-    });
-
-    tabSignup.addEventListener('click', () => {
-      tabSignup.className = "w-1/2 py-2 text-center text-sm font-semibold border-b-2 border-emerald-400 text-emerald-400";
-      tabSignin.className = "w-1/2 py-2 text-center text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200";
-      signupForm.classList.remove('hidden');
-      signinForm.classList.add('hidden');
-    });
-
-    // Native Forms Submit Handlers
-    signinForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      signedOutView.classList.add('hidden');
-      signedInView.classList.remove('hidden');
-    });
-
-    signupForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      signedOutView.classList.add('hidden');
-      signedInView.classList.remove('hidden');
-    });
-
-    // REAL GOOGLE AUTH RESPONSE HANDLER
-    function handleCredentialResponse(response) {
-      // User successfully picked their own Google account
-      signedOutView.classList.add('hidden');
-      signedInView.classList.remove('hidden');
-    }
-
-    logoutBtn.addEventListener('click', () => {
-      signedInView.classList.add('hidden');
-      signedOutView.classList.remove('hidden');
-      signinForm.reset();
-      signupForm.reset();
-    });
-
-    // Email Parser Actions
-    document.getElementById('sample-btn').addEventListener('click', () => {
-      document.getElementById('email-text').value = "Subject: LOAD OFFER: Dry Van - Chicago, IL to Atlanta, GA - $1,800\nHi Dispatch,\n\nWe have a heavy Dry Van load available for immediate pickup...";
-    });
-
-    document.getElementById('parse-btn').addEventListener('click', () => {
-      const input = document.getElementById('email-text').value;
-      if (!input.trim()) return alert("Please paste an email first!");
-      document.getElementById('output-container').classList.remove('hidden');
-    });
-
-    document.getElementById('copy-btn').addEventListener('click', () => {
-      alert("Counter offer email copied to clipboard!");
-    });
-  </script>
+</script>
 </body>
 </html>
