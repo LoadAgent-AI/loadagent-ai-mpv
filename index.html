@@ -311,6 +311,16 @@
   <!-- 3. JAVASCRIPT LOGIC -->
   <!-- ========================================== -->
   <script>
+    // Sidebar Drawer Toggle Function
+    function toggleSidebar() {
+      const sidebar = document.getElementById('app-sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      if (sidebar && overlay) {
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+      }
+    }
+
     const tabSignin = document.getElementById('tab-signin');
     const tabSignup = document.getElementById('tab-signup');
     const signinForm = document.getElementById('signin-form');
@@ -318,14 +328,14 @@
     const signedOutView = document.getElementById('signed-out-view');
     const signedInView = document.getElementById('signed-in-view');
     const logoutBtn = document.getElementById('logout-btn');
-    // Enter Dashboard Toggle Logic
-  document.addEventListener("click", function(e) {
-    if (e.target && e.target.id === "enter-dash-btn") {
-      document.getElementById("welcome-screen").classList.add("hidden");
-      document.getElementById("main-dashboard-content").classList.remove("hidden");
-    }
-  });
 
+    // Enter Dashboard Toggle Logic
+    document.addEventListener("click", function(e) {
+      if (e.target && e.target.id === "enter-dash-btn") {
+        document.getElementById("welcome-screen").classList.add("hidden");
+        document.getElementById("main-dashboard-content").classList.remove("hidden");
+      }
+    });
     // Tab Switching Logic
     tabSignin.addEventListener('click', () => {
       tabSignin.className = "w-1/2 py-2 text-center text-sm font-semibold border-b-2 border-emerald-400 text-emerald-400";
