@@ -268,12 +268,18 @@
   <script>
     // 1. Sidebar Toggle Functionality
     function toggleSidebar() {
-      const sidebar = document.getElementById('app-sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
-      if (sidebar) sidebar.classList.toggle('-translate-x-full');
-      if (overlay) overlay.classList.toggle('hidden');
-    }
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    if (sidebar) sidebar.classList.toggle('-translate-x-full');
+    if (overlay) overlay.classList.toggle('hidden');
+}
 
+// Google OAuth Response Handler
+window.handleCredentialResponse = function(response) {
+    if (response.credential) {
+        showWelcomeView();
+    }
+};
     document.addEventListener('DOMContentLoaded', () => {
       // Elements Assignment
       const tabSignin = document.getElementById('tab-signin');
