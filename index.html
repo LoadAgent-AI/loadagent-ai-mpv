@@ -277,7 +277,19 @@
 // Google OAuth Response Handler
 window.handleCredentialResponse = function(response) {
     if (response.credential) {
-        showWelcomeView();
+        // Session save karein
+        localStorage.setItem('isLoggedIn', 'true');
+        
+        // Sign-in view ko chupayein aur dashboard/welcome view ko show karein
+        const signedOutView = document.getElementById('signedOutView');
+        const signedInView = document.getElementById('signedInView');
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const mainContent = document.getElementById('mainContent');
+
+        if (signedOutView) signedOutView.classList.add('hidden');
+        if (signedInView) signedInView.classList.remove('hidden');
+        if (welcomeScreen) welcomeScreen.classList.remove('hidden');
+        if (mainContent) mainContent.classList.remove('hidden');
     }
 };
     document.addEventListener('DOMContentLoaded', () => {
