@@ -275,12 +275,23 @@
 }
 
     // Google OAuth Response Handler
-window.handleCredentialResponse = function(response) {
-    if (response.credential) {
+function handleCredentialResponse(response) {
+    console.log("Encoded JWT ID token: " + response.credential);
+    
+    // Save token and state to localStorage for persistence
+    localStorage.setItem("google_token", response.credential);
+    localStorage.setItem("is_logged_in", "true");
+
+    // Instantly trigger welcome view or dashboard
+    if (typeof showWelcomeView === "function") {
         showWelcomeView();
+    } else {
+        // Fallback redirection if function is missing
+        window.location.href = "#dashboard";
+        location.reload();
     }
-};
-    document.addEventListener('DOMContentLoaded', () => {
+}
+      document.addEventListener('DOMContentLoaded', () => {
       // Elements Assignment
       const tabSignin = document.getElementById('tab-signin');
       const tabSignup = document.getElementById('tab-signup');
