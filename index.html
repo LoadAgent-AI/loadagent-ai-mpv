@@ -274,24 +274,27 @@
     if (overlay) overlay.classList.toggle('hidden');
 }
 
-    // Google OAuth Response Handler
+     // Google OAuth Response Handler
 function handleCredentialResponse(response) {
     console.log("Encoded JWT ID token: " + response.credential);
     
-    // Save token and state to localStorage for persistence
+    // Save token and login status to local storage
     localStorage.setItem("google_token", response.credential);
     localStorage.setItem("is_logged_in", "true");
 
-    // Instantly trigger welcome view or dashboard
-    if (typeof showWelcomeView === "function") {
-        showWelcomeView();
+    // Toggle visibility between login form and dashboard view
+    const authView = document.getElementById("auth-view") || document.querySelector("form").closest("div");
+    const signedInView = document.getElementById("signed-in-view");
+
+    if (signedInView) {
+        signedInView.classList.remove("hidden");
+        if (authView) authView.style.display = "none";
     } else {
-        // Fallback redirection if function is missing
-        window.location.href = "#dashboard";
-        location.reload();
+        // Fallback: reload page if signed-in container ID is missing
+        window.location.reload();
     }
 }
-      document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
       // Elements Assignment
       const tabSignin = document.getElementById('tab-signin');
       const tabSignup = document.getElementById('tab-signup');
