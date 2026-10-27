@@ -110,158 +110,151 @@
       </button>
     </div>
 
-    <!-- 2. MAIN DASHBOARD CONTENT (Hidden until Enter Button Clicked) -->
-    <div id="main-dashboard-content" class="hidden min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col">
+      <!-- MAIN DASHBOARD CONTENT (Updated Sidebar & Mobile View) -->
+<div id="main-dashboard-content" class="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+  
+  <!-- Top Header Navigation Bar -->
+  <header class="h-16 w-full bg-slate-900/90 border-b border-slate-800 backdrop-blur sticky top-0 z-30 px-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <!-- Toggle Sidebar Button for Mobile -->
+      <button id="menu-toggle-btn" type="button" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" onclick="toggleSidebar()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
       
-      <!-- Top Navigation Bar -->
-      <header class="h-16 w-full bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md">
-        <div class="flex items-center gap-3">
-          <!-- Collapsible Menu Button -->
-          <button id="menu-toggle-btn" onclick="toggleSidebar()" class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">
-            <i class="fa-solid fa-bars text-base"></i>
-          </button>
-          <!-- App Brand Title -->
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center font-bold text-slate-950">LA</div>
-            <span class="font-bold text-slate-100 text-base">LoadAgent<span class="text-emerald-400">-AI</span></span>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <!-- Verified Shield & Status -->
-          <div class="hidden sm:flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full text-xs text-emerald-400">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>MC #894210 Verified</span>
-          </div>
-          <button id="logout-btn" class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs px-3 py-1.5 border border-slate-700 flex items-center gap-2">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span>Logout</span>
-          </button>
-        </div>
-      </header>
-
-      <div class="flex flex-1 w-full relative">
-        
-        <!-- Collapsible Sidebar Drawer -->
-        <aside id="app-sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Navigation</span>
-              <button onclick="toggleSidebar()" class="text-slate-400 hover:text-slate-200">
-                <i class="fa-solid fa-xmark text-base"></i>
-              </button>
-            </div>
-            <nav class="space-y-1">
-              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 text-sm font-semibold">
-                <i class="fa-solid fa-chart-line w-4"></i>
-                <span>Dashboard</span>
-              </a>
-              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm">
-                <i class="fa-solid fa-truck-ramp-box w-4"></i>
-                <span>Active Loads</span>
-              </a>
-              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm">
-                <i class="fa-solid fa-location-dot w-4"></i>
-                <span>Fleet Maps</span>
-              </a>
-              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-sm">
-                <i class="fa-brands fa-chrome w-4"></i>
-                <span>Extension</span>
-              </a>
-            </nav>
-          </div>
-          <div class="pt-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-            LoadAgent-AI v1.0
-          </div>
-        </aside>
-
-        <!-- Sidebar Overlay for Mobile -->
-        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/80 z-40 hidden"></div>
-
-        <!-- Main Workspace Area -->
-        <main class="flex-1 w-full p-4 max-w-5xl mx-auto space-y-6">
-          
-          <!-- Key Performance Cards -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
-              <p class="text-[11px] text-slate-400 uppercase">Active Loads</p>
-              <h3 class="text-xl md:text-2xl font-bold text-slate-100 mt-1">14 Active</h3>
-            </div>
-            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
-              <p class="text-[11px] text-slate-400 uppercase">Target RPM</p>
-              <h3 class="text-xl md:text-2xl font-bold text-emerald-400 mt-1">$3.42 / mi</h3>
-            </div>
-            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
-              <p class="text-[11px] text-slate-400 uppercase">Saved Hours</p>
-              <h3 class="text-xl md:text-2xl font-bold text-slate-100 mt-1">4.8 Hrs</h3>
-            </div>
-            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
-              <p class="text-[11px] text-slate-400 uppercase">Extension</p>
-              <h3 class="text-xl md:text-2xl font-bold text-emerald-400 mt-1">Connected</h3>
-            </div>
-          </div>
-
-          <!-- Email Parser & Counter Offer -->
-          <div class="bg-slate-900/80 border border-slate-800 p-4 md:p-6 rounded-2xl space-y-4">
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-sm md:text-base font-bold text-slate-100">Load Email & Board Parser</h2>
-                <p class="text-[11px] text-slate-400">Paste broker email or DAT load text below</p>
-              </div>
-              <button id="sample-btn" type="button" class="text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-lg">Sample Email</button>
-            </div>
-
-            <textarea id="email-text" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs md:text-sm text-slate-200 focus:border-emerald-400 focus:outline-none" placeholder="Paste rate confirmation or broker negotiation email here..."></textarea>
-
-            <button id="parse-btn" type="button" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs md:text-sm flex items-center justify-center gap-2">
-              <i class="fa-solid fa-bolt"></i>
-              <span>Calculate Optimal Counter Offer & Draft Reply</span>
-            </button>
-
-            <!-- AI Output Display -->
-            <div id="output-container" class="space-y-4 pt-2 hidden">
-              <h2 class="text-sm font-bold text-slate-100">AI Rate Optimization Output</h2>
-              <div class="grid grid-cols-2 gap-3">
-                <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl">
-                  <span class="text-slate-400 text-xs">BROKER OFFER</span>
-                  <p id="offered-rate" class="text-lg font-bold text-slate-100">$0</p>
-                </div>
-                <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl">
-                  <span class="text-slate-400 text-xs">AI TARGET RATE</span>
-                  <p id="target-rate" class="text-lg font-bold text-emerald-400">$0</p>
-                </div>
-              </div>
-
-              <div class="space-y-2">
-                <span class="text-xs text-slate-400">Generated Response:</span>
-                <div id="generated-email-draft" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-xs font-mono text-slate-300 whitespace-pre-wrap"></div>
-                <button id="copy-btn" type="button" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-xl border border-slate-700">📋 Copy Draft to Clipboard</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Fleet Live Location -->
-          <div class="bg-slate-900/80 border border-slate-800 p-4 md:p-6 rounded-2xl space-y-3">
-            <h2 class="font-bold text-slate-100 text-sm flex items-center justify-between">
-              <span>Live Fleet Status</span>
-              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">ELD Live</span>
-            </h2>
-            <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl flex items-center justify-between text-xs">
-              <div>
-                <p class="font-bold text-slate-200">Truck #104 (Alex)</p>
-                <p class="text-slate-400 text-[11px]">Route: Chicago, IL → Omaha, NE</p>
-                <p class="text-emerald-400 text-[11px]">ETA: 5:30 PM Today</p>
-              </div>
-              <span class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg font-bold">65 MPH</span>
-            </div>
-          </div>
-
-        </main>
+      <!-- Brand Logo & Name -->
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center font-bold text-slate-950">LA</div>
+        <span class="font-bold text-lg tracking-tight">LoadAgent<span class="text-emerald-400">-AI</span></span>
       </div>
     </div>
+
+    <!-- Right Header Actions (Profile Badge & Logout) -->
+    <div class="flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-2 bg-slate-800/70 px-3 py-1.5 rounded-full border border-slate-700/60">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-xs font-semibold text-slate-200">Zain Ul Abdin</span>
+        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded font-bold">Verified ✅</span>
+      </div>
+      <button type="button" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 transition flex items-center gap-1">
+        <span>Logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Body Layout: Sidebar + Dashboard Content -->
+  <div class="flex-1 flex relative">
+    
+    <!-- Collapsible / Mobile Slide-Over Sidebar -->
+    <aside id="sidebar-drawer" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
+      <div class="p-4 space-y-6 overflow-y-auto">
+        
+        <!-- User Quick Status Card (Sidebar Header) -->
+        <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-slate-800 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400">ZA</div>
+          <div class="overflow-hidden">
+            <h4 class="text-sm font-semibold text-slate-200 truncate">Zain Ul Abdin</h4>
+            <div class="flex items-center gap-1 text-[11px] text-emerald-400">
+              <span>Account Status: Verified</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Links Menu -->
+        <nav class="space-y-1">
+          <a href="#dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-sm font-medium">
+            <span>📊</span> Dashboard
+          </a>
+          <a href="#profile" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+            <span>👤</span> Profile
+          </a>
+          <a href="#status" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+            <span>🛡️</span> Account Status
+          </a>
+          <a href="#location" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+            <span>📍</span> Live Location
+          </a>
+          <a href="#diesel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+            <span>⛽</span> Diesel Rates
+          </a>
+          <a href="#profit" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+            <span>💰</span> Profit Calculation
+          </a>
+          <a href="#counter" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+            <span>⚡</span> Counter Offer
+          </a>
+          <a href="#settings" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+            <span>⚙️</span> Settings
+          </a>
+          <a href="#support" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+            <span>💬</span> Help & Support
+          </a>
+          <a href="#faq" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+            <span>❓</span> FAQ
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Overlay backdrop for mobile menu -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Main Workspace Dashboard Area -->
+    <main class="flex-1 lg:ml-64 p-4 lg:p-6 space-y-6">
+      
+      <!-- Quick Stats Grid (4 Cards) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
+          <p class="text-xs text-slate-400 font-medium">Active Loads</p>
+          <h3 class="text-xl font-bold text-white mt-1">14 Active</h3>
+        </div>
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
+          <p class="text-xs text-slate-400 font-medium">Target RPM</p>
+          <h3 class="text-xl font-bold text-emerald-400 mt-1">$3.42 / mi</h3>
+        </div>
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
+          <p class="text-xs text-slate-400 font-medium">Saved Hours</p>
+          <h3 class="text-xl font-bold text-white mt-1">4.8 Hrs</h3>
+        </div>
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
+          <p class="text-xs text-slate-400 font-medium">Extension Status</p>
+          <h3 class="text-xl font-bold text-emerald-400 mt-1">Connected</h3>
+        </div>
+      </div>
+
+      <!-- AI Email & Board Parser Widget -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 lg:p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-slate-100 text-base">Load Email & Board Parser</h3>
+          <button class="text-xs bg-slate-800 text-emerald-400 px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-700 transition">Sample Email</button>
+        </div>
+        <textarea rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 transition" placeholder="Paste rate confirmation or broker negotiation email here..."></textarea>
+        <button type="button" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg transition flex items-center justify-center gap-2 text-sm">
+          <span>⚡ Calculate Optimal Counter Offer & Draft Reply</span>
+        </button>
+      </div>
+
+      <!-- Live Fleet Location Overview (Dashboard Summary) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-slate-100 text-base">Live Fleet Status (Location Preview)</h3>
+          <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">ELD Live</span>
+        </div>
+        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-200">Truck #104 (Alex)</p>
+            <p class="text-[11px] text-slate-400">Route: Chicago, IL ➔ Omaha, NE</p>
+            <p class="text-[10px] text-emerald-400 mt-1">ETA: 5:30 PM Today</p>
+          </div>
+          <span class="text-xs font-bold text-slate-300 bg-slate-800 px-2.5 py-1 rounded">65 MPH</span>
+        </div>
+      </div>
+
+    </main>
   </div>
-
-
+</div>
+    
   <!-- ================================================= -->
   <!-- 3. JAVASCRIPT LOGIC                               -->
   <!-- ================================================= -->
@@ -431,5 +424,15 @@ function handleCredentialResponse(response) {
       }
     });
   </script>
+    <script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar-drawer');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar && backdrop) {
+      sidebar.classList.toggle('-translate-x-full');
+      backdrop.classList.toggle('hidden');
+    }
+  }
+    </script>
 </body>
 </html>
