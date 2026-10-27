@@ -110,14 +110,14 @@
       </button>
     </div>
 
-      <!-- MAIN DASHBOARD CONTENT (Updated Sidebar & Mobile View) -->
+  <!-- MAIN DASHBOARD CONTENT (Updated Dynamic User Profile & Responsive Layout) -->
 <div id="main-dashboard-content" class="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
   
   <!-- Top Header Navigation Bar -->
-  <header class="h-16 w-full bg-slate-900/90 border-b border-slate-800 backdrop-blur sticky top-0 z-30 px-4 flex items-center justify-between">
+  <header class="h-16 w-full bg-slate-900 border-b border-slate-800 sticky top-0 z-50 px-4 flex items-center justify-between shadow-md">
     <div class="flex items-center gap-3">
-      <!-- Toggle Sidebar Button for Mobile -->
-      <button id="menu-toggle-btn" type="button" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" onclick="toggleSidebar()">
+      <!-- Toggle Sidebar Button for Mobile & Desktop -->
+      <button id="menu-toggle-btn" type="button" class="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition focus:outline-none" onclick="toggleSidebar()">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
@@ -125,20 +125,20 @@
       
       <!-- Brand Logo & Name -->
       <div class="flex items-center gap-2">
-        <div class="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center font-bold text-slate-950">LA</div>
+        <div class="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center font-bold text-slate-950 shadow">LA</div>
         <span class="font-bold text-lg tracking-tight">LoadAgent<span class="text-emerald-400">-AI</span></span>
       </div>
     </div>
 
-    <!-- Right Header Actions (Profile Badge & Logout) -->
+    <!-- Right Header Actions (Dynamic User Name & Status) -->
     <div class="flex items-center gap-3">
-      <div class="hidden sm:flex items-center gap-2 bg-slate-800/70 px-3 py-1.5 rounded-full border border-slate-700/60">
+      <div class="hidden sm:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-xs font-semibold text-slate-200">Zain Ul Abdin</span>
-        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded font-bold">Verified ✅</span>
+        <span id="header-user-name" class="text-xs font-semibold text-slate-200">User Profile</span>
+        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded font-bold">Verified ✅</span>
       </div>
-      <button type="button" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 transition flex items-center gap-1">
-        <span>Logout</span>
+      <button type="button" onclick="location.reload()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 transition">
+        Logout
       </button>
     </div>
   </header>
@@ -146,108 +146,134 @@
   <!-- Main Body Layout: Sidebar + Dashboard Content -->
   <div class="flex-1 flex relative">
     
-    <!-- Collapsible / Mobile Slide-Over Sidebar -->
-    <aside id="sidebar-drawer" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
-      <div class="p-4 space-y-6 overflow-y-auto">
+    <!-- Mobile Slide-Over Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden transition-opacity" onclick="toggleSidebar()"></div>
+
+    <!-- Collapsible Sidebar Drawer -->
+    <aside id="sidebar-drawer" class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0 shrink-0">
+      <div class="p-4 space-y-5 overflow-y-auto h-full">
         
-        <!-- User Quick Status Card (Sidebar Header) -->
-        <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-slate-800 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400">ZA</div>
+        <!-- Dynamic User Quick Status Card -->
+        <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 flex items-center gap-3 shadow-inner">
+          <div id="sidebar-user-avatar" class="w-10 h-10 rounded-full bg-slate-800 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 shrink-0">
+            US
+          </div>
           <div class="overflow-hidden">
-            <h4 class="text-sm font-semibold text-slate-200 truncate">Zain Ul Abdin</h4>
-            <div class="flex items-center gap-1 text-[11px] text-emerald-400">
-              <span>Account Status: Verified</span>
+            <h4 id="sidebar-user-name" class="text-sm font-semibold text-slate-200 truncate">User Profile</h4>
+            <div class="flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
+              <span>● Status: Verified</span>
             </div>
           </div>
         </div>
 
-        <!-- Sidebar Links Menu -->
-        <nav class="space-y-1">
-          <a href="#dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-sm font-medium">
+        <!-- Sidebar Navigation Links Menu -->
+        <nav class="space-y-1 text-sm font-medium">
+          <a href="#dashboard" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <span>📊</span> Dashboard
           </a>
-          <a href="#profile" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
-            <span>👤</span> Profile
+          <a href="#profile" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+            <span>👤</span> Profile & Verification
           </a>
-          <a href="#status" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+          <a href="#status" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
             <span>🛡️</span> Account Status
           </a>
-          <a href="#location" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+          <a href="#pricing" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+            <span>💎</span> Pricing & Subscriptions
+          </a>
+          <a href="#location" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
             <span>📍</span> Live Location
           </a>
-          <a href="#diesel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+          <a href="#diesel" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
             <span>⛽</span> Diesel Rates
           </a>
-          <a href="#profit" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+          <a href="#profit" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
             <span>💰</span> Profit Calculation
           </a>
-          <a href="#counter" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
-            <span>⚡</span> Counter Offer
+          <a href="#counter" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+            <span>⚡</span> Counter Offer & Extension
           </a>
-          <a href="#settings" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+          <a href="#settings" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
             <span>⚙️</span> Settings
           </a>
-          <a href="#support" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+          <a href="#support" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
             <span>💬</span> Help & Support
           </a>
-          <a href="#faq" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition">
+          <a href="#faq" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
             <span>❓</span> FAQ
           </a>
         </nav>
       </div>
     </aside>
 
-    <!-- Overlay backdrop for mobile menu -->
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
-
     <!-- Main Workspace Dashboard Area -->
-    <main class="flex-1 lg:ml-64 p-4 lg:p-6 space-y-6">
+    <main class="flex-1 p-4 lg:p-6 space-y-6 max-w-7xl mx-auto w-full">
       
-      <!-- Quick Stats Grid (4 Cards) -->
+      <!-- Quick Stats Grid -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
           <p class="text-xs text-slate-400 font-medium">Active Loads</p>
           <h3 class="text-xl font-bold text-white mt-1">14 Active</h3>
         </div>
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
           <p class="text-xs text-slate-400 font-medium">Target RPM</p>
           <h3 class="text-xl font-bold text-emerald-400 mt-1">$3.42 / mi</h3>
         </div>
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
           <p class="text-xs text-slate-400 font-medium">Saved Hours</p>
           <h3 class="text-xl font-bold text-white mt-1">4.8 Hrs</h3>
         </div>
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
-          <p class="text-xs text-slate-400 font-medium">Extension Status</p>
-          <h3 class="text-xl font-bold text-emerald-400 mt-1">Connected</h3>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <p class="text-xs text-slate-400 font-medium">Extension & Pricing</p>
+          <div class="flex items-center justify-between mt-1">
+            <h3 class="text-sm font-bold text-emerald-400">Connected</h3>
+            <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-bold">Pro Plan</span>
+          </div>
         </div>
       </div>
 
       <!-- AI Email & Board Parser Widget -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 lg:p-5 space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 lg:p-5 space-y-4 shadow-sm">
         <div class="flex items-center justify-between">
           <h3 class="font-bold text-slate-100 text-base">Load Email & Board Parser</h3>
           <button class="text-xs bg-slate-800 text-emerald-400 px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-700 transition">Sample Email</button>
         </div>
         <textarea rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 transition" placeholder="Paste rate confirmation or broker negotiation email here..."></textarea>
-        <button type="button" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg transition flex items-center justify-center gap-2 text-sm">
+        <button type="button" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg transition flex items-center justify-center gap-2 text-sm shadow-lg shadow-emerald-500/10">
           <span>⚡ Calculate Optimal Counter Offer & Draft Reply</span>
         </button>
       </div>
 
-      <!-- Live Fleet Location Overview (Dashboard Summary) -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-slate-100 text-base">Live Fleet Status (Location Preview)</h3>
-          <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">ELD Live</span>
-        </div>
-        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-semibold text-slate-200">Truck #104 (Alex)</p>
-            <p class="text-[11px] text-slate-400">Route: Chicago, IL ➔ Omaha, NE</p>
-            <p class="text-[10px] text-emerald-400 mt-1">ETA: 5:30 PM Today</p>
+      <!-- Live Fleet & Regional Diesel Rates Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Live Fleet Location Preview -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 shadow-sm">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-100 text-sm">Live Fleet Status (Location)</h3>
+            <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">ELD Live</span>
           </div>
-          <span class="text-xs font-bold text-slate-300 bg-slate-800 px-2.5 py-1 rounded">65 MPH</span>
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-200">Truck #104 (Alex)</p>
+              <p class="text-[11px] text-slate-400">Route: Chicago, IL ➔ Omaha, NE</p>
+              <p class="text-[10px] text-emerald-400 mt-1">ETA: 5:30 PM Today</p>
+            </div>
+            <span class="text-xs font-bold text-slate-300 bg-slate-800 px-2.5 py-1 rounded">65 MPH</span>
+          </div>
+        </div>
+
+        <!-- Diesel Rates Quick Widget -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 shadow-sm">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-100 text-sm">Regional Diesel Rates</h3>
+            <span class="text-xs text-slate-400">US National Avg</span>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-200">Midwest / South Region</p>
+              <p class="text-[11px] text-slate-400">Updated Today via EIA API</p>
+            </div>
+            <span class="text-sm font-bold text-emerald-400">$3.84 / gal</span>
+          </div>
         </div>
       </div>
 
