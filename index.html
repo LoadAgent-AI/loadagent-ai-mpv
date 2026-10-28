@@ -335,10 +335,10 @@ function handleCredentialResponse(response) {
         localStorage.setItem('isLoggedIn', 'true');
       }
 
-      // Check Session Storage on Page Load
-      if (localStorage.getItem('isLoggedIn') === 'true') {
-        showWelcomeView();
-      }
+    // Check Session Storage on Page Load
+if (localStorage.getItem('isLoggedIn')) {
+    showDashboardView(); // If already logged in, keep the user on the dashboard upon page refresh
+}
 
       // Enter Dashboard Bypass Button Logic
       if (enterDashBtn) {
