@@ -536,6 +536,21 @@ if (localStorage.getItem('isLoggedIn')) {
         });
       }
     });
+    // Check and handle Profile & Verification view toggle logic
+    const profileBtn = document.querySelector('a[href="#profile"]');
+const profileVerificationView = document.getElementById('profileVerificationView');
+
+if (profileBtn && profileVerificationView) {
+    profileBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Hide all other views first (assuming common view container or classes)
+        // Add your hide logic for other views here if needed
+        
+        // Show the profile and verification view
+        profileVerificationView.classList.remove('hidden');
+    });
+}
   </script>
     <script>
   function toggleSidebar() {
