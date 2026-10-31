@@ -416,7 +416,7 @@ function handleCredentialResponse(response) {
     }
 } 
     document.addEventListener('DOMContentLoaded', () => {
-    // 1. DOM Elements Assignment
+    // 1. Element References
     const tabSignin = document.getElementById('tab-signin');
     const tabSignup = document.getElementById('tab-signup');
     const signinForm = document.getElementById('signin-form');
@@ -431,64 +431,53 @@ function handleCredentialResponse(response) {
     const logoutBtn = document.getElementById('logout-btn');
     const enterDashBtn = document.getElementById('enter-dash-btn');
     const profileBtn = document.querySelector('a[href="#profile"]') || document.getElementById('profile-link');
-    const dashboardTriggers = document.querySelectorAll('a[href="#dashboard"], .dashboard-nav-btn, #backToDashBtn, [data-action="dashboard"]');
 
-    // 2. Robust View Switcher Functions
-    function showSignedOutState() {
-        if (signedOutView) signedOutView.classList.remove('hidden');
-        if (signedInView) signedInView.classList.add('hidden');
+    // 2. Centralized State Manager (Prevents view overlapping)
+    function setActiveView(targetView) {
+        // Hide all major views first
         if (welcomeScreen) welcomeScreen.classList.add('hidden');
         if (mainContent) mainContent.classList.add('hidden');
         if (profileVerificationView) profileVerificationView.classList.add('hidden');
-    }
 
-    function showWelcomeState() {
+        if (targetView === 'signedOut') {
+            if (signedOutView) signedOutView.classList.remove('hidden');
+            if (signedInView) signedInView.classList.add('hidden');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('activeView');
+            return;
+        }
+
+        // For all logged in views
         if (signedOutView) signedOutView.classList.add('hidden');
         if (signedInView) signedInView.classList.remove('hidden');
-        if (welcomeScreen) welcomeScreen.classList.remove('hidden');
-        if (mainContent) mainContent.classList.add('hidden');
-        if (profileVerificationView) profileVerificationView.classList.add('hidden');
         localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('activeView', 'welcome');
+        localStorage.setItem('activeView', targetView);
+
+        if (targetView === 'welcome') {
+            if (welcomeScreen) welcomeScreen.classList.remove('hidden');
+        } else if (targetView === 'dashboard') {
+            if (mainContent) mainContent.classList.remove('hidden');
+        } else if (targetView === 'profile') {
+            if (profileVerificationView) profileVerificationView.classList.remove('hidden');
+        }
     }
 
-    function showDashboardState() {
-        if (signedOutView) signedOutView.classList.add('hidden');
-        if (signedInView) signedInView.classList.remove('hidden');
-        if (welcomeScreen) welcomeScreen.classList.add('hidden');
-        if (profileVerificationView) profileVerificationView.classList.add('hidden');
-        if (mainContent) mainContent.classList.remove('hidden');
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('activeView', 'dashboard');
-    }
+    // Expose showWelcomeView for external handlers
+    window.showWelcomeView = function() {
+        setActiveView('welcome');
+    };
 
-    function showProfileState() {
-        if (signedOutView) signedOutView.classList.add('hidden');
-        if (signedInView) signedInView.classList.remove('hidden');
-        if (welcomeScreen) welcomeScreen.classList.add('hidden');
-        if (mainContent) mainContent.classList.add('hidden');
-        if (profileVerificationView) profileVerificationView.classList.remove('hidden');
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('activeView', 'profile');
-    }
-
-    // 3. Initial Load State & Refresh Check
+    // 3. Initial Load Check (Persists session & current view on refresh)
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const activeView = localStorage.getItem('activeView');
+    const savedView = localStorage.getItem('activeView') || 'welcome';
 
     if (isLoggedIn) {
-        if (activeView === 'dashboard') {
-            showDashboardState();
-        } else if (activeView === 'profile') {
-            showProfileState();
-        } else {
-            showWelcomeState();
-        }
+        setActiveView(savedView);
     } else {
-        showSignedOutState();
+        setActiveView('signedOut');
     }
 
-    // Tab Switching (Signin / Signup)
+    // 4. Tab Switching Logic (Signin / Signup)
     if (tabSignin && tabSignup && signinForm && signupForm) {
         tabSignin.addEventListener('click', () => {
             tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold";
@@ -505,61 +494,64 @@ function handleCredentialResponse(response) {
         });
     }
 
-    // Form Submissions
+    // 5. Form Submissions Logic
     if (signinForm) {
         signinForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            showWelcomeState();
+            setActiveView('welcome');
         });
     }
 
     if (signupForm) {
         signupForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            showWelcomeState();
+            setActiveView('welcome');
         });
     }
 
-    // Google OAuth Handler
+    // Google OAuth Global Handler
     window.handleCredentialResponse = function(response) {
-        console.log("Google Token: " + response.credential);
-        localStorage.setItem("google_token", response.credential);
-        showWelcomeState();
+        if (response && response.credential) {
+            localStorage.setItem("google_token", response.credential);
+            setActiveView('welcome');
+        }
     };
 
-    // Navigation Triggers
+    // 6. Navigation Event Listeners
     if (enterDashBtn) {
         enterDashBtn.addEventListener('click', () => {
-            showDashboardState();
+            setActiveView('dashboard');
         });
     }
 
-    dashboardTriggers.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+    // Universal Dashboard Navigation Click Handler
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('a[href="#dashboard"], .dashboard-nav-btn, #backToDashBtn, [data-action="dashboard"]');
+        if (target) {
             e.preventDefault();
-            showDashboardState();
-        });
+            setActiveView('dashboard');
+        }
     });
 
     if (profileBtn) {
         profileBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            showProfileState();
+            setActiveView('profile');
         });
     }
 
-    // Clean Logout Logic (Wipes storage & forces fresh signed-out state)
+    // 7. Robust Logout Logic
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             localStorage.clear();
-            showSignedOutState();
+            setActiveView('signedOut');
             if (signinForm) signinForm.reset();
             if (signupForm) signupForm.reset();
             window.location.reload();
         });
     }
 
-    // Parser & Draft Counter Offer Logic
+    // 8. Parser & Counter Offer Feature
     const sampleBtn = document.getElementById('sample-btn');
     const emailText = document.getElementById('email-text');
     const parseBtn = document.getElementById('parse-btn');
@@ -611,7 +603,7 @@ function handleCredentialResponse(response) {
         });
     }
 
-    // Profile Edit & Verification Logic
+    // 9. Profile Verification Logic
     const toggleEditBtn = document.getElementById('toggleEditBtn');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     const mcInput = document.getElementById('mcNumberInput');
@@ -724,7 +716,7 @@ function handleCredentialResponse(response) {
             profileStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
         }
     }
-});
+});            
     </script>
 </body>
 </html>
