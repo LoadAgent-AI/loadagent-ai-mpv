@@ -428,25 +428,53 @@ function handleCredentialResponse(response) {
     const logoutBtn = document.getElementById('logout-btn');
     const enterDashBtn = document.getElementById('enter-dash-btn');
 
-    // Helper function to switch to Signed-In Welcome View
-    function showWelcomeView() {
+    // Profile & Verification Elements
+    const profileBtn = document.querySelector('a[href="#profile"]') || document.getElementById('profile-link');
+    const profileVerificationView = document.getElementById('profileVerificationView');
+    
+    // Dashboard Navigation Links/Buttons (jo verification page ya kahin se bhi dashboard kholen)
+    const dashboardBtns = document.querySelectorAll('a[href="#dashboard"], .dashboard-nav-btn, #backToDashBtn');
+
+    // Helper functions for view switching
+    window.showWelcomeView = function() {
         if (signedOutView) signedOutView.classList.add('hidden');
         if (signedInView) signedInView.classList.remove('hidden');
         if (welcomeScreen) welcomeScreen.classList.remove('hidden');
         if (mainContent) mainContent.classList.add('hidden');
         if (profileVerificationView) profileVerificationView.classList.add('hidden');
         localStorage.setItem('isLoggedIn', 'true');
-    }
+        localStorage.setItem('activeView', 'welcome');
+    };
 
     function showDashboardView() {
+        if (signedOutView) signedOutView.classList.add('hidden');
+        if (signedInView) signedInView.classList.remove('hidden');
         if (welcomeScreen) welcomeScreen.classList.add('hidden');
         if (profileVerificationView) profileVerificationView.classList.add('hidden');
         if (mainContent) mainContent.classList.remove('hidden');
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('activeView', 'dashboard');
     }
 
-    // Check Session Storage on Page Load
+    function showProfileVerificationView() {
+        if (signedOutView) signedOutView.classList.add('hidden');
+        if (signedInView) signedInView.classList.remove('hidden');
+        if (welcomeScreen) welcomeScreen.classList.add('hidden');
+        if (mainContent) mainContent.classList.add('hidden');
+        if (profileVerificationView) profileVerificationView.classList.remove('hidden');
+        localStorage.setItem('activeView', 'profile');
+    }
+
+    // Check Session Storage and Active View on Page Load (Refresh Fix)
     if (localStorage.getItem('isLoggedIn') === 'true') {
-        showWelcomeView();
+        const activeView = localStorage.getItem('activeView');
+        if (activeView === 'dashboard') {
+            showDashboardView();
+        } else if (activeView === 'profile') {
+            showProfileVerificationView();
+        } else {
+            showWelcomeView();
+        }
     }
 
     // Enter Dashboard Bypass Button Logic
@@ -455,6 +483,14 @@ function handleCredentialResponse(response) {
             showDashboardView();
         });
     }
+
+    // Handle all Dashboard navigation clicks from any view (including verification page)
+    dashboardBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showDashboardView();
+        });
+    });
 
     // Tab Switching Logic
     if (tabSignin && tabSignup && signinForm && signupForm) {
@@ -473,7 +509,7 @@ function handleCredentialResponse(response) {
         });
     }
 
-    // Forms Submission Logic (Normal Email Signin / Signup)
+    // Forms Submission Logic
     if (signinForm) {
         signinForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -488,19 +524,30 @@ function handleCredentialResponse(response) {
         });
     }
 
-    // Logout Logic
+    // Logout Logic with complete cleanup to avoid cookie/storage residue
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('isLoggedIn');
+            localStorage.clear(); // Saari local storage clean kar dega taake koi conflict na ho
+
             if (signedInView) signedInView.classList.add('hidden');
             if (signedOutView) signedOutView.classList.remove('hidden');
             if (welcomeScreen) welcomeScreen.classList.add('hidden');
             if (mainContent) mainContent.classList.add('hidden');
             if (profileVerificationView) profileVerificationView.classList.add('hidden');
+
             if (signinForm) signinForm.reset();
             if (signupForm) signupForm.reset();
+
+            window.location.reload();
         });
     }
+
+    // Google OAuth Handler
+    window.handleCredentialResponse = function(response) {
+        console.log("Encoded JWT ID token: " + response.credential);
+        localStorage.setItem("google_token", response.credential);
+        showWelcomeView();
+    };
 
     // Parser & Draft Counter Offer Logic
     const sampleBtn = document.getElementById('sample-btn');
@@ -555,9 +602,6 @@ function handleCredentialResponse(response) {
     }
 
     // Profile & Verification View Toggle & Persistence Logic
-    const profileBtn = document.querySelector('a[href="#profile"]');
-    const profileVerificationView = document.getElementById('profileVerificationView');
-    const mainWorkspace = document.querySelector('main');
     const toggleEditBtn = document.getElementById('toggleEditBtn');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     
@@ -588,9 +632,7 @@ function handleCredentialResponse(response) {
     if (profileBtn && profileVerificationView) {
         profileBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (welcomeScreen) welcomeScreen.classList.add('hidden');
-            if (mainWorkspace) mainWorkspace.classList.add('hidden');
-            profileVerificationView.classList.remove('hidden');
+            showProfileVerificationView();
         });
     }
 
@@ -684,16 +726,6 @@ function handleCredentialResponse(response) {
         }
     }
 });
-  </script>
-  <script>
-  function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar-drawer');
-    const backdrop = document.getElementById('sidebar-backdrop');
-    if (sidebar && backdrop) {
-      sidebar.classList.toggle('-translate-x-full');
-      backdrop.classList.toggle('hidden');
-    }
-  }
     </script>
 </body>
 </html>
