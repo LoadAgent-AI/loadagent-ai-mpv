@@ -796,6 +796,17 @@
         }
     }
 });
+      // Standalone Logout Fix
+document.addEventListener('click', function(e) {
+    const logoutTarget = e.target.closest('#logout-btn');
+    const isLogoutText = e.target.textContent && e.target.textContent.trim() === 'Logout';
+    
+    if (logoutTarget || isLogoutText) {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.reload();
+    }
+});
 </script>
 </body>
 </html>
