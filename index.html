@@ -387,162 +387,135 @@
   <!-- 3. JAVASCRIPT LOGIC                               -->
   <!-- ================================================= -->
   <script>
-    // 1. Sidebar Toggle Functionality
-    function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    if (sidebar) sidebar.classList.toggle('-translate-x-full');
-    if (overlay) overlay.classList.toggle('hidden');
-}
+    // ==========================================
+// LOADAGENT-AI PRODUCTION CORE SCRIPT
+// ==========================================
 
-     // Google OAuth Response Handler
-function handleCredentialResponse(response) {
-    console.log("Encoded JWT ID token: " + response.credential);
+document.addEventListener("DOMContentLoaded", function () {
     
-    // Save token and login status to local storage
-    localStorage.setItem("google_token", response.credential);
-    localStorage.setItem("is_logged_in", "true");
-
-    // Toggle visibility between login form and dashboard view
-    const authView = document.getElementById("auth-view") || document.querySelector("form").closest("div");
+    // --- DOM Elements Reference ---
+    const tabSignin = document.getElementById("tabSignin");
+    const tabSignup = document.getElementById("tabSignup");
+    const signinForm = document.getElementById("signinForm");
+    const signupForm = document.getElementById("signupForm");
+    
+    const signedOutView = document.getElementById("signed-out-view");
     const signedInView = document.getElementById("signed-in-view");
-
-    if (signedInView) {
-        signedInView.classList.remove("hidden");
-        if (authView) authView.style.display = "none";
-    } else {
-        // Fallback: reload page if signed-in container ID is missing
-        window.location.reload();
-    }
-} 
-    document.addEventListener('DOMContentLoaded', () => {
-    // 1. Element References
-    const tabSignin = document.getElementById('tab-signin');
-    const tabSignup = document.getElementById('tab-signup');
-    const signinForm = document.getElementById('signin-form');
-    const signupForm = document.getElementById('signup-form');
+    const welcomeScreen = document.getElementById("welcome-screen");
+    const mainContent = document.getElementById("main-dashboard-content") || document.getElementById("mainContent");
+    const profileVerificationView = document.getElementById("profileVerificationView");
     
-    const signedOutView = document.getElementById('signed-out-view');
-    const signedInView = document.getElementById('signed-in-view');
-    const welcomeScreen = document.getElementById('welcome-screen');
-    const mainContent = document.getElementById('main-content') || document.querySelector('main');
-    const profileVerificationView = document.getElementById('profileVerificationView');
-    
-    const logoutBtn = document.getElementById('logout-btn');
-    const enterDashBtn = document.getElementById('enter-dash-btn');
-    const profileBtn = document.querySelector('a[href="#profile"]') || document.getElementById('profile-link');
+    const logoutBtn = document.getElementById("logout-btn") || document.getElementById("logoutBtn");
+    const enterDashBtn = document.getElementById("enter-dash-btn") || document.getElementById("enterDashBtn");
 
-    // 2. Centralized State Manager (Prevents view overlapping)
-    function setActiveView(targetView) {
+    // --- Centralized View Manager (Zero Overlap & Perfect State) ---
+    function setActiveView(viewName) {
         // Hide all major views first
-        if (welcomeScreen) welcomeScreen.classList.add('hidden');
-        if (mainContent) mainContent.classList.add('hidden');
-        if (profileVerificationView) profileVerificationView.classList.add('hidden');
+        if (signedOutView) signedOutView.classList.add("hidden");
+        if (signedInView) signedInView.classList.add("hidden");
+        if (welcomeScreen) welcomeScreen.classList.add("hidden");
+        if (mainContent) mainContent.classList.add("hidden");
+        if (profileVerificationView) profileVerificationView.classList.add("hidden");
 
-        if (targetView === 'signedOut') {
-            if (signedOutView) signedOutView.classList.remove('hidden');
-            if (signedInView) signedInView.classList.add('hidden');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('activeView');
-            return;
-        }
+        if (viewName === 'signedOut') {
+            if (signedOutView) signedOutView.classList.remove("hidden");
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("activeView");
+        } else {
+            // All logged-in states
+            if (signedInView) signedInView.classList.remove("hidden");
+            localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("activeView", viewName);
 
-        // For all logged in views
-        if (signedOutView) signedOutView.classList.add('hidden');
-        if (signedInView) signedInView.classList.remove('hidden');
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('activeView', targetView);
-
-        if (targetView === 'welcome') {
-            if (welcomeScreen) welcomeScreen.classList.remove('hidden');
-        } else if (targetView === 'dashboard') {
-            if (mainContent) mainContent.classList.remove('hidden');
-        } else if (targetView === 'profile') {
-            if (profileVerificationView) profileVerificationView.classList.remove('hidden');
+            if (viewName === 'welcome') {
+                if (welcomeScreen) welcomeScreen.classList.remove("hidden");
+            } else if (viewName === 'dashboard') {
+                if (mainContent) mainContent.classList.remove("hidden");
+            } else if (viewName === 'profile') {
+                if (profileVerificationView) profileVerificationView.classList.remove("hidden");
+            }
         }
     }
 
-    // Expose showWelcomeView for external handlers
+    // Expose globally for external triggers
     window.showWelcomeView = function() {
         setActiveView('welcome');
     };
 
-    // 3. Initial Load Check (Persists session & current view on refresh)
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const savedView = localStorage.getItem('activeView') || 'welcome';
-
+    // --- Initial Session & Refresh State Restoration ---
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const savedView = localStorage.getItem("activeView") || "welcome";
+    
     if (isLoggedIn) {
         setActiveView(savedView);
     } else {
-        setActiveView('signedOut');
+        setActiveView("signedOut");
     }
 
-    // 4. Tab Switching Logic (Signin / Signup)
+    // --- Tab Switching (Sign In / Sign Up) ---
     if (tabSignin && tabSignup && signinForm && signupForm) {
-        tabSignin.addEventListener('click', () => {
-            tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold";
-            tabSignup.className = "w-1/2 py-2 text-center text-slate-400 font-semibold";
-            signinForm.classList.remove('hidden');
-            signupForm.classList.add('hidden');
+        tabSignin.addEventListener("click", () => {
+            signinForm.classList.remove("hidden");
+            signupForm.classList.add("hidden");
         });
-
-        tabSignup.addEventListener('click', () => {
-            tabSignup.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold";
-            tabSignin.className = "w-1/2 py-2 text-center text-slate-400 font-semibold";
-            signupForm.classList.remove('hidden');
-            signinForm.classList.add('hidden');
+        tabSignup.addEventListener("click", () => {
+            signupForm.classList.remove("hidden");
+            signinForm.classList.add("hidden");
         });
     }
 
-    // 5. Form Submissions Logic
+    // --- Form Submissions ---
     if (signinForm) {
-        signinForm.addEventListener('submit', (e) => {
+        signinForm.addEventListener("submit", function (e) {
             e.preventDefault();
-            setActiveView('welcome');
+            setActiveView('dashboard');
         });
     }
-
     if (signupForm) {
-        signupForm.addEventListener('submit', (e) => {
+        signupForm.addEventListener("submit", function (e) {
             e.preventDefault();
-            setActiveView('welcome');
+            setActiveView('dashboard');
         });
     }
 
-    // Google OAuth Global Handler
+    // --- Google OAuth Global Handler ---
     window.handleCredentialResponse = function(response) {
         if (response && response.credential) {
+            console.log("Google Token Received Successfully");
             localStorage.setItem("google_token", response.credential);
-            setActiveView('welcome');
+            setActiveView('dashboard');
         }
     };
 
-    // 6. Navigation Event Listeners
+    // --- Navigation & Button Click Handlers ---
     if (enterDashBtn) {
-        enterDashBtn.addEventListener('click', () => {
+        enterDashBtn.addEventListener("click", (e) => {
+            e.preventDefault();
             setActiveView('dashboard');
         });
     }
 
-    // Universal Dashboard Navigation Click Handler
-    document.addEventListener('click', (e) => {
-        const target = e.target.closest('a[href="#dashboard"], .dashboard-nav-btn, #backToDashBtn, [data-action="dashboard"]');
-        if (target) {
+    // Universal Click Listener for Navbar & Sidebar links to prevent breaking
+    document.addEventListener("click", (e) => {
+        const target = e.target.closest("a, button");
+        if (!target) return;
+
+        const href = target.getAttribute("href") || "";
+        const action = target.getAttribute("data-action") || "";
+
+        if (href === "#dashboard" || action === "dashboard" || target.classList.contains("nav-dashboard-btn")) {
             e.preventDefault();
             setActiveView('dashboard');
+        } else if (href === "#profile" || action === "profile" || target.classList.contains("nav-verify-btn")) {
+            e.preventDefault();
+            setActiveView('profile');
         }
     });
 
-    if (profileBtn) {
-        profileBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            setActiveView('profile');
-        });
-    }
-
-    // 7. Robust Logout Logic
+    // --- Logout Logic ---
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
+        logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
             localStorage.clear();
             setActiveView('signedOut');
             if (signinForm) signinForm.reset();
@@ -551,172 +524,64 @@ function handleCredentialResponse(response) {
         });
     }
 
-    // 8. Parser & Counter Offer Feature
-    const sampleBtn = document.getElementById('sample-btn');
-    const emailText = document.getElementById('email-text');
-    const parseBtn = document.getElementById('parse-btn');
-    const outputContainer = document.getElementById('output-container');
-    const offeredRateEl = document.getElementById('offered-rate');
-    const targetRateEl = document.getElementById('target-rate');
-    const generatedDraftEl = document.getElementById('generated-email-draft');
-    const copyBtn = document.getElementById('copy-btn');
+    // --- Counter Offer & Email Parser Feature ---
+    const sampleBtn = document.getElementById("sample-btn") || document.getElementById("sampleBtn");
+    const emailText = document.getElementById("email-text") || document.getElementById("emailText");
+    const parseBtn = document.getElementById("parse-btn") || document.getElementById("parseBtn");
+    const outputContainer = document.getElementById("output-container") || document.getElementById("outputContainer");
+    const offeredRateEl = document.getElementById("offered-rate") || document.getElementById("offeredRateEl");
+    const targetRateEl = document.getElementById("target-rate") || document.getElementById("targetRateEl");
+    const generatedDraftEl = document.getElementById("generated-draft") || document.getElementById("generatedDraftEl");
+    const copyBtn = document.getElementById("copy-btn") || document.getElementById("copyBtn");
 
     if (sampleBtn && emailText) {
-        sampleBtn.addEventListener('click', () => {
-            emailText.value = "Subject: Load Confirmation - Flatbed Load from Chicago, IL to Omaha, NE\nHi Team,\nWe have a load ready for pickup...";
+        sampleBtn.addEventListener("click", () => {
+            emailText.value = "Subject: Load Offer Chicago to Omaha\nHi, we have a flatbed load paying $1200. Pickup tomorrow morning. Let us know if interested.";
         });
     }
 
-    if (parseBtn && emailText && outputContainer) {
-        parseBtn.addEventListener('click', () => {
+    if (parseBtn && emailText) {
+        parseBtn.addEventListener("click", () => {
             const text = emailText.value.trim();
             if (!text) {
-                alert("Please paste broker email text first!");
+                alert("Please paste a broker negotiation email first.");
                 return;
             }
+
             let rate = 0;
-            const match = text.match(/\$*([0-9,]+)/);
+            const match = text.match(/\$\s*([0-9,]+)/);
             if (match && match[1]) {
-                rate = parseInt(match[1].replace(/,/g, ''), 10);
+                rate = parseInt(match[1].replace(/,/g, ""), 10);
             }
+
             if (rate === 0) {
-                alert("Could not find '$' rate amount in text. Include text like 'Rate: $1200.'");
+                alert("Could not extract rate from the provided text.");
                 return;
             }
-            const targetRate = Math.round(rate * 1.15);
+
+            const targetRate = Math.round(rate * 1.15); // 15% optimal counter offer
+
             if (offeredRateEl) offeredRateEl.textContent = `$${rate.toLocaleString()}`;
             if (targetRateEl) targetRateEl.textContent = `$${targetRate.toLocaleString()}`;
             if (generatedDraftEl) {
-                generatedDraftEl.textContent = `Hi Mark,\n\nThanks for reaching out. Given current market conditions and operating expenses, our target rate is $${targetRate.toLocaleString()}. Let us know if this works so we can dispatch immediately.\n\nBest regards,\nLoadAgent Team`;
+                generatedDraftEl.textContent = `Hi, thank you for reaching out. Based on current market rates for this lane, we can cover this load for $${targetRate.toLocaleString()}. Please let us know if you can update the rate confirmation.`;
             }
-            outputContainer.classList.remove('hidden');
+
+            if (outputContainer) outputContainer.classList.remove("hidden");
         });
     }
 
     if (copyBtn && generatedDraftEl) {
-        copyBtn.addEventListener('click', () => {
+        copyBtn.addEventListener("click", () => {
             navigator.clipboard.writeText(generatedDraftEl.textContent);
-            copyBtn.textContent = "✓ Copied to Clipboard!";
+            copyBtn.textContent = "✅ Copied to Clipboard!";
             setTimeout(() => {
-                copyBtn.textContent = "📋 Copy Draft to Clipboard";
+                copyBtn.textContent = "📋 Copy Draft Reply";
             }, 2000);
         });
     }
 
-    // 9. Profile Verification Logic
-    const toggleEditBtn = document.getElementById('toggleEditBtn');
-    const saveProfileBtn = document.getElementById('saveProfileBtn');
-    const mcInput = document.getElementById('mcNumberInput');
-    const docInput = document.getElementById('mcDocInput');
-    const nameInput = document.getElementById('userFullNameInput');
-    const emailInput = document.getElementById('userEmailInput');
-    const companyInput = document.getElementById('userCompanyInput');
-    
-    const mcStatusBadge = document.getElementById('mcStatusBadge');
-    const docStatusBadge = document.getElementById('docStatusBadge');
-    const emailStatusBadge = document.getElementById('emailStatusBadge');
-    const identityStatusBadge = document.getElementById('identityStatusBadge');
-    const profileStatusText = document.getElementById('profileStatusText');
-    const profileStatusDot = document.getElementById('profileStatusDot');
-
-    const profileInputs = [nameInput, emailInput, companyInput, mcInput, docInput];
-
-    if (localStorage.getItem('loadagent_user_verified') === 'true') {
-        if (mcInput) mcInput.value = localStorage.getItem('loadagent_user_mc') || '';
-        if (nameInput) nameInput.value = localStorage.getItem('loadagent_user_name') || '';
-        if (emailInput) emailInput.value = localStorage.getItem('loadagent_user_email') || '';
-        if (companyInput) companyInput.value = localStorage.getItem('loadagent_user_company') || '';
-        applyVerifiedUI();
-    }
-
-    if (toggleEditBtn) {
-        toggleEditBtn.addEventListener('click', () => {
-            const isDisabled = nameInput.disabled;
-            profileInputs.forEach(input => { if (input) input.disabled = !isDisabled; });
-            
-            if (isDisabled) {
-                toggleEditBtn.textContent = "Cancel";
-                toggleEditBtn.className = "px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold rounded-xl transition border border-rose-500/20";
-                if (saveProfileBtn) saveProfileBtn.classList.remove('hidden');
-            } else {
-                toggleEditBtn.textContent = "Edit Profile";
-                toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition border border-slate-700";
-                if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
-            }
-        });
-    }
-
-    if (saveProfileBtn) {
-        saveProfileBtn.addEventListener('click', () => {
-            const mcVal = mcInput ? mcInput.value.trim() : '';
-            const emailVal = emailInput ? emailInput.value.trim() : '';
-            const nameVal = nameInput ? nameInput.value.trim() : '';
-            const hasDoc = (docInput && docInput.files.length > 0) || localStorage.getItem('loadagent_user_verified') === 'true';
-
-            if (!nameVal || !emailVal) {
-                alert("Please enter your Full Name and Email Address.");
-                return;
-            }
-
-            const mcRegex = /^(MC-?)?\d{5,7}$/i;
-            const dotRegex = /^(USDOT-?)?\d{5,8}$/i;
-
-            if (!mcRegex.test(mcVal) && !dotRegex.test(mcVal)) {
-                alert("Invalid MC or DOT number format. Enter a valid 6-7 digit MC# or 5-8 digit USDOT#.");
-                return;
-            }
-
-            if (!hasDoc) {
-                alert("Please attach your official MC Certificate / Authority Document for verification.");
-                return;
-            }
-
-            localStorage.setItem('loadagent_user_verified', 'true');
-            localStorage.setItem('loadagent_user_mc', mcVal);
-            localStorage.setItem('loadagent_user_name', nameVal);
-            localStorage.setItem('loadagent_user_email', emailVal);
-            if (companyInput) localStorage.setItem('loadagent_user_company', companyInput.value.trim());
-
-            profileInputs.forEach(input => { if (input) input.disabled = true; });
-            if (toggleEditBtn) {
-                toggleEditBtn.textContent = "Edit Profile";
-                toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition border border-slate-700";
-            }
-            if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
-
-            applyVerifiedUI();
-            alert("Profile updated & verified successfully!");
-        });
-    }
-
-    function applyVerifiedUI() {
-        if (mcStatusBadge) {
-            mcStatusBadge.textContent = "Active";
-            mcStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-        }
-        if (docStatusBadge) {
-            docStatusBadge.textContent = "Uploaded & Verified";
-            docStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-        }
-        if (emailStatusBadge) {
-            emailStatusBadge.textContent = "Verified";
-            emailStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-            const emailIcon = document.getElementById('emailCheckIcon');
-            if (emailIcon) { emailIcon.textContent = "✓"; emailIcon.className = "text-emerald-400"; }
-        }
-        if (identityStatusBadge) {
-            identityStatusBadge.textContent = "Secured";
-            identityStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-            const identityIcon = document.getElementById('identityCheckIcon');
-            if (identityIcon) { identityIcon.textContent = "✓"; identityIcon.className = "text-emerald-400"; }
-        }
-        if (profileStatusText && profileStatusDot) {
-            profileStatusText.textContent = "Account Status: Active & Verified";
-            profileStatusText.className = "text-xs font-medium text-emerald-400";
-            profileStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
-        }
-    }
-});            
+});
     </script>
 </body>
 </html>
