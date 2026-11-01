@@ -387,28 +387,7 @@
   <!-- 3. JAVASCRIPT LOGIC                               -->
   <!-- ================================================= -->
   <script>
-       <script>
-    // 1. Global Sidebar Toggle (Outside DOMContentLoaded so onclick works instantly)
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar-drawer') || document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-backdrop') || document.getElementById('overlay');
-        if (sidebar) sidebar.classList.toggle('-translate-x-full');
-        if (overlay) overlay.classList.toggle('hidden');
-    }
-
-    // 2. Global Google OAuth Handler (Outside DOMContentLoaded so Google SDK finds it)
-    window.handleCredentialResponse = function(response) {
-        if (response && response.credential) {
-            localStorage.setItem("google_token", response.credential);
-            localStorage.setItem('isLoggedIn', 'true');
-            if (typeof setActiveView === 'function') {
-                setActiveView('welcome');
-            } else {
-                window.location.reload();
-            }
-        }
-    };
-document.addEventListener('DOMContentLoaded', () => {
+       document.addEventListener('DOMContentLoaded', () => {
     // 1. Sidebar Toggle Fix (Matching HTML IDs: sidebar-drawer & sidebar-backdrop)
     window.toggleSidebar = function() {
         const sidebar = document.getElementById('sidebar-drawer') || document.getElementById('sidebar');
