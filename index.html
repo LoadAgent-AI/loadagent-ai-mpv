@@ -536,25 +536,26 @@
             window.location.reload();
         });
     }
-
-    // 9. Flexible Parser & Counter Offer Feature
-    const sampleBtn = document.getElementById('sample-btn');
-    const emailText = document.getElementById('email-text');
-    const parseBtn = document.getElementById('parse-btn');
-    const outputContainer = document.getElementById('output-container');
+         // 9. Flexible & Bulletproof Parser & Counter Offer Feature
+    const sampleBtn = document.getElementById('sample-btn') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Sample Email'));
+    const emailText = document.getElementById('email-text') || document.querySelector('textarea');
+    const parseBtn = document.getElementById('parse-btn') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Calculate Optimal Counter Offer'));
+    const outputContainer = document.getElementById('output-container') || document.querySelector('.output-box, div[id*="output"]');
+    
     const offeredRateEl = document.getElementById('offered-rate');
     const targetRateEl = document.getElementById('target-rate');
-    const generatedDraftEl = document.getElementById('generated-email-draft');
-    const copyBtn = document.getElementById('copy-btn');
+    const generatedDraftEl = document.getElementById('generated-email-draft') || document.querySelector('pre, code, .draft-text');
+    const copyBtn = document.getElementById('copy-btn') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Copy'));
 
     if (sampleBtn && emailText) {
         sampleBtn.addEventListener('click', () => {
-            emailText.value = "Subject: Load Confirmation - Flatbed Load from Chicago, IL to Omaha, NE\nHi Team,\nWe have a load ready for pickup. Rate: $1,250.";
+            emailText.value = "Subject: Urgent Load Available - Dry Van from Chicago, IL to Dallas, TX\nHi Dispatch Team,\nWe have an urgent load ready for pickup tomorrow morning from Chicago, IL to Dallas, TX.\nCommodity: General Freight (42,000 lbs).\nOffering Rate: $1,450.\nPlease let me know if you have an available truck.";
         });
     }
 
     if (parseBtn) {
-        parseBtn.addEventListener('click', () => {
+        parseBtn.addEventListener('click', (e) => {
+            if (e) e.preventDefault();
             const text = emailText ? emailText.value.trim() : '';
             if (!text) {
                 alert("Please paste broker email text first!");
@@ -562,6 +563,7 @@
             }
             
             let rate = 0;
+            // Enhanced regex to pull rate amount ($1,450 or 1450)
             const matches = text.match(/(?:\$|USD)?\s*([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)/g);
             
             for (let match of matches || []) {
@@ -580,17 +582,24 @@
             }
 
             if (rate === 0) {
-                alert("Could not find a valid rate amount in text. Please include text like 'Rate: $1200.'");
+                alert("Could not find a valid rate amount in text. Please include text like 'Rate: $1450.'");
                 return;
             }
 
             const targetRate = Math.round(rate * 1.15);
+            
             if (offeredRateEl) offeredRateEl.textContent = `$${rate.toLocaleString()}`;
             if (targetRateEl) targetRateEl.textContent = `$${targetRate.toLocaleString()}`;
+            
             if (generatedDraftEl) {
-                generatedDraftEl.textContent = `Hi Mark,\n\nThanks for reaching out. Given current market conditions and operating expenses, our target rate is $${targetRate.toLocaleString()}. Let us know if this works so we can dispatch immediately.\n\nBest regards,\nLoadAgent Team`;
+                generatedDraftEl.textContent = `Hi Team,\n\nThanks for reaching out regarding this load. Given current market conditions and operating expenses, our target rate is $${targetRate.toLocaleString()}. Let us know if this works so we can dispatch immediately.\n\nBest regards,\nLoadAgent Team`;
             }
-            if (outputContainer) outputContainer.classList.remove('hidden');
+
+            // Forcefully remove 'hidden' class to show result box
+            if (outputContainer) {
+                outputContainer.classList.remove('hidden');
+                outputContainer.style.display = 'block';
+            }
         });
     }
 
@@ -603,7 +612,6 @@
             }, 2000);
         });
     }
-
     // 10. Profile Verification Logic
     const toggleEditBtn = document.getElementById('toggleEditBtn');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
