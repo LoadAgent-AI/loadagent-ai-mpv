@@ -386,7 +386,77 @@
   <!-- ================================================= -->
   <!-- 3. JAVASCRIPT LOGIC                               -->
   <!-- ================================================= -->
-  <script>
+ <script>
+    // 1. Global Sidebar Toggle
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar-drawer') || document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-backdrop') || document.getElementById('overlay');
+        if (sidebar) sidebar.classList.toggle('-translate-x-full');
+        if (overlay) overlay.classList.toggle('hidden');
+    }
+
+    // 2. Global View Manager (Outside DOMContentLoaded so Google Auth can access it instantly)
+    function setActiveView(targetView) {
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const mainContent = document.getElementById('main-content') || document.querySelector('main');
+        const profileVerificationView = document.getElementById('profileVerificationView');
+        const signedOutView = document.getElementById('signed-out-view');
+        const signedInView = document.getElementById('signed-in-view');
+
+        if (welcomeScreen) welcomeScreen.classList.add('hidden');
+        if (mainContent) mainContent.classList.add('hidden');
+        if (profileVerificationView) profileVerificationView.classList.add('hidden');
+
+        if (targetView === 'signedOut') {
+            if (signedOutView) signedOutView.classList.remove('hidden');
+            if (signedInView) signedInView.classList.add('hidden');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('activeView');
+            return;
+        }
+
+        if (signedOutView) signedOutView.classList.add('hidden');
+        if (signedInView) signedInView.classList.remove('hidden');
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('activeView', targetView);
+
+        if (targetView === 'welcome') {
+            if (welcomeScreen) welcomeScreen.classList.remove('hidden');
+        } else if (targetView === 'dashboard') {
+            if (mainContent) mainContent.classList.remove('hidden');
+        } else if (targetView === 'profile') {
+            if (profileVerificationView) profileVerificationView.classList.remove('hidden');
+        }
+    }
+
+    window.showWelcomeView = function() {
+        setActiveView('welcome');
+    };
+
+    // 3. Global Google OAuth Handler
+    window.handleCredentialResponse = function(response) {
+        if (response && response.credential) {
+            localStorage.setItem("google_token", response.credential);
+            localStorage.setItem('isLoggedIn', 'true');
+            setActiveView('welcome');
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Baqi saara DOM listeners aur initialization code yahan rahe ga...
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const savedView = localStorage.getItem('activeView') || 'welcome';
+
+        if (isLoggedIn) {
+            setActiveView(savedView);
+        } else {
+            setActiveView('signedOut');
+        }
+
+        // ... (baki elements aur event listeners wese hi rahenge)
+    });
+      </script>
+    <script>
        document.addEventListener('DOMContentLoaded', () => {
     // 1. Sidebar Toggle Fix (Matching HTML IDs: sidebar-drawer & sidebar-backdrop)
     window.toggleSidebar = function() {
