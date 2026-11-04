@@ -378,7 +378,66 @@
         </div>
       </div>
     </div>
+<!-- COUNTER OFFER MODULE SECTION -->
+<section id="counter" class="app-section" style="display: none; padding: 20px;">
+    
+    <!-- Top Chrome Extension Teaser Banner -->
+    <div style="background: linear-gradient(90deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 8px; padding: 12px 20px; margin-bottom: 24px; color: #fff; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="background: #f97316; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Extension</span>
+            <span style="font-size: 14px; font-weight: 500;">LoadAgent AI Chrome Extension Integration</span>
+        </div>
+        <span style="font-size: 12px; color: #94a3b8; background: #334155; padding: 4px 10px; border-radius: 12px;">Coming Soon (Phase 4)</span>
+    </div>
 
+    <!-- Main Counter Offer Engine UI -->
+    <div style="max-width: 900px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+        
+        <div style="margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+            <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 0 0 6px 0;">AI Counter-Offer Engine</h2>
+            <p style="font-size: 14px; color: #64748b; margin: 0;">Paste the broker's email load details below to generate a profit-maximized, humanized response in under 5 seconds.</p>
+        </div>
+
+        <!-- Input Section -->
+        <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px;">
+            <div>
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">Broker Email / Rate Confirmation Text:</label>
+                <textarea id="brokerEmailInput" rows="6" placeholder="Paste raw broker email here..." style="width: 100%; padding: 12px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: inherit; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: #475569;">Target Rate ($):</label>
+                    <input type="number" id="targetRateInput" placeholder="e.g. 1800" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: #475569;">Tone / Style:</label>
+                    <select id="toneSelect" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: #fff;">
+                        <option value="professional">Professional & Firm</option>
+                        <option value="friendly">Friendly Negotiator</option>
+                        <option value="urgent">Direct & Quick Close</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="generateCounterBtn" style="background: #f97316; color: #ffffff; border: none; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; cursor: pointer;">
+                Generate Counter-Offer ✨
+            </button>
+        </div>
+
+        <!-- Output Section -->
+        <div id="counterOutputContainer" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 13px; font-weight: 700; color: #0f172a;">Generated Humanized Response:</span>
+                <button id="copyCounterBtn" style="background: #e2e8f0; color: #334155; border: none; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer;">
+                    Copy to Clipboard 📋
+                </button>
+            </div>
+            <div id="counterOutputText" style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap; background: #fff; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px;"></div>
+        </div>
+
+    </div>
+</section>
   </div>
 </div>
 </div>
@@ -805,6 +864,57 @@ document.addEventListener('click', function(e) {
         e.preventDefault();
         localStorage.clear();
         window.location.reload();
+    }
+});
+      document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generateCounterBtn');
+    const brokerInput = document.getElementById('brokerEmailInput');
+    const targetRateInput = document.getElementById('targetRateInput');
+    const toneSelect = document.getElementById('toneSelect');
+    const outputContainer = document.getElementById('counterOutputContainer');
+    const outputText = document.getElementById('counterOutputText');
+    const copyBtn = document.getElementById('copyCounterBtn');
+
+    if (generateBtn) {
+        generateBtn.addEventListener('click', function() {
+            const rawText = brokerInput.value.trim();
+            const targetRate = targetRateInput.value ? `$${targetRateInput.value}` : 'our standard lane rate';
+            
+            if (!rawText) {
+                alert('Please paste the broker email content first.');
+                return;
+            }
+
+            generateBtn.innerText = 'Analyzing & Generating...';
+            generateBtn.disabled = true;
+
+            setTimeout(() => {
+                let responseText = '';
+                const tone = toneSelect ? toneSelect.value : 'professional';
+
+                if (tone === 'professional') {
+                    responseText = `Hi,\n\nThank you for reaching out regarding this load. Based on current lane conditions, deadhead miles, and fuel adjustments, we can cover this load for ${targetRate} all-in.\n\nOur equipment is clean, fully insured, and ready for immediate dispatch. Let me know if that works on your end so I can send over our rate confirmation details right away.\n\nBest regards,\nDispatch Team`;
+                } else if (tone === 'friendly') {
+                    responseText = `Hey there,\n\nThanks for sending this over! We actually have a truck ready right near the pickup area. However, with current market rates on this lane, we’d need to be at ${targetRate} to make the numbers work.\n\nIf you can meet us at that rate, we’ll lock it in immediately and guarantee clear updates all the way to delivery.\n\nThanks!`;
+                } else {
+                    responseText = `Hi,\n\nWe have a driver ready to lock this load in immediately, but we need ${targetRate} all-in to cover the trip expenses on this lane.\n\nIf you can update the rate con to ${targetRate}, send it over and we will sign and return it right away.\n\nBest,`;
+                }
+
+                outputText.innerText = responseText;
+                outputContainer.style.display = 'block';
+                generateBtn.innerText = 'Generate Counter-Offer ✨';
+                generateBtn.disabled = false;
+            }, 600);
+        });
+    }
+
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            navigator.clipboard.writeText(outputText.innerText).then(() => {
+                copyBtn.innerText = 'Copied! ✅';
+                setTimeout(() => { copyBtn.innerText = 'Copy to Clipboard 📋'; }, 2000);
+            });
+        });
     }
 });
 </script>
