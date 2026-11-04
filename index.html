@@ -867,55 +867,42 @@ document.addEventListener('click', function(e) {
     }
 });
       document.addEventListener('DOMContentLoaded', function() {
-    const generateBtn = document.getElementById('generateCounterBtn');
-    const brokerInput = document.getElementById('brokerEmailInput');
-    const targetRateInput = document.getElementById('targetRateInput');
-    const toneSelect = document.getElementById('toneSelect');
-    const outputContainer = document.getElementById('counterOutputContainer');
-    const outputText = document.getElementById('counterOutputText');
-    const copyBtn = document.getElementById('copyCounterBtn');
+    
+    // 1. Sidebar Link Fix (#counter) aur Dashboard Green Button Fix dono ko handle karne ke liye
+    const sidebarCounterBtn = document.querySelector('a[href="#counter"]');
+    const dashboardActionBtn = document.querySelector('button, .green-btn, div:has(> span:contains("Calculate"))'); // ya jo bhi green button ki class ho
+    const counterSection = document.getElementById('counter');
 
-    if (generateBtn) {
-        generateBtn.addEventListener('click', function() {
-            const rawText = brokerInput.value.trim();
-            const targetRate = targetRateInput.value ? `$${targetRateInput.value}` : 'our standard lane rate';
-            
-            if (!rawText) {
-                alert('Please paste the broker email content first.');
-                return;
-            }
+    // Agar purana section hide/show karne ka koi function hai toh usay use karenge, warna direct display block
+    function openCounterOfferPage(e) {
+        if(e) e.preventDefault();
+        
+        // Agar aapki site par baqi sections chupane ka koi tareeqa hai (jaise class hidden lagana)
+        const allSections = document.querySelectorAll('.app-section');
+        allSections.forEach(sec => sec.style.display = 'none');
 
-            generateBtn.innerText = 'Analyzing & Generating...';
-            generateBtn.disabled = true;
+        if (counterSection) {
+            counterSection.style.display = 'block';
+            window.location.hash = 'counter';
+        }
+    }
 
-            setTimeout(() => {
-                let responseText = '';
-                const tone = toneSelect ? toneSelect.value : 'professional';
+    // Sidebar button listener
+    if (sidebarCounterBtn) {
+        sidebarCounterBtn.addEventListener('click', openCounterOfferPage);
+    }
 
-                if (tone === 'professional') {
-                    responseText = `Hi,\n\nThank you for reaching out regarding this load. Based on current lane conditions, deadhead miles, and fuel adjustments, we can cover this load for ${targetRate} all-in.\n\nOur equipment is clean, fully insured, and ready for immediate dispatch. Let me know if that works on your end so I can send over our rate confirmation details right away.\n\nBest regards,\nDispatch Team`;
-                } else if (tone === 'friendly') {
-                    responseText = `Hey there,\n\nThanks for sending this over! We actually have a truck ready right near the pickup area. However, with current market rates on this lane, we’d need to be at ${targetRate} to make the numbers work.\n\nIf you can meet us at that rate, we’ll lock it in immediately and guarantee clear updates all the way to delivery.\n\nThanks!`;
-                } else {
-                    responseText = `Hi,\n\nWe have a driver ready to lock this load in immediately, but we need ${targetRate} all-in to cover the trip expenses on this lane.\n\nIf you can update the rate con to ${targetRate}, send it over and we will sign and return it right away.\n\nBest,`;
-                }
-
-                outputText.innerText = responseText;
-                outputContainer.style.display = 'block';
-                generateBtn.innerText = 'Generate Counter-Offer ✨';
-                generateBtn.disabled = false;
-            }, 600);
+    // Dashboard wala green button ("Calculate Optimal Counter Offer...") par ID add kar dete hain taake miss na ho
+    // Aap chahein toh HTML mein green button ko id="generateCounterBtn" ya id="openCounterDashboardBtn" de sakte hain.
+    const greenTriggerBtn = document.getElementById('generateCounterBtn') || document.querySelector('button[style*="background"]');
+    
+    if (greenTriggerBtn) {
+        greenTriggerBtn.addEventListener('click', function(e) {
+            // Agar yeh email generate karta hai ya page kholta hai
+            console.log('Counter button clicked');
         });
     }
 
-    if (copyBtn) {
-        copyBtn.addEventListener('click', function() {
-            navigator.clipboard.writeText(outputText.innerText).then(() => {
-                copyBtn.innerText = 'Copied! ✅';
-                setTimeout(() => { copyBtn.innerText = 'Copy to Clipboard 📋'; }, 2000);
-            });
-        });
-    }
 });
 </script>
 </body>
