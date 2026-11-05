@@ -189,8 +189,8 @@
           <a href="#profit" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
             <span>💰</span> Profit Calculation
           </a>
-          <a href="#counter" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
-            <span>⚡</span> Counter Offer & Extension
+          <a href="#counter" onclick="setActiveView('counter'); toggleSidebar();" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+    <span>⚡</span> Counter Offer & Extension
           </a>
           <a href="#settings" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
             <span>⚙️</span> Settings
@@ -391,7 +391,7 @@
     </div>
 
     <!-- Main Counter Offer Engine UI -->
-    <div style="max-width: 900px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="max-width: 900px; margin: 0 auto; background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 24px; color: #f8fafc;">
         
         <div style="margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
             <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 0 0 6px 0;">AI Counter-Offer Engine</h2>
@@ -402,7 +402,7 @@
         <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px;">
             <div>
                 <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">Broker Email / Rate Confirmation Text:</label>
-                <textarea id="brokerEmailInput" rows="6" placeholder="Paste raw broker email here..." style="width: 100%; padding: 12px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: inherit; resize: vertical;"></textarea>
+           <textarea id="email-text" rows="6" placeholder="Paste raw broker email here..." style="width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 12px; color: #f8fafc; outline: none;"></textarea>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
@@ -420,14 +420,13 @@
                 </div>
             </div>
 
-            <button id="generateCounterBtn" style="background: #f97316; color: #ffffff; border: none; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; cursor: pointer;">
-                Generate Counter-Offer ✨
-            </button>
+            <button id="parse-btn" type="button" style="background: #f97316; color: #ffffff; border: none; padding: 12px 20px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer;">
+    Generate Counter-Offer 
         </div>
 
         <!-- Output Section -->
-        <div id="counterOutputContainer" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div id="counterOutputContainer" style="display: none; background: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+            <div id="output-container" class="hidden" style="margin-top: 20px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px;">
                 <span style="font-size: 13px; font-weight: 700; color: #0f172a;">Generated Humanized Response:</span>
                 <button id="copyCounterBtn" style="background: #e2e8f0; color: #334155; border: none; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer;">
                     Copy to Clipboard 📋
