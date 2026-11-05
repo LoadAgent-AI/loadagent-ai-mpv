@@ -238,8 +238,8 @@
           <button class="text-xs bg-slate-800 text-emerald-400 px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-700 transition">Sample Email</button>
         </div>
         <textarea rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 transition" placeholder="Paste rate confirmation or broker negotiation email here..."></textarea>
-        <button type="button" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg transition flex items-center justify-center gap-2 text-sm shadow-lg shadow-emerald-500/10">
-          <span>⚡ Calculate Optimal Counter Offer & Draft Reply</span>
+        <button id="parse-btn" type="button" class="...">
+    <span>⚡ Calculate Optimal Counter Offer & Draft Reply</span>
         </button>
       </div>
 
@@ -903,6 +903,18 @@ document.addEventListener('click', function(e) {
         });
     }
 
+});
+      document.addEventListener('click', (e) => {
+    const counterLink = e.target.closest('a[href="#counter"]');
+    if (counterLink) {
+        e.preventDefault();
+        setActiveView('counter'); // Ya counter section ko display block kar dein
+        const counterSec = document.getElementById('counter');
+        if (counterSec) {
+            document.querySelectorAll('main > div, .app-section').forEach(sec => sec.style.display = 'none');
+            counterSec.style.display = 'block';
+        }
+    }
 });
 </script>
 </body>
