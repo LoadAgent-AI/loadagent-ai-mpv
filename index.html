@@ -379,7 +379,7 @@
       </div>
     </div>
 <!-- COUNTER OFFER MODULE SECTION -->
-<section id="counter" class="app-section" style="display: none; padding: 20px;">
+<section id="counter" class="app-section hidden" style="padding: 20px;">
     
     <!-- Top Chrome Extension Teaser Banner -->
     <div style="background: linear-gradient(90deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 8px; padding: 12px 20px; margin-bottom: 24px; color: #fff; display: flex; align-items: center; justify-content: space-between;">
@@ -461,7 +461,8 @@
         const profileVerificationView = document.getElementById('profileVerificationView');
         const signedOutView = document.getElementById('signed-out-view');
         const signedInView = document.getElementById('signed-in-view');
-
+const counterView = document.getElementById('counter');
+if (counterView) counterView.classList.add('hidden');
         if (welcomeScreen) welcomeScreen.classList.add('hidden');
         if (mainContent) mainContent.classList.add('hidden');
         if (profileVerificationView) profileVerificationView.classList.add('hidden');
@@ -485,7 +486,9 @@
             if (mainContent) mainContent.classList.remove('hidden');
         } else if (targetView === 'profile') {
             if (profileVerificationView) profileVerificationView.classList.remove('hidden');
-        }
+        }else if (targetView === 'counter') {
+    if (counterView) counterView.classList.remove('hidden');
+  }
     }
 
     window.showWelcomeView = function() {
