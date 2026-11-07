@@ -569,11 +569,9 @@ if (counterView) counterView.classList.add('hidden');
 
     // 3. Centralized State Manager (Prevents view overlapping & handles persistence)
     function setActiveView(targetView) {
-    const counterView = document.getElementById('counter'); // Isay yahan upar ya views ke sath rakhein
     if (welcomeScreen) welcomeScreen.classList.add('hidden');
     if (mainContent) mainContent.classList.add('hidden');
     if (profileVerificationView) profileVerificationView.classList.add('hidden');
-    if (counterView) counterView.classList.add('hidden');
 
     if (targetView === 'signedOut') {
         if (signedOutView) signedOutView.classList.remove('hidden');
@@ -582,6 +580,11 @@ if (counterView) counterView.classList.add('hidden');
         localStorage.removeItem('activeView');
         return;
     }
+
+    const counterView = document.getElementById('counter');
+    if (counterView) counterView.classList.add('hidden');
+
+    if (signedOutView) signedOutView.classList.add('hidden');
 
     if (signedOutView) signedOutView.classList.add('hidden');
     if (signedInView) signedInView.classList.remove('hidden');
