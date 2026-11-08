@@ -469,110 +469,32 @@
     
   <!-- ================================================= -->
   <!-- 3. JAVASCRIPT LOGIC                               -->
-  <!-- ================================================= -->
- <script>
-    // 1. Global Sidebar Toggle
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar-drawer') || document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-backdrop') || document.getElementById('overlay');
-        if (sidebar) sidebar.classList.toggle('-translate-x-full');
-        if (overlay) overlay.classList.toggle('hidden');
-    }
+ // ==========================================
+// LOADAGENT-AI FINAL PRODUCTION SCRIPT
+// ==========================================
 
-    // 2. Global View Manager (Outside DOMContentLoaded so Google Auth can access it instantly)
-    function setActiveView(targetView) {
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const mainContent = document.getElementById('main-content') || document.querySelector('main');
-        const profileVerificationView = document.getElementById('profileVerificationView');
-        const signedOutView = document.getElementById('signed-out-view');
-        const signedInView = document.getElementById('signed-in-view');
-const counterView = document.getElementById('counter');
-if (counterView) counterView.classList.add('hidden');
-        if (welcomeScreen) welcomeScreen.classList.add('hidden');
-        if (mainContent) mainContent.classList.add('hidden');
-        if (profileVerificationView) profileVerificationView.classList.add('hidden');
+// 1. Sidebar Toggle Functionality
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar-drawer') || document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-backdrop') || document.getElementById('overlay');
+    if (sidebar) sidebar.classList.toggle('-translate-x-full');
+    if (overlay) overlay.classList.toggle('hidden');
+}
 
-        if (targetView === 'signedOut') {
-            if (signedOutView) signedOutView.classList.remove('hidden');
-            if (signedInView) signedInView.classList.add('hidden');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('activeView');
-            return;
-        }
-
-        if (signedOutView) signedOutView.classList.add('hidden');
-        if (signedInView) signedInView.classList.remove('hidden');
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('activeView', targetView);
-
-        if (targetView === 'welcome') {
-            if (welcomeScreen) welcomeScreen.classList.remove('hidden');
-        } else if (targetView === 'dashboard') {
-            if (mainContent) mainContent.classList.remove('hidden');
-        } else if (targetView === 'profile') {
-            if (profileVerificationView) profileVerificationView.classList.remove('hidden');
-        }else if (targetView === 'counter') {
-    if (counterView) counterView.classList.remove('hidden');
-  }
-    }
-
-    window.showWelcomeView = function() {
-        setActiveView('welcome');
-    };
-
-    // 3. Global Google OAuth Handler
-    window.handleCredentialResponse = function(response) {
-        if (response && response.credential) {
-            localStorage.setItem("google_token", response.credential);
-            localStorage.setItem('isLoggedIn', 'true');
-            setActiveView('welcome');
-        }
-    };
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Baqi saara DOM listeners aur initialization code yahan rahe ga...
-        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        const savedView = localStorage.getItem('activeView') || 'welcome';
-
-        if (isLoggedIn) {
-            setActiveView(savedView);
-        } else {
-            setActiveView('signedOut');
-        }
-
-        // ... (baki elements aur event listeners wese hi rahenge)
-    });
-      </script>
-    <script>
-       document.addEventListener('DOMContentLoaded', () => {
-    // 1. Sidebar Toggle Fix (Matching HTML IDs: sidebar-drawer & sidebar-backdrop)
-    window.toggleSidebar = function() {
-        const sidebar = document.getElementById('sidebar-drawer') || document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-backdrop') || document.getElementById('overlay');
-        if (sidebar) sidebar.classList.toggle('-translate-x-full');
-        if (overlay) overlay.classList.toggle('hidden');
-    };
-
-    // 2. Element References
-    const tabSignin = document.getElementById('tab-signin');
-    const tabSignup = document.getElementById('tab-signup');
-    const signinForm = document.getElementById('signin-form');
-    const signupForm = document.getElementById('signup-form');
-    
+// 2. Centralized View Manager (Zero Overlap)
+function setActiveView(targetView) {
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const mainContent = document.getElementById('main-content') || document.getElementById('mainContent');
+    const profileVerificationView = document.getElementById('profileVerificationView');
     const signedOutView = document.getElementById('signed-out-view');
     const signedInView = document.getElementById('signed-in-view');
-    const welcomeScreen = document.getElementById('welcome-screen');
-    const mainContent = document.getElementById('main-content') || document.querySelector('main');
-    const profileVerificationView = document.getElementById('profileVerificationView');
-    
-    const logoutBtn = document.getElementById('logout-btn');
-    const enterDashBtn = document.getElementById('enter-dash-btn');
+    const counterSection = document.getElementById('counter');
 
-    // 3. Centralized State Manager (Prevents view overlapping & handles persistence)
-    function setActiveView(targetView) {
+    // Hide everything first
     if (welcomeScreen) welcomeScreen.classList.add('hidden');
     if (mainContent) mainContent.classList.add('hidden');
     if (profileVerificationView) profileVerificationView.classList.add('hidden');
+    if (counterSection) counterSection.classList.add('hidden');
 
     if (targetView === 'signedOut') {
         if (signedOutView) signedOutView.classList.remove('hidden');
@@ -582,11 +504,7 @@ if (counterView) counterView.classList.add('hidden');
         return;
     }
 
-    const counterView = document.getElementById('counter');
-    if (counterView) counterView.classList.add('hidden');
-
-    if (signedOutView) signedOutView.classList.add('hidden');
-
+    // Logged in views
     if (signedOutView) signedOutView.classList.add('hidden');
     if (signedInView) signedInView.classList.remove('hidden');
     localStorage.setItem('isLoggedIn', 'true');
@@ -599,68 +517,68 @@ if (counterView) counterView.classList.add('hidden');
     } else if (targetView === 'profile') {
         if (profileVerificationView) profileVerificationView.classList.remove('hidden');
     } else if (targetView === 'counter') {
-        if (counterView) counterView.classList.remove('hidden');
+        if (counterSection) counterSection.classList.remove('hidden');
     }
-  }
+}
 
-    window.showWelcomeView = function() {
+window.showWelcomeView = function() {
+    setActiveView('welcome');
+};
+
+// 3. Global Google OAuth Handler
+window.handleCredentialResponse = function(response) {
+    if (response && response.credential) {
+        localStorage.setItem("google_token", response.credential);
         setActiveView('welcome');
-    };
+    }
+};
 
-    // 4. Initial Load Check (Persists session across refreshes)
+// 4. DOM Content Loaded Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Initial Session Restore
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const savedView = localStorage.getItem('activeView') || 'welcome';
-
+    
     if (isLoggedIn) {
         setActiveView(savedView);
     } else {
         setActiveView('signedOut');
     }
 
-    // 5. Tab Switching Logic (Signin / Signup)
+    // Tab Switching (Sign In / Sign Up)
+    const tabSignin = document.getElementById('tab-signin');
+    const tabSignup = document.getElementById('tab-signup');
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+
     if (tabSignin && tabSignup && signinForm && signupForm) {
         tabSignin.addEventListener('click', () => {
-            tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
-            tabSignup.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
             signinForm.classList.remove('hidden');
             signupForm.classList.add('hidden');
         });
-
         tabSignup.addEventListener('click', () => {
-            tabSignup.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
-            tabSignin.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
             signupForm.classList.remove('hidden');
             signinForm.classList.add('hidden');
         });
     }
 
-    // 6. Unified Authentication Handler (Both Normal & Google Sign-In/Signup)
-    function handleSuccessfulAuth() {
-        setActiveView('welcome');
-    }
-
+    // Form Submissions
     if (signinForm) {
         signinForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            handleSuccessfulAuth();
+            setActiveView('welcome');
         });
     }
-
     if (signupForm) {
         signupForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            handleSuccessfulAuth();
+            setActiveView('welcome');
         });
     }
 
-    window.handleCredentialResponse = function(response) {
-        if (response && response.credential) {
-            localStorage.setItem("google_token", response.credential);
-            handleSuccessfulAuth();
-        }
-    };
-
-    // 7. Navigation & Dashboard Click Handlers
+    // Navigation Click Listeners (Sidebar & Navbar)
+    const enterDashBtn = document.getElementById('enter-dash-btn');
     if (enterDashBtn) {
         enterDashBtn.addEventListener('click', () => {
             setActiveView('dashboard');
@@ -668,94 +586,78 @@ if (counterView) counterView.classList.add('hidden');
     }
 
     document.addEventListener('click', (e) => {
-        const dashTarget = e.target.closest('a[href="#dashboard"], .dashboard-nav-btn, #backToDashBtn, [data-action="dashboard"]');
-        if (dashTarget) {
+        const target = e.target.closest('a, button');
+        if (!target) return;
+
+        const href = target.getAttribute('href') || '';
+        const action = target.getAttribute('data-action') || '';
+
+        // Close sidebar on mobile when clicked
+        const sidebar = document.getElementById('sidebar-drawer') || document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-backdrop') || document.getElementById('overlay');
+
+        if (href === '#dashboard' || action === 'dashboard' || target.classList.contains('nav-dashboard-btn')) {
             e.preventDefault();
             setActiveView('dashboard');
-            // Close sidebar on mobile if open
-            const sidebar = document.getElementById('sidebar-drawer');
-            const overlay = document.getElementById('sidebar-backdrop');
             if (sidebar) sidebar.classList.add('-translate-x-full');
             if (overlay) overlay.classList.add('hidden');
-        }
-
-        const profileTarget = e.target.closest('a[href="#profile"], .profile-nav-btn, [data-action="profile"]');
-        if (profileTarget) {
+        } else if (href === '#profile' || action === 'profile' || target.classList.contains('nav-verify-btn')) {
             e.preventDefault();
             setActiveView('profile');
-            const sidebar = document.getElementById('sidebar-drawer');
-            const overlay = document.getElementById('sidebar-backdrop');
+            if (sidebar) sidebar.classList.add('-translate-x-full');
+            if (overlay) overlay.classList.add('hidden');
+        } else if (href === '#counter' || action === 'counter' || target.textContent.includes('Counter Offer')) {
+            e.preventDefault();
+            setActiveView('counter');
             if (sidebar) sidebar.classList.add('-translate-x-full');
             if (overlay) overlay.classList.add('hidden');
         }
     });
 
-    // 8. Robust Logout Logic
+    // Logout Logic
+    const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             localStorage.clear();
             setActiveView('signedOut');
-            if (signinForm) signinForm.reset();
-            if (signupForm) signupForm.reset();
             window.location.reload();
         });
     }
-         // 9. Flexible & Bulletproof Parser & Counter Offer Feature
-    const sampleBtn = document.getElementById('sample-btn') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Sample Email'));
-    const emailText = document.getElementById('email-text') || document.querySelector('textarea');
-    const parseBtn = document.getElementById('parse-btn') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Calculate Optimal Counter Offer'));
-    const outputContainer = document.getElementById('output-container') || document.querySelector('.output-box, div[id*="output"]');
-    
+
+    // Counter Offer & Email Parser Feature
+    const sampleBtn = document.getElementById('sample-btn');
+    const emailText = document.getElementById('email-text');
+    const parseBtn = document.getElementById('parse-btn');
+    const outputContainer = document.getElementById('counterOutputContainer') || document.getElementById('output-container');
     const offeredRateEl = document.getElementById('offered-rate');
     const targetRateEl = document.getElementById('target-rate');
-    const generatedDraftEl = document.getElementById('generated-email-draft') || document.querySelector('pre, code, .draft-text');
-    const copyBtn = document.getElementById('copy-btn') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Copy'));
+    const generatedDraftEl = document.getElementById('generated-email-draft') || document.getElementById('generated-draft');
+    const copyBtn = document.getElementById('copy-btn');
 
     if (sampleBtn && emailText) {
         sampleBtn.addEventListener('click', () => {
-            emailText.value = "Subject: Urgent Load Available - Dry Van from Chicago, IL to Dallas, TX\nHi Dispatch Team,\nWe have an urgent load ready for pickup tomorrow morning from Chicago, IL to Dallas, TX.\nCommodity: General Freight (42,000 lbs).\nOffering Rate: $1,450.\nPlease let me know if you have an available truck.";
+            emailText.value = "Subject: Urgent Load Available - Dry Van from Chicago, IL to Dallas, TX\\nHi, we have a load paying $1450. Let us know if you can cover it.";
         });
     }
 
-    if (parseBtn) {
+    if (parseBtn && emailText) {
         parseBtn.addEventListener('click', (e) => {
-            if (e) e.preventDefault();
-            const text = emailText ? emailText.value.trim() : '';
+            e.preventDefault();
+            const text = emailText.value.trim();
             if (!text) {
                 alert("Please paste broker email text first!");
                 return;
             }
-          
+
             let rate = 0;
-
-        // 1. Direct search for dollar sign rate (e.g. $82)
-        const dollarMatch = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
-        if (dollarMatch && dollarMatch[1]) {
-            const val = parseFloat(dollarMatch[1]);
-            if (val > 10) rate = Math.round(val);
-        }
-
-        // 2. Fallback to general numbers while ignoring weight (42000) and mileage (like 10mile, 600mile)
-        if (rate === 0) {
-            const matches = text.match(/\b[0-9]{2,5}\b/g);
-            if (matches) {
-                for (let matchStr of matches) {
-                    const num = parseInt(matchStr, 10);
-                    if (num > 30 && num < 15000 && num !== 42000) {
-                        const idx = text.indexOf(matchStr);
-                        const sub = text.substring(idx + matchStr.length, idx + matchStr.length + 6).toLowerCase();
-                        if (!sub.includes('mil') && !sub.includes('mi')) {
-                            rate = num;
-                            break;
-                        }
-                    }
-                }
+            const match = text.match(/\\$\\s*([0-9,]+)/);
+            if (match && match[1]) {
+                rate = parseInt(match[1].replace(/,/g, ''), 10);
             }
-        }
-
-        if (rate === 0) rate = 1800;
 
             if (rate === 0) {
+                // Fallback digit search
                 const digits = text.replace(/[^0-9]/g, '');
                 if (digits.length >= 3) {
                     rate = parseInt(digits, 10);
@@ -763,20 +665,18 @@ if (counterView) counterView.classList.add('hidden');
             }
 
             if (rate === 0) {
-                alert("Could not find a valid rate amount in text. Please include text like 'Rate: $1450.'");
+                alert("Could not find a valid rate amount in text.");
                 return;
             }
 
             const targetRate = Math.round(rate * 1.15);
-            
+
             if (offeredRateEl) offeredRateEl.textContent = `$${rate.toLocaleString()}`;
             if (targetRateEl) targetRateEl.textContent = `$${targetRate.toLocaleString()}`;
-            
             if (generatedDraftEl) {
-                generatedDraftEl.textContent = `Hi Team,\n\nThanks for reaching out regarding this load. Given current market conditions and operating expenses, our target rate is $${targetRate.toLocaleString()}. Let us know if this works so we can dispatch immediately.\n\nBest regards,\nLoadAgent Team`;
+                generatedDraftEl.textContent = `Hi Team,\\n\\nThanks for reaching out regarding this load. Given current market conditions, we can cover this lane for $${targetRate.toLocaleString()}. Please let us know if you can update the rate confirmation.\\n\\nBest regards,\\nLoadAgent AI Dispatch`;
             }
 
-            // Forcefully remove 'hidden' class to show result box
             if (outputContainer) {
                 outputContainer.classList.remove('hidden');
                 outputContainer.style.display = 'block';
@@ -787,136 +687,13 @@ if (counterView) counterView.classList.add('hidden');
     if (copyBtn && generatedDraftEl) {
         copyBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(generatedDraftEl.textContent);
-            copyBtn.textContent = "✓ Copied to Clipboard!";
+            copyBtn.textContent = "✅ Copied to Clipboard!";
             setTimeout(() => {
                 copyBtn.textContent = "📋 Copy Draft to Clipboard";
             }, 2000);
         });
     }
-    // 10. Profile Verification Logic
-    const toggleEditBtn = document.getElementById('toggleEditBtn');
-    const saveProfileBtn = document.getElementById('saveProfileBtn');
-    const mcInput = document.getElementById('mcNumberInput');
-    const docInput = document.getElementById('mcDocInput');
-    const nameInput = document.getElementById('userFullNameInput');
-    const emailInput = document.getElementById('userEmailInput');
-    const companyInput = document.getElementById('userCompanyInput');
-    
-    const mcStatusBadge = document.getElementById('mcStatusBadge');
-    const docStatusBadge = document.getElementById('docStatusBadge');
-    const emailStatusBadge = document.getElementById('emailStatusBadge');
-    const identityStatusBadge = document.getElementById('identityStatusBadge');
-    const profileStatusText = document.getElementById('profileStatusText');
-    const profileStatusDot = document.getElementById('profileStatusDot');
 
-    const profileInputs = [nameInput, emailInput, companyInput, mcInput, docInput];
-
-    if (localStorage.getItem('loadagent_user_verified') === 'true') {
-        if (mcInput) mcInput.value = localStorage.getItem('loadagent_user_mc') || '';
-        if (nameInput) nameInput.value = localStorage.getItem('loadagent_user_name') || '';
-        if (emailInput) emailInput.value = localStorage.getItem('loadagent_user_email') || '';
-        if (companyInput) companyInput.value = localStorage.getItem('loadagent_user_company') || '';
-        applyVerifiedUI();
-    }
-
-    if (toggleEditBtn) {
-        toggleEditBtn.addEventListener('click', () => {
-            const isDisabled = nameInput.disabled;
-            profileInputs.forEach(input => { if (input) input.disabled = !isDisabled; });
-            
-            if (isDisabled) {
-                toggleEditBtn.textContent = "Cancel";
-                toggleEditBtn.className = "px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold rounded-xl transition border border-rose-500/20";
-                if (saveProfileBtn) saveProfileBtn.classList.remove('hidden');
-            } else {
-                toggleEditBtn.textContent = "Edit Profile";
-                toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition border border-slate-700";
-                if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
-            }
-        });
-    }
-
-    if (saveProfileBtn) {
-        saveProfileBtn.addEventListener('click', () => {
-            const mcVal = mcInput ? mcInput.value.trim() : '';
-            const emailVal = emailInput ? emailInput.value.trim() : '';
-            const nameVal = nameInput ? nameInput.value.trim() : '';
-            const hasDoc = (docInput && docInput.files.length > 0) || localStorage.getItem('loadagent_user_verified') === 'true';
-
-            if (!nameVal || !emailVal) {
-                alert("Please enter your Full Name and Email Address.");
-                return;
-            }
-
-            const mcRegex = /^(MC-?)?\d{5,7}$/i;
-            const dotRegex = /^(USDOT-?)?\d{5,8}$/i;
-
-            if (!mcRegex.test(mcVal) && !dotRegex.test(mcVal)) {
-                alert("Invalid MC or DOT number format. Enter a valid 6-7 digit MC# or 5-8 digit USDOT#.");
-                return;
-            }
-
-            if (!hasDoc) {
-                alert("Please attach your official MC Certificate / Authority Document for verification.");
-                return;
-            }
-
-            localStorage.setItem('loadagent_user_verified', 'true');
-            localStorage.setItem('loadagent_user_mc', mcVal);
-            localStorage.setItem('loadagent_user_name', nameVal);
-            localStorage.setItem('loadagent_user_email', emailVal);
-            if (companyInput) localStorage.setItem('loadagent_user_company', companyInput.value.trim());
-
-            profileInputs.forEach(input => { if (input) input.disabled = true; });
-            if (toggleEditBtn) {
-                toggleEditBtn.textContent = "Edit Profile";
-                toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition border border-slate-700";
-            }
-            if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
-
-            applyVerifiedUI();
-            alert("Profile updated & verified successfully!");
-        });
-    }
-
-    function applyVerifiedUI() {
-        if (mcStatusBadge) {
-            mcStatusBadge.textContent = "Active";
-            mcStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-        }
-        if (docStatusBadge) {
-            docStatusBadge.textContent = "Uploaded & Verified";
-            docStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-        }
-        if (emailStatusBadge) {
-            emailStatusBadge.textContent = "Verified";
-            emailStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-            const emailIcon = document.getElementById('emailCheckIcon');
-            if (emailIcon) { emailIcon.textContent = "✓"; emailIcon.className = "text-emerald-400"; }
-        }
-        if (identityStatusBadge) {
-            identityStatusBadge.textContent = "Secured";
-            identityStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-            const identityIcon = document.getElementById('identityCheckIcon');
-            if (identityIcon) { identityIcon.textContent = "✓"; identityIcon.className = "text-emerald-400"; }
-        }
-        if (profileStatusText && profileStatusDot) {
-            profileStatusText.textContent = "Account Status: Active & Verified";
-            profileStatusText.className = "text-xs font-medium text-emerald-400";
-            profileStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
-        }
-    }
-});
-      // Standalone Logout Fix
-document.addEventListener('click', function(e) {
-    const logoutTarget = e.target.closest('#logout-btn');
-    const isLogoutText = e.target.textContent && e.target.textContent.trim() === 'Logout';
-    
-    if (logoutTarget || isLogoutText) {
-        e.preventDefault();
-        localStorage.clear();
-        window.location.reload();
-    }
 });
 </script>
 </body>
