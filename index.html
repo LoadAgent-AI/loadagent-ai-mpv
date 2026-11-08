@@ -403,6 +403,7 @@
         </div>
       </div>
     </div>
+    
 <!-- COUNTER OFFER MODULE SECTION -->
 <section id="counter" class="app-section hidden" style="padding: 20px;">
     
@@ -459,8 +460,6 @@
             </div>
             <div id="counterOutputText" style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap; background: #fff; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px;"></div>
         </div>
-
-    </div>
 </section>
   </div>
 </div>
@@ -924,19 +923,12 @@ document.addEventListener('click', function(e) {
     const dashboardActionBtn = document.querySelector('button, .green-btn, div:has(> span:contains("Calculate"))'); // ya jo bhi green button ki class ho
     const counterSection = document.getElementById('counter');
 
-    // Agar purana section hide/show karne ka koi function hai toh usay use karenge, warna direct display block
-    function openCounterOfferPage(e) {
-        if(e) e.preventDefault();
-        
-        // Agar aapki site par baqi sections chupane ka koi tareeqa hai (jaise class hidden lagana)
-        const allSections = document.querySelectorAll('.app-section');
-        allSections.forEach(sec => sec.style.display = 'none');
-
-        if (counterSection) {
-            counterSection.style.display = 'block';
-            window.location.hash = 'counter';
-        }
-    }
+    // Unified Counter Offer Click Handler
+const counterLink = e.target.closest('a[href="#counter"], .counter-nav-btn, [data-action="counter"]');
+if (counterLink) {
+    e.preventDefault();
+    setActiveView('counter');
+}
 
     // Sidebar button listener
     if (sidebarCounterBtn) {
