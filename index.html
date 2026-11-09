@@ -549,6 +549,45 @@ window.handleCredentialResponse = function(response) {
     // All other listeners and event handlers are integrated above.
 });
   <script>
+    // 2. Element References for Auth & Tabs
+    const tabSignin = document.getElementById('tab-signin');
+    const tabSignup = document.getElementById('tab-signup');
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+
+    // 3. Tab Switching Logic (Sign In / Register)
+    if (tabSignin && tabSignup && signinForm && signupForm) {
+        tabSignin.addEventListener('click', () => {
+            tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
+            tabSignup.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
+            signinForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+        });
+
+        tabSignup.addEventListener('click', () => {
+            tabSignup.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
+            tabSignin.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
+            signinForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+        });
+    }
+
+    // 4. Manual Sign In & Sign Up Form Handlers
+    if (signinForm) {
+        signinForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            localStorage.setItem('isLoggedIn', 'true');
+            setActiveView('welcome');
+        });
+    }
+
+    if (signupForm) {
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            localStorage.setItem('isLoggedIn', 'true');
+            setActiveView('welcome');
+        });
+    }
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Sidebar Toggle Fix
     window.toggleSidebar = function() {
