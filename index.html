@@ -514,6 +514,8 @@
         // Show target view accurately
         if (targetView === 'welcome' && welcomeScreen) {
             welcomeScreen.classList.remove('hidden');
+        } else if (targetView === 'signed-in' && mainContent) {
+           mainContent.classList.remove('hidden');
         } else if (targetView === 'dashboard' && mainContent) {
             mainContent.classList.remove('hidden');
         } else if (targetView === 'profile' && profileVerificationView) {
@@ -588,15 +590,7 @@
             });
         }
     });
-
-window.handleCredentialResponse = function(response) {
-    if (response && response.credential) {
-        localStorage.setItem('google_token', response.credential);
-        localStorage.setItem('isLoggedIn', 'true');
-setActiveView('welcome');
-    }
-};
-
+  
 // 7. Navigation & Dashboard Click Handlers
 if (enterDashBtn) {
     enterDashBtn.addEventListener('click', () => {
