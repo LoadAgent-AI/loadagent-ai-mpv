@@ -68,7 +68,7 @@
 
     <!-- Official Google Button Container -->
     <div id="g_id_onload"
-      data-client-id="447380316463-hc9hadn3fdkko7our9f3mi7um1minaps.apps.googleusercontent.com"
+      data-client_id="447380316463-hc9hadn3fdkko7our9f3mi7um1minaps.apps.googleusercontent.com"
       data-callback="handleCredentialResponse"
       data-auto_prompt="false">
     </div>
@@ -660,8 +660,7 @@ window.handleCredentialResponse = function(response) {
             });
         }
     });
-</script>
-  
+
 window.handleCredentialResponse = function(response) {
     if (response && response.credential) {
         localStorage.setItem('google_token', response.credential);
