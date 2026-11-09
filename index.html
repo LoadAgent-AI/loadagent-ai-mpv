@@ -439,7 +439,7 @@
               </div>
               <div>
                 <label style="font-size: 12px; font-weight: 600; color: #475569;">Tone / Style:</label>
-                <select id="toneSelect" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #020617; color: #f8fafc; font-size: 14px;">
+                <select id="tone-counter" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #020617; color: #f8fafc; font-size: 14px;">
                   <option value="professional">Professional & Firm</option>
                   <option value="friendly">Friendly Negotiator</option>
                   <option value="urgent">Direct & Quick Close</option>
@@ -448,7 +448,7 @@
             </div>
           </div>
 
-          <button id="parse-btn" type="button" style="background: #f97316; color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 15px;">
+          <button id="parse-btn-counter" type="button" style="background: #f97316; color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 15px;">
             Generate Counter-Offer
           </button>
 
@@ -456,7 +456,7 @@
           <div id="counterOutputContainer" style="display: none; background: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-top: 20px;">
             <div id="output-container" class="hidden" style="margin-top: 20px; background: #1px solid #334155; border-radius: 8px; padding: 16px;">
               <span style="font-size: 13px; font-weight: 700; color: #0f172a;">Generated Humanized Response:</span>
-              <button id="copyBtn" style="background: #e2e8f0; color: #334155; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+              <button id="copyBtn-counter" style="background: #e2e8f0; color: #334155; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
                 Copy to Clipboard 📋
               </button>
             </div>
@@ -504,7 +504,8 @@ function setActiveView(targetView) {
     if (signedInView) signedInView.classList.remove('hidden');
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('activeView', targetView);
-
+setActiveView('welcome');
+return;
     // Hide all views first to prevent overlapping
     if (welcomeScreen) welcomeScreen.classList.add('hidden');
     if (mainContent) mainContent.classList.add('hidden');
