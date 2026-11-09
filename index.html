@@ -549,72 +549,23 @@ window.handleCredentialResponse = function(response) {
     // All other listeners and event handlers are integrated above.
 });
   <script>
-    // 2. Element References for Auth & Tabs
-    const tabSignin = document.getElementById('tab-signin');
-    const tabSignup = document.getElementById('tab-signup');
-    const signinForm = document.getElementById('signin-form');
-    const signupForm = document.getElementById('signup-form');
-
-    // 3. Tab Switching Logic (Sign In / Register)
-    if (tabSignin && tabSignup && signinForm && signupForm) {
-        tabSignin.addEventListener('click', () => {
-            tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
-            tabSignup.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
-            signinForm.classList.remove('hidden');
-            signupForm.classList.add('hidden');
-        });
-
-        tabSignup.addEventListener('click', () => {
-            tabSignup.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
-            tabSignin.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
-            signinForm.classList.add('hidden');
-            signupForm.classList.remove('hidden');
-        });
-    }
-
-    // 4. Manual Sign In & Sign Up Form Handlers
-    if (signinForm) {
-        signinForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            localStorage.setItem('isLoggedIn', 'true');
-            setActiveView('welcome');
-        });
-    }
-
-    if (signupForm) {
-        signupForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            localStorage.setItem('isLoggedIn', 'true');
-            setActiveView('welcome');
-        });
-    }
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Sidebar Toggle Fix
-    window.toggleSidebar = function() {
-        const sidebar = document.getElementById('sidebar-drawer') || document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-backdrop') || document.getElementById('overlay');
+    // 1. Global Sidebar Toggle
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar-drawer');
+        const overlay = document.getElementById('sidebar-backdrop');
         if (sidebar) sidebar.classList.toggle('-translate-x-full');
         if (overlay) overlay.classList.toggle('hidden');
-    };
+    }
 
-    // 2. Element References
-    const tabSignin = document.getElementById('tab-signin');
-    const tabSignup = document.getElementById('tab-signup');
-    const signinForm = document.getElementById('signin-form');
-    const signupForm = document.getElementById('signup-form');
+    // 2. Global View Manager (Unified & Error-Free)
+    function setActiveView(targetView) {
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const mainContent = document.getElementById('main-content') || document.getElementById('main-dashboard-content');
+        const profileVerificationView = document.getElementById('profileVerificationView');
+        const signedOutView = document.getElementById('signed-out-view');
+        const signedInView = document.getElementById('signed-in-view');
+        const counterView = document.getElementById('counter');
 
-    const signedOutView = document.getElementById('signed-out-view');
-    const signedInView = document.getElementById('signed-in-view');
-    const welcomeScreen = document.getElementById('welcome-screen');
-    const mainContent = document.getElementById('main-content') || document.getElementById('main-dashboard-content');
-    const profileVerificationView = document.getElementById('profileVerificationView');
-    const counterView = document.getElementById('counter');
-
-    const logoutBtn = document.getElementById('logout-btn');
-    const enterDashBtn = document.getElementById('enter-dash-btn');
-
-    // 3. Centralized State Manager (Prevents view overlapping)
-    window.setActiveView = function(targetView) {
         if (targetView === 'signedOut') {
             if (signedOutView) signedOutView.classList.remove('hidden');
             if (signedInView) signedInView.classList.add('hidden');
@@ -644,58 +595,71 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (targetView === 'counter' && counterView) {
             counterView.classList.remove('hidden');
         }
-    };
+    }
 
     window.showWelcomeView = function() {
         setActiveView('welcome');
     };
 
-    // 4. Initial Load Check (Persists session across refreshes)
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    const savedView = localStorage.getItem('activeView') || 'welcome';
-    
-    if (isLoggedIn) {
-        setActiveView(savedView);
-    } else {
-        setActiveView('signedOut');
-    }
+    // 3. Global Google OAuth Handler
+    window.handleCredentialResponse = function(response) {
+        if (response && response.credential) {
+            localStorage.setItem('google_token', response.credential);
+            localStorage.setItem('isLoggedIn', 'true');
+            setActiveView('welcome');
+        }
+    };
 
-    // 5. Tab Switching Logic (Sign in / Sign up)
-    if (tabSignin && tabSignup && signinForm && signupForm) {
-        tabSignin.addEventListener('click', () => {
-            tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
-            tabSignup.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
-            signinForm.classList.remove('hidden');
-            signupForm.classList.add('hidden');
-        });
+    // 4. DOM Content Loaded - Listeners & Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initial Session Load Check
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const savedView = localStorage.getItem('activeView') || 'welcome';
 
-        tabSignup.addEventListener('click', () => {
-            tabSignup.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
-            tabSignin.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
-            signupForm.classList.remove('hidden');
-            signinForm.classList.add('hidden');
-        });
-    }
-});
-  // 6. Unified Authentication Handler (Both Normal & Google Sign-In/Signup)
-function handleSuccessfulAuth() {
-    setActiveView('welcome');
-}
+        if (isLoggedIn) {
+            setActiveView(savedView);
+        } else {
+            setActiveView('signedOut');
+        }
 
-if (signinForm) {
-    signinForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        handleSuccessfulAuth();
+        // Element References for Auth & Tabs
+        const tabSignin = document.getElementById('tab-signin');
+        const tabSignup = document.getElementById('tab-signup');
+        const signinForm = document.getElementById('signin-form');
+        const signupForm = document.getElementById('signup-form');
+
+        // Tab Switching Logic (Sign In / Register)
+        if (tabSignin && tabSignup && signinForm && signupForm) {
+            tabSignin.addEventListener('click', () => {
+                tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
+                tabSignup.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
+                signinForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+            });
+
+            tabSignup.addEventListener('click', () => {
+                tabSignup.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
+                tabSignin.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
+                signinForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+            });
+        }
+
+        // Manual Sign In & Sign Up Form Handlers
+        if (signinForm) {
+            signinForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                setActiveView('welcome');
+            });
+        }
+
+        if (signupForm) {
+            signupForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                setActiveView('welcome');
+            });
+        }
     });
-}
-
-if (signupForm) {
-    signupForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        handleSuccessfulAuth();
-    });
-}
-
 window.handleCredentialResponse = function(response) {
     if (response && response.credential) {
         localStorage.setItem('google_token', response.credential);
