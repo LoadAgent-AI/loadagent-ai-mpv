@@ -473,82 +473,8 @@
   <!-- ------------------------------------ -->
   <!-- 3. JAVASCRIPT LOGIC ----------------- -->
   <!-- ------------------------------------ -->
-    
+   
     <script>
-// 1. Global Sidebar Toggle
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar-drawer');
-    const overlay = document.getElementById('sidebar-backdrop');
-    if (sidebar) sidebar.classList.toggle('-translate-x-full');
-    if (overlay) overlay.classList.toggle('hidden');
-}
-
-// 2. Global View Manager (Unified & Error-Free)
-function setActiveView(targetView) {
-    const welcomeScreen = document.getElementById('welcome-screen');
-    const mainContent = document.getElementById('main-content') || document.getElementById('main-dashboard-content');
-    const profileVerificationView = document.getElementById('profileVerificationView');
-    const signedOutView = document.getElementById('signed-out-view');
-    const signedInView = document.getElementById('signed-in-view');
-    const counterView = document.getElementById('counter');
-
-    if (targetView === 'signedOut') {
-        if (signedOutView) signedOutView.classList.remove('hidden');
-        if (signedInView) signedInView.classList.add('hidden');
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('activeView');
-        return;
-    }
-
-    if (signedOutView) signedOutView.classList.add('hidden');
-    if (signedInView) signedInView.classList.remove('hidden');
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('activeView', targetView);
-setActiveView('welcome');
-return;
-    // Hide all views first to prevent overlapping
-    if (welcomeScreen) welcomeScreen.classList.add('hidden');
-    if (mainContent) mainContent.classList.add('hidden');
-    if (profileVerificationView) profileVerificationView.classList.add('hidden');
-    if (counterView) counterView.classList.add('hidden');
-
-    // Show target view accurately
-    if (targetView === 'welcome' && welcomeScreen) {
-        welcomeScreen.classList.remove('hidden');
-    } else if (targetView === 'dashboard' && mainContent) {
-        mainContent.classList.remove('hidden');
-    } else if (targetView === 'profile' && profileVerificationView) {
-        profileVerificationView.classList.remove('hidden');
-    } else if (targetView === 'counter' && counterView) {
-        counterView.classList.remove('hidden');
-    }
-}
-
-window.showWelcomeView = function() {
-    setActiveView('welcome');
-};
-
-// 3. Global Google OAuth Handler
-window.handleCredentialResponse = function(response) {
-    if (response && response.credential) {
-        localStorage.setItem('google_token', response.credential);
-        localStorage.setItem('isLoggedIn', 'true');
-        setActiveView('welcome');
-    }
-};
-  // Initial Load Check & Session Restoration
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const savedView = localStorage.getItem('activeView') || 'welcome';
-
-    if (isLoggedIn) {
-        setActiveView(savedView);
-    } else {
-        setActiveView('signedOut');
-    }
-
-    // All other listeners and event handlers are integrated above.
-});
-  <script>
     // 1. Global Sidebar Toggle
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar-drawer');
@@ -649,6 +575,7 @@ window.handleCredentialResponse = function(response) {
         if (signinForm) {
             signinForm.addEventListener('submit', (e) => {
                 e.preventDefault();
+              localStorage.setItem('isLoggedIn', 'true');
                 setActiveView('welcome');
             });
         }
@@ -656,6 +583,7 @@ window.handleCredentialResponse = function(response) {
         if (signupForm) {
             signupForm.addEventListener('submit', (e) => {
                 e.preventDefault();
+              localStorage.setItem('isLoggedIn', 'true');
                 setActiveView('welcome');
             });
         }
@@ -746,7 +674,7 @@ if (parseBtn) {
 
         // 2. Fallback to general numbers while ignoring weight (42000) and mileage (like 10mile, 600mile)
         if (rate === 0) {
-            const matches = text.match(/\b[0-9]{2,5}\b/g);
+            const matches = text.match(/\b([0-9]{2,5})\b/g);
             if (matches) {
                 for (let matchStr of matches) {
                     const num = parseInt(matchStr, 10);
@@ -761,9 +689,7 @@ if (parseBtn) {
                 }
             }
         }
-
-        if (rate === 0) rate = 1800;
-
+       
         if (rate === 0) {
             const digits = text.replace(/[^0-9]/g, '');
             if (digits.length >= 3) {
@@ -924,7 +850,7 @@ document.addEventListener('click', function(e) {
 
     if (logoutTarget || isLogoutText) {
         e.preventDefault();
-        localStorage.clear();
+        localStorage.removeItem('isLoggedIn');
         window.location.reload();
     }
 });
@@ -936,7 +862,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function openCounterOfferPage(e) {
         if (e) e.preventDefault();
-        setActiveView('counter');
+        setActiveView('sigend-in');
         if (counterSection) {
             window.location.hash = 'counter';
         }
@@ -953,7 +879,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const greenTriggerBtn = document.getElementById('generateCounterBtn') || document.querySelector('button[style*="background"]');
     if (greenTriggerBtn) {
         greenTriggerBtn.addEventListener('click', function(e) {
-            setActiveView('counter');
+            setActiveView('sigend-in');
         });
     }
 
@@ -961,7 +887,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const counterLink = e.target.closest('a[href="#counter"], .counter-nav-btn, [data-action="counter"]');
         if (counterLink) {
             e.preventDefault();
-            setActiveView('counter');
+            setActiveView('signed-in');
         }
     });
 });
