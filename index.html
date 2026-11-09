@@ -592,7 +592,8 @@
 window.handleCredentialResponse = function(response) {
     if (response && response.credential) {
         localStorage.setItem('google_token', response.credential);
-        handleSuccessfulAuth();
+        localStorage.setItem('isLoggedIn', 'true');
+setActiveView('welcome');
     }
 };
 
