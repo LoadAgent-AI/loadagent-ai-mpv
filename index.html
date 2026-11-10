@@ -492,34 +492,33 @@
   const signedInView = document.getElementById('signed-in-view');
   const counterView = document.getElementById('counter');
 
-  // Hide all views first
-  if (welcomeScreen) welcomeScreen.classList.add('hidden');
-  if (mainContent) mainContent.classList.add('hidden');
-  if (profileVerificationView) profileVerificationView.classList.add('hidden');
-  if (counterView) counterView.classList.add('hidden');
-  if (signedOutView) signedOutView.classList.add('hidden');
-  if (signedInView) signedInView.classList.add('hidden');
+  // Hide all with display none, this beats flex
+  if (welcomeScreen) welcomeScreen.style.display = 'none';
+  if (mainContent) mainContent.style.display = 'none';
+  if (profileVerificationView) profileVerificationView.style.display = 'none';
+  if (counterView) counterView.style.display = 'none';
+  if (signedOutView) signedOutView.style.display = 'none';
+  if (signedInView) signedInView.style.display = 'none';
 
   if (targetView === 'signedOut' || targetView === 'signed-out') {
-    if (signedOutView) signedOutView.classList.remove('hidden');
+    if (signedOutView) signedOutView.style.display = 'flex';
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('activeView');
     return;
   }
 
-  // Show signed-in container
-  if (signedInView) signedInView.classList.remove('hidden');
+  if (signedInView) signedInView.style.display = 'flex';
   localStorage.setItem('isLoggedIn', 'true');
   localStorage.setItem('activeView', targetView);
 
   if (targetView === 'welcome' && welcomeScreen) {
-    welcomeScreen.classList.remove('hidden');
+    welcomeScreen.style.display = 'flex';
   } else if ((targetView === 'signed-in' || targetView === 'dashboard') && mainContent) {
-    mainContent.classList.remove('hidden');
+    mainContent.style.display = 'flex';
   } else if (targetView === 'profile' && profileVerificationView) {
-    profileVerificationView.classList.remove('hidden');
+    profileVerificationView.style.display = 'flex';
   } else if (targetView === 'counter' && counterView) {
-    counterView.classList.remove('hidden');
+    counterView.style.display = 'flex';
   }
     }
 
