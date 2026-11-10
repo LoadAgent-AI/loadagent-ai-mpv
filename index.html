@@ -482,354 +482,340 @@
    
     <script>
     // 1. Global Sidebar Toggle
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar-drawer');
-        const overlay = document.getElementById('sidebar-backdrop');
-        if (sidebar) sidebar.classList.toggle('-translate-x-full');
-        if (overlay) overlay.classList.toggle('hidden');
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar-drawer');
+    const overlay = document.getElementById('sidebar-backdrop');
+    if (sidebar) sidebar.classList.toggle('-translate-x-full');
+    if (overlay) overlay.classList.toggle('hidden');
+}
+
+// 2. Global View Manager (Unified & Error-Free)
+function setActiveView(targetView) {
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const mainContent = document.getElementById('main-dashboard-content');
+    const profileVerificationView = document.getElementById('profileVerificationView');
+    const counterView = document.getElementById('counter');
+
+    // Sabhi views ko pehle hide karein
+    if (welcomeScreen) welcomeScreen.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'none';
+    if (profileVerificationView) profileVerificationView.style.display = 'none';
+    if (counterView) counterView.style.display = 'none';
+
+    if (targetView === 'signedOut' || targetView === 'signed-out' || targetView === 'signin') {
+        document.body.classList.remove('is-logged-in');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('activeView');
+        return;
     }
 
-    // 2. Global View Manager (Unified & Error-Free)
-    function setActiveView(targetView) {
-  const welcomeScreen = document.getElementById('welcome-screen');
-  const mainContent = document.getElementById('main-dashboard-content');
-  const profileVerificationView = document.getElementById('profile-verification-view');
-  const counterView = document.getElementById('counter');
+    document.body.classList.add('is-logged-in');
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('activeView', targetView);
 
-  if (targetView === 'signedOut' || targetView === 'signed-out') {
-    document.body.classList.remove('is-logged-in');
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('activeView');
-    return;
-  }
-
-  document.body.classList.add('is-logged-in');
-  localStorage.setItem('isLoggedIn', 'true');
-  localStorage.setItem('activeView', targetView);
-
-  if (welcomeScreen) welcomeScreen.style.display = 'none';
-  if (mainContent) mainContent.style.display = 'none';
-  if (profileVerificationView) profileVerificationView.style.display = 'none';
-  if (counterView) counterView.style.display = 'none';
-
-  if (targetView === 'welcome' && welcomeScreen) welcomeScreen.style.display = 'flex';
-  if ((targetView === 'signed-in' || targetView === 'dashboard') && mainContent) mainContent.style.display = 'flex';
-  if (targetView === 'profile' && profileVerificationView) profileVerificationView.style.display = 'flex';
-  if (targetView === 'counter' && counterView) counterView.style.display = 'flex';
+    // Target view ke mutabiq display set karein
+    if (targetView === 'welcome' && welcomeScreen) {
+        welcomeScreen.style.display = 'flex';
+    } else if ((targetView === 'signed-in' || targetView === 'dashboard') && mainContent) {
+        mainContent.style.display = 'flex';
+    } else if (targetView === 'profile' && profileVerificationView) {
+        profileVerificationView.classList.remove('hidden');
+        profileVerificationView.style.display = 'block';
+    } else if (targetView === 'counter' && counterView) {
+        counterView.classList.remove('app-section-hidden');
+        counterView.style.display = 'block';
     }
-    window.showWelcomeView = function() {
+}
+
+// 3. Global Google OAuth Handler
+window.handleCredentialResponse = function(response) {
+    if (response && response.credential) {
+        localStorage.setItem('google_token', response.credential);
+        localStorage.setItem('isLoggedIn', 'true');
         setActiveView('welcome');
-    };
+    }
+};
 
-    // 3. Global Google OAuth Handler
-    window.handleCredentialResponse = function(response) {
-        if (response && response.credential) {
-            localStorage.setItem('google_token', response.credential);
+// 4. DOM Content Loaded - Listeners & Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial Session Load Check
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const savedView = localStorage.getItem('activeView') || 'welcome';
+    
+    if (isLoggedIn) {
+        setActiveView(savedView);
+    } else {
+        setActiveView('signed-out');
+    }
+
+    // Element References for Auth & Tabs
+    const tabSignin = document.getElementById('tab-signin');
+    const tabSignup = document.getElementById('tab-signup');
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+
+    // Tab Switching Logic (Sign In / Register)
+    if (tabSignin && tabSignup && signinForm && signupForm) {
+        tabSignin.addEventListener('click', () => {
+            tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
+            tabSignup.className = "w-1/2 py-2 text-center border-b border-slate-400 text-slate-400 font-medium cursor-pointer";
+            signinForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+        });
+
+        tabSignup.addEventListener('click', () => {
+            tabSignup.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
+            tabSignin.className = "w-1/2 py-2 text-center border-b border-slate-400 text-slate-400 font-medium cursor-pointer";
+            signinForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+        });
+    }
+
+    // Manual Sign In & Sign Up Form Handlers
+    if (signinForm) {
+        signinForm.addEventListener('submit', (e) => {
+            e.preventDefault();
             localStorage.setItem('isLoggedIn', 'true');
             setActiveView('welcome');
-        }
-    };
-
-    // 4. DOM Content Loaded - Listeners & Initialization
-    document.addEventListener('DOMContentLoaded', () => {
-        // Initial Session Load Check
-        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        const savedView = localStorage.getItem('activeView') || 'welcome';
-
-        if (isLoggedIn) {
-            setActiveView(savedView);
-        } else {
-            setActiveView('signedOut');
-        }
-
-        // Element References for Auth & Tabs
-        const tabSignin = document.getElementById('tab-signin');
-        const tabSignup = document.getElementById('tab-signup');
-        const signinForm = document.getElementById('signin-form');
-        const signupForm = document.getElementById('signup-form');
-
-        // Tab Switching Logic (Sign In / Register)
-        if (tabSignin && tabSignup && signinForm && signupForm) {
-            tabSignin.addEventListener('click', () => {
-                tabSignin.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
-                tabSignup.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
-                signinForm.classList.remove('hidden');
-                signupForm.classList.add('hidden');
-            });
-
-            tabSignup.addEventListener('click', () => {
-                tabSignup.className = "w-1/2 py-2 text-center border-b-2 border-emerald-400 text-slate-200 font-semibold cursor-pointer";
-                tabSignin.className = "w-1/2 py-2 text-center text-slate-400 font-semibold cursor-pointer";
-                signinForm.classList.add('hidden');
-                signupForm.classList.remove('hidden');
-            });
-        }
-
-        // Manual Sign In & Sign Up Form Handlers
-        if (signinForm) {
-            signinForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-              localStorage.setItem('isLoggedIn', 'true');
-                setActiveView('welcome');
-            });
-        }
-
-        if (signupForm) {
-            signupForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-              localStorage.setItem('isLoggedIn', 'true');
-                setActiveView('welcome');
-            });
-        }
-    });
-  
-// 7. Navigation & Dashboard Click Handlers
-if (enterDashBtn) {
-    enterDashBtn.addEventListener('click', () => {
-        setActiveView('dashboard');
-    });
-}
-
-document.addEventListener('click', (e) => {
-    const dashTarget = e.target.closest('a[href="#dashboard"], .dashboard-nav-btn, #backToDashBtn, [data-action="dashboard"]');
-    if (dashTarget) {
-        e.preventDefault();
-        setActiveView('dashboard');
-        // Close sidebar on mobile if open
-        const sidebar = document.getElementById('sidebar-drawer');
-        const overlay = document.getElementById('sidebar-backdrop');
-        if (sidebar) sidebar.classList.add('-translate-x-full');
-        if (overlay) overlay.classList.add('hidden');
+        });
     }
 
-    const profileTarget = e.target.closest('a[href="#profile"], .profile-nav-btn, [data-action="profile"]');
-    if (profileTarget) {
-        e.preventDefault();
-        setActiveView('profile');
-        // Close sidebar on mobile if open
-        const sidebar = document.getElementById('sidebar-drawer');
-        const overlay = document.getElementById('sidebar-backdrop');
-        if (sidebar) sidebar.classList.add('-translate-x-full');
-        if (overlay) overlay.classList.add('hidden');
+    if (signupForm) {
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            localStorage.setItem('isLoggedIn', 'true');
+            setActiveView('welcome');
+        });
     }
-});
 
-// 8. Robust Logout Logic
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-        localStorage.clear();
-        setActiveView('signedOut');
-        if (signinForm) signinForm.reset();
-        if (signupForm) signupForm.reset();
-        window.location.reload();
-    });
-}
+    // Navigation & Dashboard Click Handlers
+    const enterDashBtn = document.getElementById('enter-dash-btn');
+    if (enterDashBtn) {
+        enterDashBtn.addEventListener('click', () => {
+            setActiveView('dashboard');
+        });
+    }
 
-// 9. Flexible & Bulletproof Parser & Counter Offer Feature
-const sampleBtn = document.getElementById('sample-btn');
-const emailText = document.getElementById('email-text') || document.querySelector('textarea');
-const parseBtn = document.getElementById('parse-btn');
-const outputContainer = document.getElementById('output-container');
-
-const offeredRateEl = document.getElementById('offered-rate');
-const targetRateEl = document.getElementById('target-rate');
-const generatedDraftEl = document.getElementById('generated-email-draft') || document.querySelector('pre, code, .draft-box');
-const copyBtn = document.getElementById('copy-btn');
-
-if (sampleBtn && emailText) {
-    sampleBtn.addEventListener('click', () => {
-        emailText.value = "Subject: Urgent Load Available - Dry Van from Chicago, IL to Dallas, TX\nHi Dispatch Team,\nWe have a load ready for pickup tomorrow morning. Rate is $2,200. Let me know if you can cover this.";
-    });
-}
-if (parseBtn) {
-    parseBtn.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        const text = emailText ? emailText.value.trim() : '';
-        if (!text) {
-            alert("Please paste broker email text first!");
-            return;
+    document.addEventListener('click', (e) => {
+        // Dashboard Link Click
+        const dashTarget = e.target.closest('a[href="#dashboard"], .dashboard-nav-btn, #backToDashBtn, [data-action="dashboard"]');
+        if (dashTarget) {
+            e.preventDefault();
+            setActiveView('dashboard');
+            toggleSidebar();
         }
 
-        let rate = 0;
-
-        // 1. Direct search for dollar sign rate (e.g. $82)
-        const dollarMatch = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
-        if (dollarMatch) {
-            const val = parseFloat(dollarMatch[1]);
-            if (val > 10) rate = Math.round(val);
+        // Profile Link Click
+        const profileTarget = e.target.closest('a[href="#profile"], .profile-nav-btn, [data-action="profile"]');
+        if (profileTarget) {
+            e.preventDefault();
+            setActiveView('profile');
+            toggleSidebar();
         }
 
-        // 2. Fallback to general numbers while ignoring weight (42000) and mileage (like 10mile, 600mile)
-        if (rate === 0) {
-            const matches = text.match(/\b([0-9]{2,5})\b/g);
-            if (matches) {
-                for (let matchStr of matches) {
-                    const num = parseInt(matchStr, 10);
-                    if (num > 30 && num < 15000 && num !== 42000) {
-                        const idx = text.indexOf(matchStr);
-                        const sub = text.substring(idx + matchStr.length, idx + matchStr.length + 6).toLowerCase();
-                        if (!sub.includes('mil') && !sub.includes('mi')) {
-                            rate = num;
-                            break;
+        // Counter / Extension Link Click
+        const counterLink = e.target.closest('a[href="#counter"], .counter-nav-btn, [data-action="counter"]');
+        if (counterLink) {
+            e.preventDefault();
+            setActiveView('counter');
+            toggleSidebar();
+        }
+    });
+
+    // Logout Logic
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            setActiveView('signed-out');
+            if (signinForm) signinForm.reset();
+            if (signupForm) signupForm.reset();
+            window.location.reload();
+        });
+    }
+
+    // 9. Flexible & Bulletproof Parser & Counter Offer Feature
+    const sampleBtn = document.getElementById('sample-btn');
+    const emailText = document.getElementById('email-text') || document.querySelector('textarea');
+    const parseBtn = document.getElementById('parse-btn');
+    const outputContainer = document.getElementById('output-container');
+
+    const offeredRateEl = document.getElementById('offered-rate');
+    const targetRateEl = document.getElementById('target-rate');
+    const generatedDraftEl = document.getElementById('generated-email-draft') || document.querySelector('pre, code, .draft-box');
+    const copyBtn = document.getElementById('copy-btn');
+
+    if (sampleBtn && emailText) {
+        sampleBtn.addEventListener('click', () => {
+            emailText.value = "Subject: Urgent Load Available - Dry Van from Chicago, IL to Dallas, TX\nHi Team,\nWe have an urgent load moving tomorrow. Offering $1,450. Let me know if your truck is available.";
+        });
+    }
+
+    if (parseBtn) {
+        parseBtn.addEventListener('click', (e) => {
+            if (e) e.preventDefault();
+            const text = emailText ? emailText.value.trim() : '';
+            if (!text) {
+                alert("Please paste broker email text first!");
+                return;
+            }
+
+            let rate = 0;
+            const dollarMatch = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
+            if (dollarMatch) {
+                const val = parseFloat(dollarMatch[1]);
+                if (val > 10) rate = Math.round(val);
+            }
+
+            if (rate === 0) {
+                const matches = text.match(/\b([0-9]{2,5})\b/g);
+                if (matches) {
+                    for (let matchStr of matches) {
+                        const num = parseInt(matchStr, 10);
+                        if (num > 30 && num < 15000 && num !== 42000) {
+                            const idx = text.indexOf(matchStr);
+                            const sub = text.substring(idx + matchStr.length, idx + matchStr.length + 6).toLowerCase();
+                            if (!sub.includes('mil') && !sub.includes('mi')) {
+                                rate = num;
+                                break;
+                            }
                         }
                     }
                 }
             }
-        }
-       
-        if (rate === 0) {
-            const digits = text.replace(/[^0-9]/g, '');
-            if (digits.length >= 3) {
-                rate = parseInt(digits, 10);
+
+            if (rate === 0) {
+                const digits = text.replace(/[^0-9]/g, '');
+                if (digits.length >= 3) {
+                    rate = parseInt(digits, 10);
+                }
             }
-        }
 
-        if (rate === 0) {
-            alert("Could not find a valid rate amount in text. Please include text like 'Rate: $1450.'");
-            return;
-        }
+            if (rate === 0) {
+                alert("Could not find a valid rate amount in text. Please include text like 'Rate: $1450.'");
+                return;
+            }
 
-        const targetRate = Math.round(rate * 1.15);
+            const targetRate = Math.round(rate * 1.15);
 
-        if (offeredRateEl) offeredRateEl.textContent = `$${rate.toLocaleString()}`;
-        if (targetRateEl) targetRateEl.textContent = `$${targetRate.toLocaleString()}`;
+            if (offeredRateEl) offeredRateEl.textContent = `$${rate.toLocaleString()}`;
+            if (targetRateEl) targetRateEl.textContent = `$${targetRate.toLocaleString()}`;
+            if (generatedDraftEl) {
+                generatedDraftEl.textContent = `Hi Team,\n\nThanks for reaching out regarding this load. Given current market rates and deadhead miles, our counter offer is $${targetRate.toLocaleString()}. Let's lock it in!`;
+            }
 
-        if (generatedDraftEl) {
-            generatedDraftEl.textContent = `Hi Team,\n\nThanks for reaching out regarding this load. Given current market conditions, our counter-offer rate is $${targetRate.toLocaleString()}. Please let us know if this works for you.\n\nBest regards,\nLoadAgent Team`;
-        }
+            if (outputContainer) {
+                outputContainer.classList.remove('hidden');
+                outputContainer.style.display = 'block';
+            }
+        });
+    }
 
-        // Forcefully remove 'hidden' class to show result box
-        if (outputContainer) {
-            outputContainer.classList.remove('hidden');
-            outputContainer.style.display = 'block';
-        }
-    });
-}
+    if (copyBtn && generatedDraftEl) {
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(generatedDraftEl.textContent);
+            const oldText = copyBtn.textContent;
+            copyBtn.textContent = "✓ Copied to Clipboard!";
+            setTimeout(() => {
+                copyBtn.textContent = oldText;
+            }, 2000);
+        });
+    }
 
-if (copyBtn && generatedDraftEl) {
-    copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(generatedDraftEl.textContent);
-        copyBtn.textContent = "✓ Copied to Clipboard!";
-        setTimeout(() => {
-            copyBtn.textContent = "📋 Copy Draft to Clipboard";
-        }, 2000);
-    });
-}
+    // 10. Profile Verification Logic
+    const toggleEditBtn = document.getElementById('toggleEditBtn');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    const mcInput = document.getElementById('mcNumberInput');
+    const docInput = document.getElementById('mcDocInput');
+    const nameInput = document.getElementById('userFullNameInput');
+    const emailInput = document.getElementById('userEmailInput');
+    const companyInput = document.getElementById('userCompanyInput');
 
-// 10. Profile Verification Logic
-const toggleEditBtn = document.getElementById('toggleEditBtn');
-const saveProfileBtn = document.getElementById('saveProfileBtn');
-const mcInput = document.getElementById('mcNumberInput');
-const docInput = document.getElementById('mcDocInput');
-const nameInput = document.getElementById('userFullNameInput');
-const emailInput = document.getElementById('userEmailInput');
-const companyInput = document.getElementById('userCompanyInput');
+    const profileInputs = [nameInput, emailInput, companyInput, mcInput, docInput];
 
-const mcStatusBadge = document.getElementById('mcStatusBadge');
-const docStatusBadge = document.getElementById('docStatusBadge');
-const emailStatusBadge = document.getElementById('emailStatusBadge');
-const identityStatusBadge = document.getElementById('identityStatusBadge');
-const profileStatusText = document.getElementById('profileStatusText');
-const profileStatusDot = document.getElementById('profileStatusDot');
-const profileInputs = [nameInput, emailInput, companyInput, mcInput, docInput];
-
-if (localStorage.getItem('loadagent_user_verified') === 'true') {
-    if (mcInput) mcInput.value = localStorage.getItem('loadagent_user_mc') || '';
-    if (nameInput) nameInput.value = localStorage.getItem('loadagent_user_name') || '';
-    if (emailInput) emailInput.value = localStorage.getItem('loadagent_user_email') || '';
-    if (companyInput) companyInput.value = localStorage.getItem('loadagent_user_company') || '';
-    applyVerifiedUI();
-}
-
-if (toggleEditBtn) {
-    toggleEditBtn.addEventListener('click', () => {
-        const isDisabled = nameInput.disabled;
-        profileInputs.forEach(input => { if (input) input.disabled = !isDisabled; });
-
-        if (isDisabled) {
-            toggleEditBtn.textContent = "Cancel";
-            toggleEditBtn.className = "px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold";
-            if (saveProfileBtn) saveProfileBtn.classList.remove('hidden');
-        } else {
-            toggleEditBtn.textContent = "Edit Profile";
-            toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold";
-            if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
-        }
-    });
-}
-
-if (saveProfileBtn) {
-    saveProfileBtn.addEventListener('click', () => {
-        const mcVal = mcInput ? mcInput.value.trim() : '';
-        const emailVal = emailInput ? emailInput.value.trim() : '';
-        const nameVal = nameInput ? nameInput.value.trim() : '';
-        const hasDoc = (docInput && docInput.files.length > 0) || localStorage.getItem('loadagent_user_verified') === 'true';
-
-        if (!nameVal || !emailVal) {
-            alert("Please enter your Full Name and Email Address.");
-            return;
-        }
-
-        const mcRegex = /^(MC-?)?\d{5,7}$/i;
-        const dotRegex = /^(USDOT-?)?\d{5,8}$/i;
-
-        if (!mcRegex.test(mcVal) && !dotRegex.test(mcVal)) {
-            alert("Invalid MC or DOT number format. Enter a valid 6-7 digit MC# or 5-8 digit USDOT#.");
-            return;
-        }
-
-        if (!hasDoc) {
-            alert("Please attach your official MC Certificate / Authority Document for verification.");
-            return;
-        }
-
-        localStorage.setItem('loadagent_user_verified', 'true');
-        localStorage.setItem('loadagent_user_mc', mcVal);
-        localStorage.setItem('loadagent_user_name', nameVal);
-        localStorage.setItem('loadagent_user_email', emailVal);
-        if (companyInput) localStorage.setItem('loadagent_user_company', companyInput.value.trim());
-
-        profileInputs.forEach(input => { if (input) input.disabled = true; });
-        if (toggleEditBtn) {
-            toggleEditBtn.textContent = "Edit Profile";
-            toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold";
-        }
-        if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
-
+    if (localStorage.getItem('loadagent_user_verified') === 'true') {
+        if (mcInput) mcInput.value = localStorage.getItem('loadagent_user_mc') || '';
+        if (nameInput) nameInput.value = localStorage.getItem('loadagent_user_name') || '';
+        if (emailInput) emailInput.value = localStorage.getItem('loadagent_user_email') || '';
+        if (companyInput) companyInput.value = localStorage.getItem('loadagent_user_company') || '';
         applyVerifiedUI();
-        alert("Profile updated & verified successfully!");
-    });
-}
+    }
+
+    if (toggleEditBtn) {
+        toggleEditBtn.addEventListener('click', () => {
+            const isDisabled = nameInput ? nameInput.disabled : true;
+            profileInputs.forEach(input => { if (input) input.disabled = !isDisabled; });
+
+            if (isDisabled) {
+                toggleEditBtn.textContent = "Cancel";
+                toggleEditBtn.className = "px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold rounded-lg";
+                if (saveProfileBtn) saveProfileBtn.classList.remove('hidden');
+            } else {
+                toggleEditBtn.textContent = "Edit Profile";
+                toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-lg";
+                if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
+            }
+        });
+    }
+
+    if (saveProfileBtn) {
+        saveProfileBtn.addEventListener('click', () => {
+            const nameVal = nameInput ? nameInput.value.trim() : '';
+            const emailVal = emailInput ? emailInput.value.trim() : '';
+
+            if (!nameVal || !emailVal) {
+                alert("Please enter your Full Name and Email Address.");
+                return;
+            }
+
+            localStorage.setItem('loadagent_user_verified', 'true');
+            if (nameInput) localStorage.setItem('loadagent_user_name', nameVal);
+            if (emailInput) localStorage.setItem('loadagent_user_email', emailVal);
+            if (companyInput) localStorage.setItem('loadagent_user_company', companyInput.value.trim());
+
+            profileInputs.forEach(input => { if (input) input.disabled = true; });
+            if (toggleEditBtn) {
+                toggleEditBtn.textContent = "Edit Profile";
+                toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-lg";
+            }
+            if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
+            applyVerifiedUI();
+            alert("Profile updated & verified successfully!");
+        });
+    }
+});
 
 function applyVerifiedUI() {
+    const mcStatusBadge = document.getElementById('mcStatusBadge');
+    const docStatusBadge = document.getElementById('docStatusBadge');
+    const emailStatusBadge = document.getElementById('emailStatusBadge');
+    const identityStatusBadge = document.getElementById('identityStatusBadge');
+    const profileStatusText = document.getElementById('profileStatusText');
+    const profileStatusDot = document.getElementById('profileStatusDot');
+
     if (mcStatusBadge) {
         mcStatusBadge.textContent = "Active";
-        mcStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
+        mcStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md font-medium";
     }
     if (docStatusBadge) {
         docStatusBadge.textContent = "Uploaded & Verified";
-        docStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
+        docStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-lg font-medium";
     }
     if (emailStatusBadge) {
         emailStatusBadge.textContent = "Verified";
-        emailStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-        const emailIcon = document.getElementById('emailCheckIcon');
-        if (emailIcon) { emailIcon.textContent = "✓"; emailIcon.className = "text-emerald-400"; }
+        emailStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md font-medium";
     }
     if (identityStatusBadge) {
         identityStatusBadge.textContent = "Secured";
-        identityStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-500/20";
-        const identityIcon = document.getElementById('identityCheckIcon');
-        if (identityIcon) { identityIcon.textContent = "✓"; identityIcon.className = "text-emerald-400"; }
+        identityStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md font-medium";
     }
-  }
-  if (profileStatusText && profileStatusDot) {
+    if (profileStatusText && profileStatusDot) {
         profileStatusText.textContent = "Account Status: Active & Verified";
         profileStatusText.className = "text-xs font-medium text-emerald-400";
         profileStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
     }
-}
-
+    }
 // Standalone Logout Fix
 document.addEventListener('click', function(e) {
     const logoutTarget = e.target.closest('#logout-btn');
