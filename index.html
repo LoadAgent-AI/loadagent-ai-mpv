@@ -485,44 +485,42 @@
 
     // 2. Global View Manager (Unified & Error-Free)
     function setActiveView(targetView) {
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const mainContent = document.getElementById('main-content') || document.getElementById('main-dashboard-content');
-        const profileVerificationView = document.getElementById('profileVerificationView');
-        const signedOutView = document.getElementById('signed-out-view');
-        const signedInView = document.getElementById('signed-in-view');
-        const counterView = document.getElementById('counter');
+  const welcomeScreen = document.getElementById('welcome-screen');
+  const mainContent = document.getElementById('main-content') || document.getElementById('main-dashboard-content');
+  const profileVerificationView = document.getElementById('profile-verification-view');
+  const signedOutView = document.getElementById('signed-out-view');
+  const signedInView = document.getElementById('signed-in-view');
+  const counterView = document.getElementById('counter');
 
-        if (targetView === 'signedOut') {
-            if (signedOutView) signedOutView.classList.remove('hidden');
-            if (signedInView) signedInView.classList.add('hidden');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('activeView');
-            return;
-        }
+  // Hide all views first
+  if (welcomeScreen) welcomeScreen.classList.add('hidden');
+  if (mainContent) mainContent.classList.add('hidden');
+  if (profileVerificationView) profileVerificationView.classList.add('hidden');
+  if (counterView) counterView.classList.add('hidden');
+  if (signedOutView) signedOutView.classList.add('hidden');
+  if (signedInView) signedInView.classList.add('hidden');
 
-        if (signedOutView) signedOutView.classList.add('hidden');
-        if (signedInView) signedInView.classList.remove('hidden');
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('activeView', targetView);
+  if (targetView === 'signedOut' || targetView === 'signed-out') {
+    if (signedOutView) signedOutView.classList.remove('hidden');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('activeView');
+    return;
+  }
 
-        // Hide all internal views first
-        if (welcomeScreen) welcomeScreen.classList.add('hidden');
-        if (mainContent) mainContent.classList.add('hidden');
-        if (profileVerificationView) profileVerificationView.classList.add('hidden');
-        if (counterView) counterView.classList.add('hidden');
+  // Show signed-in container
+  if (signedInView) signedInView.classList.remove('hidden');
+  localStorage.setItem('isLoggedIn', 'true');
+  localStorage.setItem('activeView', targetView);
 
-        // Show target view accurately
-        if (targetView === 'welcome' && welcomeScreen) {
-            welcomeScreen.classList.remove('hidden');
-        } else if (targetView === 'signed-in' && mainContent) {
-           mainContent.classList.remove('hidden');
-        } else if (targetView === 'dashboard' && mainContent) {
-            mainContent.classList.remove('hidden');
-        } else if (targetView === 'profile' && profileVerificationView) {
-            profileVerificationView.classList.remove('hidden');
-        } else if (targetView === 'counter' && counterView) {
-            counterView.classList.remove('hidden');
-        }
+  if (targetView === 'welcome' && welcomeScreen) {
+    welcomeScreen.classList.remove('hidden');
+  } else if ((targetView === 'signed-in' || targetView === 'dashboard') && mainContent) {
+    mainContent.classList.remove('hidden');
+  } else if (targetView === 'profile' && profileVerificationView) {
+    profileVerificationView.classList.remove('hidden');
+  } else if (targetView === 'counter' && counterView) {
+    counterView.classList.remove('hidden');
+  }
     }
 
     window.showWelcomeView = function() {
