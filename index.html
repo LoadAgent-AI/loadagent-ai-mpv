@@ -8,6 +8,12 @@
   <title>LoadAgent AI - Autonomous Dispatcher</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  #signed-in-view { display: none !important; }
+  #signed-out-view { display: flex !important; }
+  body.is-logged-in #signed-in-view { display: flex !important; }
+  body.is-logged-in #signed-out-view { display: none !important; }
+</style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
 
@@ -486,42 +492,31 @@
     // 2. Global View Manager (Unified & Error-Free)
     function setActiveView(targetView) {
   const welcomeScreen = document.getElementById('welcome-screen');
-  const mainContent = document.getElementById('main-content') || document.getElementById('main-dashboard-content');
+  const mainContent = document.getElementById('main-dashboard-content');
   const profileVerificationView = document.getElementById('profile-verification-view');
-  const signedOutView = document.getElementById('signed-out-view');
-  const signedInView = document.getElementById('signed-in-view');
   const counterView = document.getElementById('counter');
 
-  // Hide all with display none, this beats flex
-  if (welcomeScreen) welcomeScreen.style.display = 'none';
-  if (mainContent) mainContent.style.display = 'none';
-  if (profileVerificationView) profileVerificationView.style.display = 'none';
-  if (counterView) counterView.style.display = 'none';
-  if (signedOutView) signedOutView.style.display = 'none';
-  if (signedInView) signedInView.style.display = 'none';
-
   if (targetView === 'signedOut' || targetView === 'signed-out') {
-    if (signedOutView) signedOutView.style.display = 'flex';
+    document.body.classList.remove('is-logged-in');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('activeView');
     return;
   }
 
-  if (signedInView) signedInView.style.display = 'flex';
+  document.body.classList.add('is-logged-in');
   localStorage.setItem('isLoggedIn', 'true');
   localStorage.setItem('activeView', targetView);
 
-  if (targetView === 'welcome' && welcomeScreen) {
-    welcomeScreen.style.display = 'flex';
-  } else if ((targetView === 'signed-in' || targetView === 'dashboard') && mainContent) {
-    mainContent.style.display = 'flex';
-  } else if (targetView === 'profile' && profileVerificationView) {
-    profileVerificationView.style.display = 'flex';
-  } else if (targetView === 'counter' && counterView) {
-    counterView.style.display = 'flex';
-  }
-    }
+  if (welcomeScreen) welcomeScreen.style.display = 'none';
+  if (mainContent) mainContent.style.display = 'none';
+  if (profileVerificationView) profileVerificationView.style.display = 'none';
+  if (counterView) counterView.style.display = 'none';
 
+  if (targetView === 'welcome' && welcomeScreen) welcomeScreen.style.display = 'flex';
+  if ((targetView === 'signed-in' || targetView === 'dashboard') && mainContent) mainContent.style.display = 'flex';
+  if (targetView === 'profile' && profileVerificationView) profileVerificationView.style.display = 'flex';
+  if (targetView === 'counter' && counterView) counterView.style.display = 'flex';
+    }
     window.showWelcomeView = function() {
         setActiveView('welcome');
     };
