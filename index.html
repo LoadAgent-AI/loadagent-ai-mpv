@@ -498,8 +498,7 @@ function toggleSidebar() {
     if (sidebar) sidebar.classList.toggle('-translate-x-full');
     if (overlay) overlay.classList.toggle('hidden');
 }
-
-// 2. Global View Manager (Unified & Error-Free)
+  // 2. Foolproof View Manager with Direct Display Control
 function setActiveView(targetView) {
     const signedOutView = document.getElementById('signed-out-view');
     const signedInView = document.getElementById('signed-in-view');
@@ -509,32 +508,32 @@ function setActiveView(targetView) {
     const profileVerificationView = document.getElementById('profileVerificationView');
     const counterView = document.getElementById('counter');
 
-    // 1. Pehle sab kuch hide kar do
-    if (signedOutView) signedOutView.style.display = 'none';
-    if (signedInView) signedInView.style.display = 'none';
-    
+    // Sabhi sub-views ko hide karein
     if (welcomeScreen) welcomeScreen.style.display = 'none';
     if (mainContent) mainContent.style.display = 'none';
     if (profileVerificationView) profileVerificationView.style.display = 'none';
     if (counterView) counterView.style.display = 'none';
 
-    // 2. Agar User Logged Out hai (Sign In Page)
+    // Agar User Logged Out hai
     if (targetView === 'signedOut' || targetView === 'signed-out' || targetView === 'signin') {
         document.body.classList.remove('is-logged-in');
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('activeView');
+        
         if (signedOutView) signedOutView.style.display = 'flex';
+        if (signedInView) signedInView.style.display = 'none';
         return;
     }
 
-    // 3. Agar User Logged In hai (Dashboard / Welcome)
+    // Agar User Logged In hai
     document.body.classList.add('is-logged-in');
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('activeView', targetView);
     
+    if (signedOutView) signedOutView.style.display = 'none';
     if (signedInView) signedInView.style.display = 'flex';
 
-    // 4. Specific Sub-View dikhao
+    // Specific Active Sub-View
     if (targetView === 'welcome' && welcomeScreen) {
         welcomeScreen.style.display = 'flex';
     } else if ((targetView === 'signed-in' || targetView === 'dashboard') && mainContent) {
