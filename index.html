@@ -9,6 +9,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
+  /* Foolproof CSS View Switching */
+body:not(.is-logged-in) #signed-in-view {
+    display: none !important;
+}
+body.is-logged-in #signed-out-view {
+    display: none !important;
+}
+body.is-logged-in #signed-in-view {
+    display: flex !important;
+}
+body:not(.is-logged-in) #signed-out-view {
+    display: flex !important;
+}
   #signed-in-view { display: none !important; }
   #signed-out-view { display: flex !important; }
   body.is-logged-in #signed-in-view { display: flex !important; }
@@ -93,8 +106,7 @@
 <!-- 2. SIGNED-IN VIEW CONTAINER                  -->
 <!-- ========================================== -->
 <div id="signed-in-view" style="display: none;" class="min-h-screen w-full flex-col">
-  <div id="signed-in-view" class="hidden min-h-screen w-full flex-col"> 
-
+  
   <!-- 1. DEDICATED WELCOME / SPLASH SCREEN -->
   <div id="welcome-screen" class="min-h-screen w-full flex flex-col items-center justify-center p-6 text-center bg-slate-900">
     <!-- Logo -->
