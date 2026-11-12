@@ -103,6 +103,50 @@
 <!-- 2. SIGNED-IN VIEW CONTAINER                  -->
 <!-- ========================================== -->
 <div id="signed-in-view" class="min-h-screen w-full flex-col" style="display: none;">
+
+  <!-- 1. Sign-Out View (Login / Register) -->
+<div id="signed-out-view" style="display: flex; flex-direction: column; width: 100%;">
+    <!-- Yahan aap ka Sign In / Register wala form ya content aayega -->
+    <div class="max-w-md mx-auto p-6 min-h-screen flex flex-col justify-center">
+        <h1 class="text-emerald-400 text-2xl font-bold">LoadAgent-AI v2</h1>
+        <p class="text-slate-400 mb-6">Autonomous AI Freight Negotiation & Dispatch</p>
+        
+        <!-- Tabs -->
+        <div class="flex mb-6 border-b border-slate-800">
+            <button class="w-1/2 py-2 text-center border-b-2 border-emerald-500 font-semibold text-white">Sign In</button>
+            <button class="w-1/2 py-2 text-center text-slate-400 font-semibold">Register</button>
+        </div>
+
+        <!-- Sign In Form Fields -->
+        <div class="mb-4">
+            <label class="block text-slate-400 mb-1 text-sm">Email Address</label>
+            <input type="email" required class="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-white">
+        </div>
+        <div class="mb-6">
+            <label class="block text-slate-400 mb-1 text-sm">Password</label>
+            <input type="password" required class="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-white">
+        </div>
+        <button class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold p-3 rounded-lg">Sign In</button>
+    </div>
+</div>
+
+<!-- 2. Signed-In View (Dashboard - Default Hidden) -->
+<div id="signed-in-view" style="display: none; flex-direction: column; width: 100%;">
+    <!-- Dashboard Stats & Main Content -->
+    <div class="p-4 max-w-xl mx-auto w-full">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <span class="text-xs text-slate-400">Active Loads</span>
+                <h3 class="text-xl font-bold text-white">14 Active</h3>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <span class="text-xs text-slate-400">Target RPM</span>
+                <h3 class="text-xl font-bold text-emerald-400">$3.42 / mi</h3>
+            </div>
+        </div>
+        <!-- Baaki dashboard elements -->
+    </div>
+</div>
   
   <!-- 1. DEDICATED WELCOME / SPLASH SCREEN -->
   <div id="welcome-screen" class="min-h-screen w-full flex flex-col items-center justify-center p-6 text-center bg-slate-900">
