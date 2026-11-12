@@ -9,696 +9,507 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
 
-<div id="signed-in-view" class="min-h-screen w-full flex-col">
-    <!-- Dashboard Stats & Main Content -->
-    <div class="p-4 max-w-xl mx-auto w-full">
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
-                <span class="text-xs text-slate-400">Active Loads</span>
-                <h3 class="text-xl font-bold text-white">14 Active</h3>
-            </div>
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
-                <span class="text-xs text-slate-400">Target RPM</span>
-                <h3 class="text-xl font-bold text-emerald-400">$3.42 / mi</h3>
-            </div>
-        </div>
-        <!-- Baaki dashboard elements -->
-    </div>
-</div>
-  
-  <!-- 1. DEDICATED WELCOME / SPLASH SCREEN -->
-  <div id="welcome-screen" class="min-h-screen w-full flex flex-col items-center justify-center p-6 text-center bg-slate-900">
-    <!-- Logo -->
-    <img src="Gemini_Generated_Image_3793ee3793ee3793.jpeg" alt="Logo" class="w-24 h-24 rounded-2xl mb-6 shadow-2xl border border-slate-700 object-cover">
-    
+  <!-- ========================================================= -->
+  <!-- 1. WELCOME / SPLASH SCREEN (Default Visible on Load)      -->
+  <!-- ========================================================= -->
+  <div id="welcome-screen" class="min-h-screen w-full flex flex-col items-center justify-center p-6 text-center bg-slate-950">
+    <!-- Brand Logo -->
+    <img src="Gemini_Generated_Image_3793ee3793ee3793.jpeg" alt="LoadAgent-AI Logo" class="w-24 h-24 rounded-2xl mb-6 shadow-2xl border border-slate-800 object-cover">
+
     <!-- Main Tagline -->
-    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-100 mb-2">
+    <h1 class="text-2xl md:text-4xl font-extrabold text-slate-100 mb-3 max-w-lg leading-tight">
       The Next Generation of AI-Powered <span class="text-emerald-400">LoadAgent-AI</span>
     </h1>
 
     <!-- Sub-Tagline -->
-    <p class="text-emerald-300/90 text-xs uppercase tracking-widest font-semibold mb-8">
-      • TRUCKING & FREIGHT DISPATCHERS INDUSTRY •
+    <p class="text-emerald-400/90 text-xs uppercase tracking-widest font-semibold mb-8">
+      • Trucking & Freight Dispatchers Industry •
     </p>
 
     <!-- Go to Dashboard Button -->
-    <button id="enter-dash-btn" type="button" class="py-3 px-8 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl shadow-lg transition">
-      <span>Go to Dashboard &rarr;</span>
+    <button id="enter-dash-btn" type="button" class="py-3.5 px-8 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition transform active:scale-95 flex items-center gap-2 text-base">
+      <span>Go to Dashboard</span>
+      <span>&rarr;</span>
     </button>
   </div>
 
-  <!-- MAIN DASHBOARD CONTENT (Updated Dynamic User Profile & Responsive Layout) -->
-  <div id="main-dashboard-content" class="hidden min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+  <!-- ========================================================= -->
+  <!-- 2. MAIN APP SHELL (Hidden until Go to Dashboard clicked)  -->
+  <!-- ========================================================= -->
+  <div id="app-shell" class="hidden min-h-screen w-full flex-col bg-slate-950">
 
-    <!-- Top Header Navigation Bar -->
-    <header class="h-16 w-full bg-slate-900 border-b border-slate-800 sticky top-0 z-50 px-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <!-- Toggle Sidebar Button for Mobile & Desktop -->
-        <button id="menu-toggle-btn" type="button" class="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
+    <!-- Top Header Navigation Bar (Left: Sidebar Icon | Center: Brand | Right: Logout) -->
+    <header class="h-16 w-full bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 flex items-center justify-between">
+      <!-- Left: Sidebar Toggle Button -->
+      <button id="menu-toggle-btn" type="button" class="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition" aria-label="Open Menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
 
-        <!-- Brand Logo & Name -->
-        <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center font-bold text-slate-950 shadow">LA</div>
-          <span class="font-bold text-lg tracking-tight">LoadAgent<span class="text-emerald-400">-AI</span></span>
-        </div>
+      <!-- Center: Brand Name -->
+      <div class="font-bold text-lg tracking-tight text-white">
+        LoadAgent<span class="text-emerald-400">-AI</span>
       </div>
 
-      <!-- Right Header Actions (Dynamic User Name & Status) -->
-      <div class="flex items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="header-user-name" class="text-xs font-semibold text-slate-200">User Profile</span>
-          <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">Pro</span>
-        </div>
-        <button type="button" onclick="location.reload()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 transition">
-          Logout
-        </button>
-      </div>
+      <!-- Right: Logout Button -->
+      <button id="logout-btn" type="button" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+        Logout
+      </button>
     </header>
 
-    <!-- Main Body Layout: Sidebar + Dashboard Content -->
-    <div class="flex-1 flex relative">
+    <!-- Sidebar Backdrop Overlay (Hidden by default) -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden"></div>
 
-      <!-- Mobile Slide-Over Sidebar Backdrop -->
-      <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden transition-opacity"></div>
-
-      <!-- Collapsible Sidebar Drawer -->
-      <aside id="sidebar-drawer" class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
-        <div class="p-4 space-y-5 overflow-y-auto h-full">
-
-          <!-- Dynamic User Quick Status Card -->
-          <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 flex items-center gap-3 shadow-inner">
-            <div id="sidebar-user-avatar" class="w-10 h-10 rounded-full bg-slate-800 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 shadow">
-              US
-            </div>
-            <div class="overflow-hidden">
-              <h4 id="sidebar-user-name" class="text-sm font-slate-200 truncate">User Profile</h4>
-              <div class="flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
-                <span>Status: Verified</span>
-              </div>
-            </div>
-          </div>
-            <span> Status: Verified</span>
-          </div>
+    <!-- Collapsible Sidebar Drawer (Closed / Off-screen by default via -translate-x-full) -->
+    <aside id="sidebar-drawer" class="fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+      <!-- Sidebar Header -->
+      <div class="h-16 px-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center font-bold text-slate-950">L</div>
+          <span class="font-bold text-base text-white">LoadAgent<span class="text-emerald-400">-AI</span></span>
         </div>
+        <button id="close-sidebar-btn" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
       </div>
 
-      <!-- Sidebar Navigation Links Menu -->
-      <nav class="space-y-1 text-sm font-medium">
-        <a href="#dashboard" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-100 bg-emerald-500/10 border border-emerald-500/30">
-          <span>📊</span> Dashboard
-        </a>
-        <a href="#profile" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>👤</span> Profile & Verification
-        </a>
-        <a href="#status" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>🛡️</span> Account Status
-        </a>
-        <a href="#pricing" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>💎</span> Pricing & Subscriptions
-        </a>
-        <a href="#location" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>📍</span> Live Location
-        </a>
-        <a href="#diesel" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>⛽</span> Diesel Rates
-        </a>
-        <a href="#profit" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>💰</span> Profit Calculation
-        </a>
-        <a href="#counter" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>⚡</span> Counter Offer & Extension
-        </a>
-        <a href="#settings" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>⚙️</span> Settings
-        </a>
-        <a href="#support" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>💬</span> Help & Support
-        </a>
-        <a href="#faq" onclick="toggleSidebar()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
-          <span>❓</span> FAQ
-        </a>
+      <!-- Sidebar Navigation Links -->
+      <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-left">
+          <span class="text-base">📊</span>
+          <span>Dashboard</span>
+        </button>
+
+        <button type="button" data-nav="counter" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+          <span class="text-base">⚡</span>
+          <span>Counter Offer & Extension</span>
+        </button>
+
+        <button type="button" data-nav="profile" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+          <span class="text-base">👤</span>
+          <span>Profile & Verification</span>
+        </button>
+
+        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+          <span class="text-base">🛡️</span>
+          <span>Account Status</span>
+        </button>
+
+        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+          <span class="text-base">💎</span>
+          <span>Pricing & Subscriptions</span>
+        </button>
+
+        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+          <span class="text-base">📍</span>
+          <span>Live Location</span>
+        </button>
+
+        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+          <span class="text-base">⛽</span>
+          <span>Diesel Rates</span>
+        </button>
       </nav>
-    </div>
-  </aside>
 
-  <!-- Main Workspace Dashboard Area -->
-  <main class="flex-1 p-4 lg:p-6 space-y-6 max-w-7xl mx-auto w-full">
+      <!-- Sidebar Footer -->
+      <div class="p-4 border-t border-slate-800 text-xs text-slate-500">
+        LoadAgent-AI v2.0 • Pro Dispatch
+      </div>
+    </aside>
 
-    <!-- Quick Stats Grid -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
-        <p class="text-xs text-slate-400 font-medium">Active Loads</p>
-        <h3 class="text-xl font-bold text-slate-100 mt-1">14 Active</h3>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
-        <p class="text-xs text-slate-400 font-medium">Target RPM</p>
-        <h3 class="text-xl font-bold text-emerald-400 mt-1">$3.42 / mi</h3>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
-        <p class="text-xs text-slate-400 font-medium">Saved Hours</p>
-        <h3 class="text-xl font-bold text-slate-100 mt-1">4.8 Hrs</h3>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
-        <p class="text-xs text-slate-400 font-medium">Connected</p>
-        <div class="flex items-center justify-between mt-1">
-          <h3 class="text-sm font-bold text-emerald-400">Connected</h3>
-          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-bold">Pro Plan</span>
+    <!-- ========================================================= -->
+    <!-- 3. MAIN CONTENT AREA (Sub-views switch cleanly here)      -->
+    <!-- ========================================================= -->
+    <main class="flex-1 w-full max-w-2xl mx-auto p-4 space-y-5">
+
+      <!-- VIEW A: MAIN DASHBOARD VIEW (Visible when entering app) -->
+      <section id="view-dashboard" class="space-y-5">
+        <!-- 4 Stats Cards Grid -->
+        <div class="grid grid-cols-2 gap-3.5">
+          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
+            <span class="text-xs text-slate-400 block mb-1">Active Loads</span>
+            <h3 class="text-xl font-bold text-white">14 Active</h3>
+          </div>
+
+          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
+            <span class="text-xs text-slate-400 block mb-1">Target RPM</span>
+            <h3 class="text-xl font-bold text-emerald-400">$3.42 / mi</h3>
+          </div>
+
+          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
+            <span class="text-xs text-slate-400 block mb-1">Saved Hours</span>
+            <h3 class="text-xl font-bold text-white">4.8 Hrs</h3>
+          </div>
+
+          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
+            <span class="text-xs text-slate-400 block mb-1">Extension Status</span>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-sm font-bold text-emerald-400">Connected</span>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md font-semibold">Pro Plan</span>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- AI Email & Board Parser Widget (Dashboard) -->
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 lg:p-5 space-y-4 shadow-sm">
-      <div class="flex items-center justify-between">
-        <h3 class="font-bold text-slate-100 text-base">Extension & Pricing</h3>
-        <button id="sample-btn" type="button" class="text-xs bg-slate-800 text-emerald-400 px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-700 transition">Sample Email</button>
-      </div>
-
-      <!-- Textarea with exact ID 'email-text' -->
-      <textarea id="email-text" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition" placeholder="Paste broker email or load board details here..."></textarea>
-
-      <!-- Target Rate Input -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs text-slate-400 block mb-1">Offered Rate ($)</label>
-          <input type="text" id="offered-rate" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-slate-200">
-        </div>
-        <div>
-          <label class="text-xs text-slate-400 block mb-1">Target Counter Rate ($)</label>
-          <input type="text" id="target-rate" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-slate-200">
-        </div>
-      </div>
-      
-             <!-- Button with exact ID 'parse-btn' -->
-            <button id="parse-btn" type="button" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl transition shadow">
-              <span>⚡</span> Calculate Optimal Counter Offer & Draft Reply
+        <!-- Quick Extension & Pricing Card -->
+        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-white">Extension & Pricing</h2>
+            <button id="quick-sample-btn" type="button" class="text-xs text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 rounded-lg font-medium transition">
+              Sample Email
             </button>
+          </div>
 
-            <!-- Output Container with exact ID 'output-container' -->
-            <div id="output-container" class="hidden mt-4 bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-200">Generated Humanized Response:</span>
-                <button id="copyBtn" type="button" class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded border border-slate-700 hover:bg-slate-700 transition">Copy to Clipboard</button>
-              </div>
-              <div id="generated-email-draft" class="text-xs text-slate-300 font-mono whitespace-pre-wrap bg-slate-900 p-3 rounded-lg border border-slate-800"></div>
+          <textarea id="quick-email-input" rows="3" placeholder="Paste broker email or load board details here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500"></textarea>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Offered Rate ($)</label>
+              <input id="quick-offered-rate" type="number" placeholder="1450" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Target Counter Rate ($)</label>
+              <input id="quick-target-rate" type="number" placeholder="1675" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-emerald-400 font-semibold focus:outline-none focus:border-emerald-500">
             </div>
           </div>
 
-          <!-- Live Fleet & Regional Diesel Rates Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- Live Fleet Location Preview -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 shadow-sm">
-              <div class="flex items-center justify-between">
-                <h3 class="font-bold text-slate-100 text-sm">Live Fleet Status (Location)</h3>
-                <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">ELD Connected</span>
-              </div>
-              <div class="bg-slate-950 p-3 rounded-lg flex items-center justify-between">
-                <div>
-                  <p class="text-xs font-semibold text-slate-200">Truck #104 (Alex)</p>
-                  <p class="text-[11px] text-slate-400">Route: Chicago, IL &rarr; Omaha, NE</p>
-                  <p class="text-[10px] text-emerald-400 mt-1">ETA: 5:30 PM Today</p>
-                </div>
-                <span class="text-xs font-bold text-slate-300 bg-slate-800 px-2.5 py-1 rounded">>65 MPH</span>
-              </div>
-            </div>
-              
-      <!-- Diesel Rates Quick Widget -->
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 shadow-sm">
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-slate-100 text-sm">Regional Diesel Rates</h3>
-          <span class="text-xs text-slate-400">US National Avg</span>
-        </div>
-        <div class="bg-slate-950 p-3 rounded-lg flex items-center justify-between">
-          <div>
-            <p class="text-sm font-semibold text-slate-200">Midwest / South Region</p>
-            <p class="text-[11px] text-slate-400">Updated Today via EIA API</p>
-          </div>
-          <span class="text-sm font-bold text-emerald-400">$3.84 / gal</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</main>
-</div>
-<!-- Profile & Verification View Container -->
-<div id="profileVerificationView" class="p-4 sm:p-6 text-white space-y-6 hidden">
-  
-  <!-- Header Section -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/60 p-6 rounded-2xl">
-    <div class="flex items-center gap-4">
-      <div id="profileAvatarText" class="w-16 h-16 rounded-full bg-slate-500/10 border border-slate-500/30 flex items-center justify-center text-xl font-bold">
-        U
-      </div>
-      <div>
-        <h2 class="text-xl font-semibold text-white">User Profile & Verification</h2>
-        <div class="flex items-center gap-2 mt-1">
-          <span id="profileStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-          <span id="profileStatusText" class="text-xs font-medium text-amber-400">Account Status: Pending Verification</span>
-        </div>
-      </div>
-    </div>
-    
-    <div class="flex items-center gap-3">
-      <button type="button" id="toggleEditBtn" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium rounded-xl transition">
-      Edit Profile
-        <button type="button" id="saveProfileBtn" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-sm font-semibold rounded-xl transition hidden">
-            Save & Verify
+          <button id="quick-calc-btn" type="button" class="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg shadow-emerald-500/10 transition flex items-center justify-center gap-2">
+            <span>⚡ Calculate Optimal Counter Offer & Draft Reply</span>
           </button>
         </div>
-      </div>
 
-      <!-- Profile Details & Verification Cards -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Live Fleet Status Card -->
+        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-white">Live Fleet Status (Location)</h2>
+            <span class="text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-md font-medium">ELD Connected</span>
+          </div>
 
-        <!-- User Personal Info Card -->
-        <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4">
-          <h3 class="text-lg font-medium text-slate-200 border-b border-slate-800 pb-3 flex items-center gap-2">
-            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            Personal & Company Information
-          </h3>
-
-          <div class="space-y-3">
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 flex items-center justify-between">
             <div>
-              <label class="text-xs text-slate-400">Full Name</label>
-              <input type="text" id="userFullNameInput" disabled placeholder="Enter your full name" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 disabled:opacity-50">
+              <h3 class="text-sm font-bold text-white">Truck #104 (Alex)</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Route: Chicago, IL &rarr; Omaha, NE</p>
+              <p class="text-xs text-emerald-400 font-medium mt-1">ETA: 5:30 PM Today</p>
             </div>
-            <div>
-              <label class="text-xs text-slate-400">Email Address</label>
-              <input type="email" id="userEmailInput" disabled placeholder="Enter your official email" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 disabled:opacity-50">
-            </div>
-            <div>
-              <label class="text-xs text-slate-400">Company / Dispatch Firm</label>
-              <input type="text" id="userCompanyInput" disabled placeholder="Enter your company name" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 disabled:opacity-50">
-            </div>
+            <span class="text-xs bg-slate-800 text-slate-200 px-2.5 py-1 rounded-lg font-semibold border border-slate-700">&gt;65 MPH</span>
           </div>
         </div>
 
-        <!-- Verification Status & Document Upload Card -->
-        <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4">
-          <h3 class="text-lg font-medium text-slate-200 border-b border-slate-800 pb-3 flex items-center gap-2">
-            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-            Verification Checks & Identity Lock
-          </h3>
-
-          <div class="space-y-3">
-            <!-- MC / DOT Number Input Section -->
-            <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-medium text-slate-300">MC / DOT Number Authorization</span>
-                <span id="mcStatusBadge" class="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-md border border-amber-500/20">Pending</span>
-              </div>
-              <input type="text" id="mcNumberInput" disabled placeholder="Enter 6-7 digit MC or DOT#" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-lg p-2 text-sm text-slate-200 disabled:opacity-50">
-            </div>
-
-            <!-- Document Upload Section -->
-            <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-medium text-slate-300">MC Certificate / Authority Letter</span>
-                <span id="docStatusBadge" class="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-md border border-amber-500/20">Required</span>
-              </div>
-              <input type="file" id="mcDocInput" disabled accept=".pdf,.png,.jpg,.jpeg" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 disabled:opacity-50">
-            </div>
-
-            <!-- Email Check -->
-            <div class="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-              <div class="flex items-center gap-3">
-                <span class="text-sm font-medium text-slate-300" id="emailCheckIcon">⏳</span>
-                <span class="text-sm font-medium text-slate-300">Email Verification</span>
-              </div>
-              <span id="emailStatusBadge" class="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-md border border-amber-500/20">Unverified</span>
-            </div>
-
-            <!-- Security Lock Check -->
-            <div class="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-              <div class="flex items-center gap-3">
-                <span class="text-sm font-medium text-slate-300" id="identityCheckIcon">⏳</span>
-                <span class="text-sm font-medium text-slate-300">Identity Security Lock</span>
-              </div>
-              <span id="identityStatusBadge" class="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-md border border-amber-500/20">Unlocked</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- COUNTER OFFER MODULE SECTION -->
-      <section id="counter" class="app-section hidden" style="padding: 20px;">
-
-        <!-- Top Chrome Extension Teaser Banner -->
-        <div style="background: linear-gradient(90deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 8px; padding: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-          <span style="background: #f97316; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">NEW</span>
-            <span style="font-size: 14px; font-weight: 500;">LoadAgent AI Chrome Extension Integration</span>
-          </div>
-          <span style="font-size: 12px; color: #94a3b8; background: #334155; padding: 4px 10px; border-radius: 12px;">Coming Soon</span>
-        </div>
-
-        <!-- Main Counter Offer Engine UI -->
-        <div style="max-width: 900px; margin: 0 auto; background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 24px;">
-
-          <div style="margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
-            <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 0 0 6px 0;">AI Counter-Offer Engine</h2>
-            <p style="font-size: 14px; color: #64748b; margin: 0;">Paste the broker's email load details below to generate an optimized response.</p>
+        <!-- Regional Diesel Rates Card -->
+        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-white">Regional Diesel Rates</h2>
+            <span class="text-xs text-slate-400">US National Avg</span>
           </div>
 
-          <!-- Input Section -->
-          <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px;">
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 flex items-center justify-between">
             <div>
-              <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">Broker Email Load Details</label>
-              <textarea id="email-text-counter" rows="6" placeholder="Paste raw broker email here..." style="width: 100%; background: #020617; border: 1px solid #334155; border-radius: 8px; padding: 12px; color: #f8fafc; font-size: 14px;"></textarea>
+              <h3 class="text-sm font-bold text-white">Midwest / South Region</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Updated Today via EIA API</p>
             </div>
+            <span class="text-base font-bold text-emerald-400">$3.84 / gal</span>
+          </div>
+        </div>
+      </section>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-              <div>
-                <label style="font-size: 12px; font-weight: 600; color: #475569;">Target Rate ($):</label>
-                <input type="number" id="targetRateInput" placeholder="e.g. 1800" style="width: 100%; padding: 8px 12px; background: #020617; border: 1px solid #334155; border-radius: 6px; color: #f8fafc; font-size: 14px;">
-              </div>
-              <div>
-                <label style="font-size: 12px; font-weight: 600; color: #475569;">Tone / Style:</label>
-                <select id="tone-counter" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #020617; color: #f8fafc; font-size: 14px;">
-                  <option value="professional">Professional & Firm</option>
-                  <option value="friendly">Friendly Negotiator</option>
-                  <option value="urgent">Direct & Quick Close</option>
-                </select>
-              </div>
-            </div>
+      <!-- ========================================================= -->
+      <!-- VIEW B: COUNTER OFFER & EXTENSION (Hidden until selected) -->
+      <!-- ========================================================= -->
+      <section id="view-counter" class="hidden space-y-4">
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
+          <div class="border-b border-slate-800 pb-3">
+            <h2 class="text-lg font-bold text-white">AI Counter-Offer Generator</h2>
+            <p class="text-xs text-slate-400 mt-1">Paste the broker's email load details below to generate an optimized response.</p>
           </div>
 
-          <button id="parse-btn-counter" type="button" style="background: #f97316; color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 15px;">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-medium text-slate-300">Broker Email Load Details</label>
+              <button id="counter-sample-btn" type="button" class="text-xs text-emerald-400 hover:underline">Insert Sample Email</button>
+            </div>
+            <textarea id="email-text" rows="7" placeholder="Paste raw broker email here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1.5">Target Rate ($):</label>
+            <input id="custom-target-input" type="number" placeholder="e.g. 1800" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1.5">Tone / Style:</label>
+            <select id="tone-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+              <option value="Professional & Firm">Professional & Firm</option>
+              <option value="Polite & Collaborative">Polite & Collaborative</option>
+              <option value="Urgent / Ready to Book">Urgent / Ready to Book</option>
+            </select>
+          </div>
+
+          <button id="parse-btn" type="button" class="w-full py-3.5 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg shadow-amber-500/20 transition">
             Generate Counter-Offer
           </button>
 
-          <!-- Output Section -->
-          <div id="counterOutputContainer" style="display: none; background: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-top: 20px;">
-            <div id="output-container" class="hidden" style="margin-top: 20px; background: #1px solid #334155; border-radius: 8px; padding: 16px;">
-              <span style="font-size: 13px; font-weight: 700; color: #0f172a;">Generated Humanized Response:</span>
-              <button id="copyBtn-counter" style="background: #e2e8f0; color: #334155; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
-                Copy to Clipboard 📋
-              </button>
+          <!-- Generated Output Container -->
+          <div id="output-container" class="hidden pt-3 border-t border-slate-800 space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <span class="text-xs text-slate-400 block">Broker Offered</span>
+                <span id="offered-rate" class="text-base font-bold text-white">$0</span>
+              </div>
+              <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <span class="text-xs text-slate-400 block">Recommended Counter</span>
+                <span id="target-rate" class="text-base font-bold text-emerald-400">$0</span>
+              </div>
             </div>
-            <div id="counterOutputText" style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap; margin-top: 12px;"></div>
-          </div>
 
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-medium text-slate-400">Generated Reply Draft</span>
+                <button id="copy-btn" type="button" class="text-xs text-emerald-400 hover:underline font-medium">Copy Draft</button>
+              </div>
+              <pre id="generated-email-draft" class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 whitespace-pre-wrap font-sans leading-relaxed"></pre>
+            </div>
+          </div>
         </div>
       </section>
-    </div>
+
+      <!-- ========================================================= -->
+      <!-- VIEW C: PROFILE & VERIFICATION (Hidden until selected)    -->
+      <!-- ========================================================= -->
+      <section id="view-profile" class="hidden space-y-4">
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h2 class="text-lg font-bold text-white">Carrier Profile & Verification</h2>
+              <p id="profileStatusText" class="text-xs text-amber-400 mt-0.5">Account Status: Pending Verification</p>
+            </div>
+            <button id="toggleEditBtn" type="button" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700">
+              Edit Profile
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Full Name</label>
+              <input id="userFullNameInput" type="text" disabled placeholder="Zain Ul Abdin" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-60">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Email Address</label>
+              <input id="userEmailInput" type="email" disabled placeholder="dispatch@loadagent-ai.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-60">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Company / Dispatch Name</label>
+              <input id="userCompanyInput" type="text" disabled placeholder="LoadAgent Logistics LLC" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-60">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">MC / DOT Number</label>
+              <input id="mcNumberInput" type="text" disabled placeholder="MC-1234567" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-60">
+            </div>
+          </div>
+
+          <button id="saveProfileBtn" type="button" class="hidden w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm">
+            Save & Verify Profile
+          </button>
+        </div>
+      </section>
+
+    </main>
   </div>
-</div>
-<script>
 
-  <!-- ------------------------------------ -->
-  <!-- 3. JAVASCRIPT LOGIC ----------------- -->
-  <!-- ------------------------------------ -->
-   
-    <script>
-    // 1. Global Sidebar Toggle
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar-drawer');
-    const overlay = document.getElementById('sidebar-backdrop');
-    if (sidebar) sidebar.classList.toggle('-translate-x-full');
-    if (overlay) overlay.classList.toggle('hidden');
-}
-  
-    // Navigation & Dashboard Click Handlers
-    const enterDashBtn = document.getElementById('enter-dash-btn');
-    if (enterDashBtn) {
-        enterDashBtn.addEventListener('click', () => {
-            setActiveView('dashboard');
+  <!-- ========================================================= -->
+  <!-- CLEAN & STRICT JAVASCRIPT LOGIC                           -->
+  <!-- ========================================================= -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Main Screens
+      const welcomeScreen = document.getElementById('welcome-screen');
+      const appShell = document.getElementById('app-shell');
+      const enterDashBtn = document.getElementById('enter-dash-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      // Sidebar Elements
+      const menuToggleBtn = document.getElementById('menu-toggle-btn');
+      const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+      const sidebarDrawer = document.getElementById('sidebar-drawer');
+      const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+      const navItems = document.querySelectorAll('.nav-item');
+
+      // Sub-Views inside App Shell
+      const views = {
+        dashboard: document.getElementById('view-dashboard'),
+        counter: document.getElementById('view-counter'),
+        profile: document.getElementById('view-profile')
+      };
+
+      // 1. Enter Dashboard from Welcome Screen
+      enterDashBtn.addEventListener('click', () => {
+        welcomeScreen.classList.add('hidden');
+        appShell.classList.remove('hidden');
+        appShell.classList.add('flex');
+        switchSubView('dashboard');
+      });
+
+      // 2. Logout back to Welcome Screen
+      logoutBtn.addEventListener('click', () => {
+        closeSidebar();
+        appShell.classList.add('hidden');
+        appShell.classList.remove('flex');
+        welcomeScreen.classList.remove('hidden');
+      });
+
+      // 3. Sidebar Open / Close Controls
+      function openSidebar() {
+        sidebarDrawer.classList.remove('-translate-x-full');
+        sidebarBackdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebarDrawer.classList.add('-translate-x-full');
+        sidebarBackdrop.classList.add('hidden');
+      }
+
+      menuToggleBtn.addEventListener('click', openSidebar);
+      closeSidebarBtn.addEventListener('click', closeSidebar);
+      sidebarBackdrop.addEventListener('click', closeSidebar);
+
+      // 4. Switch Sub-Views cleanly
+      function switchSubView(targetKey) {
+        Object.keys(views).forEach(key => {
+          if (views[key]) {
+            views[key].classList.add('hidden');
+          }
         });
-    }
-
-    document.addEventListener('click', (e) => {
-        // Dashboard Link Click
-        const dashTarget = e.target.closest('a[href="#dashboard"], .dashboard-nav-btn, #backToDashBtn, [data-action="dashboard"]');
-        if (dashTarget) {
-            e.preventDefault();
-            setActiveView('dashboard');
-            toggleSidebar();
+        if (views[targetKey]) {
+          views[targetKey].classList.remove('hidden');
         }
 
-        // Profile Link Click
-        const profileTarget = e.target.closest('a[href="#profile"], .profile-nav-btn, [data-action="profile"]');
-        if (profileTarget) {
-            e.preventDefault();
-            setActiveView('profile');
-            toggleSidebar();
+        // Highlight active nav item
+        navItems.forEach(btn => {
+          if (btn.getAttribute('data-nav') === targetKey) {
+            btn.className = 'nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-left';
+          } else {
+            btn.className = 'nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition';
+          }
+        });
+      }
+
+      navItems.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-nav') || 'dashboard';
+          switchSubView(target);
+          closeSidebar();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+
+      // 5. Quick Dashboard Sample & Calculation
+      const quickSampleBtn = document.getElementById('quick-sample-btn');
+      const quickEmailInput = document.getElementById('quick-email-input');
+      const quickOfferedRate = document.getElementById('quick-offered-rate');
+      const quickTargetRate = document.getElementById('quick-target-rate');
+      const quickCalcBtn = document.getElementById('quick-calc-btn');
+
+      quickSampleBtn.addEventListener('click', () => {
+        quickEmailInput.value = "Urgent Load: Chicago, IL to Dallas, TX (925 miles). Dry Van 53'. Offering $1450 all-in. Ready for immediate pickup.";
+        quickOfferedRate.value = 1450;
+        quickTargetRate.value = 1670;
+      });
+
+      quickCalcBtn.addEventListener('click', () => {
+        const offered = parseFloat(quickOfferedRate.value) || 1450;
+        const target = Math.round(offered * 1.15);
+        quickTargetRate.value = target;
+        // Transfer to full Counter-Offer view and generate
+        document.getElementById('email-text').value = quickEmailInput.value || `Load offer at $${offered}`;
+        document.getElementById('custom-target-input').value = target;
+        switchSubView('counter');
+        document.getElementById('parse-btn').click();
+      });
+
+      // 6. Dedicated Counter-Offer Generator Logic
+      const counterSampleBtn = document.getElementById('counter-sample-btn');
+      const emailText = document.getElementById('email-text');
+      const customTargetInput = document.getElementById('custom-target-input');
+      const toneSelect = document.getElementById('tone-select');
+      const parseBtn = document.getElementById('parse-btn');
+      const outputContainer = document.getElementById('output-container');
+      const offeredRateEl = document.getElementById('offered-rate');
+      const targetRateEl = document.getElementById('target-rate');
+      const generatedDraftEl = document.getElementById('generated-email-draft');
+      const copyBtn = document.getElementById('copy-btn');
+
+      counterSampleBtn.addEventListener('click', () => {
+        emailText.value = "Subject: Urgent Load Available - Dry Van from Chicago, IL to Dallas, TX\n\nHi Team,\nWe have a 53' Dry Van load picking up today in Chicago, IL delivering to Dallas, TX. Weight 42,000 lbs. Rate: $1450. Let me know if you can cover.";
+      });
+
+      parseBtn.addEventListener('click', () => {
+        const text = emailText.value.trim();
+        if (!text) {
+          alert("Please paste broker email text first!");
+          return;
         }
 
-        // Counter / Extension Link Click
-        const counterLink = e.target.closest('a[href="#counter"], .counter-nav-btn, [data-action="counter"]');
-        if (counterLink) {
-            e.preventDefault();
-            setActiveView('counter');
-            toggleSidebar();
+        let rate = 0;
+        const dollarMatch = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
+        if (dollarMatch) {
+          rate = Math.round(parseFloat(dollarMatch[1]));
+        } else {
+          const numMatch = text.match(/\b([0-9]{3,5})\b/);
+          if (numMatch) rate = parseInt(numMatch[1], 10);
         }
+
+        const customTarget = parseFloat(customTargetInput.value);
+        const finalTarget = customTarget > 0 ? Math.round(customTarget) : (rate > 0 ? Math.round(rate * 1.15) : 1800);
+        const displayOffered = rate > 0 ? `$${rate.toLocaleString()}` : "Not Specified";
+        const tone = toneSelect.value;
+
+        offeredRateEl.textContent = displayOffered;
+        targetRateEl.textContent = `$${finalTarget.toLocaleString()}`;
+
+        generatedDraftEl.textContent = `Hi Team,\n\nThanks for reaching out regarding this load. Given current market capacity, fuel costs, and deadhead positioning, we can cover this run reliably for $${finalTarget.toLocaleString()} all-in (${tone}).\n\nOur driver is empty and ready for immediate dispatch. Send over the rate confirmation if that works on your end.\n\nBest regards,\nDispatch Team | LoadAgent-AI`;
+
+        outputContainer.classList.remove('hidden');
+      });
+
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(generatedDraftEl.textContent);
+        const orig = copyBtn.textContent;
+        copyBtn.textContent = "✓ Copied!";
+        setTimeout(() => copyBtn.textContent = orig, 2000);
+      });
+
+      // 7. Profile Edit & Save Logic
+      const toggleEditBtn = document.getElementById('toggleEditBtn');
+      const saveProfileBtn = document.getElementById('saveProfileBtn');
+      const profileInputs = [
+        document.getElementById('userFullNameInput'),
+        document.getElementById('userEmailInput'),
+        document.getElementById('userCompanyInput'),
+        document.getElementById('mcNumberInput')
+      ];
+
+      toggleEditBtn.addEventListener('click', () => {
+        const isCurrentlyDisabled = profileInputs[0].disabled;
+        profileInputs.forEach(inp => inp.disabled = !isCurrentlyDisabled);
+        if (isCurrentlyDisabled) {
+          toggleEditBtn.textContent = "Cancel";
+          saveProfileBtn.classList.remove('hidden');
+        } else {
+          toggleEditBtn.textContent = "Edit Profile";
+          saveProfileBtn.classList.add('hidden');
+        }
+      });
+
+      saveProfileBtn.addEventListener('click', () => {
+        profileInputs.forEach(inp => inp.disabled = true);
+        toggleEditBtn.textContent = "Edit Profile";
+        saveProfileBtn.classList.add('hidden');
+        document.getElementById('profileStatusText').textContent = "Account Status: Active & Verified";
+        document.getElementById('profileStatusText').className = "text-xs text-emerald-400 mt-0.5";
+        alert("Profile updated & verified!");
+      });
     });
-
-    // Logout Logic
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.clear();
-            setActiveView('signed-out');
-            if (signinForm) signinForm.reset();
-            if (signupForm) signupForm.reset();
-            window.location.reload();
-        });
-    }
-
-    // 9. Flexible & Bulletproof Parser & Counter Offer Feature
-    const sampleBtn = document.getElementById('sample-btn');
-    const emailText = document.getElementById('email-text') || document.querySelector('textarea');
-    const parseBtn = document.getElementById('parse-btn');
-    const outputContainer = document.getElementById('output-container');
-
-    const offeredRateEl = document.getElementById('offered-rate');
-    const targetRateEl = document.getElementById('target-rate');
-    const generatedDraftEl = document.getElementById('generated-email-draft') || document.querySelector('pre, code, .draft-box');
-    const copyBtn = document.getElementById('copy-btn');
-
-    if (sampleBtn && emailText) {
-        sampleBtn.addEventListener('click', () => {
-            emailText.value = "Subject: Urgent Load Available - Dry Van from Chicago, IL to Dallas, TX\nHi Team,\nWe have an urgent load moving tomorrow. Offering $1,450. Let me know if your truck is available.";
-        });
-    }
-
-    if (parseBtn) {
-        parseBtn.addEventListener('click', (e) => {
-            if (e) e.preventDefault();
-            const text = emailText ? emailText.value.trim() : '';
-            if (!text) {
-                alert("Please paste broker email text first!");
-                return;
-            }
-
-            let rate = 0;
-            const dollarMatch = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
-            if (dollarMatch) {
-                const val = parseFloat(dollarMatch[1]);
-                if (val > 10) rate = Math.round(val);
-            }
-
-            if (rate === 0) {
-                const matches = text.match(/\b([0-9]{2,5})\b/g);
-                if (matches) {
-                    for (let matchStr of matches) {
-                        const num = parseInt(matchStr, 10);
-                        if (num > 30 && num < 15000 && num !== 42000) {
-                            const idx = text.indexOf(matchStr);
-                            const sub = text.substring(idx + matchStr.length, idx + matchStr.length + 6).toLowerCase();
-                            if (!sub.includes('mil') && !sub.includes('mi')) {
-                                rate = num;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (rate === 0) {
-                const digits = text.replace(/[^0-9]/g, '');
-                if (digits.length >= 3) {
-                    rate = parseInt(digits, 10);
-                }
-            }
-
-            if (rate === 0) {
-                alert("Could not find a valid rate amount in text. Please include text like 'Rate: $1450.'");
-                return;
-            }
-
-            const targetRate = Math.round(rate * 1.15);
-
-            if (offeredRateEl) offeredRateEl.textContent = `$${rate.toLocaleString()}`;
-            if (targetRateEl) targetRateEl.textContent = `$${targetRate.toLocaleString()}`;
-            if (generatedDraftEl) {
-                generatedDraftEl.textContent = `Hi Team,\n\nThanks for reaching out regarding this load. Given current market rates and deadhead miles, our counter offer is $${targetRate.toLocaleString()}. Let's lock it in!`;
-            }
-
-            if (outputContainer) {
-                outputContainer.classList.remove('hidden');
-                outputContainer.style.display = 'block';
-            }
-        });
-    }
-
-    if (copyBtn && generatedDraftEl) {
-        copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(generatedDraftEl.textContent);
-            const oldText = copyBtn.textContent;
-            copyBtn.textContent = "✓ Copied to Clipboard!";
-            setTimeout(() => {
-                copyBtn.textContent = oldText;
-            }, 2000);
-        });
-    }
-
-    // 10. Profile Verification Logic
-    const toggleEditBtn = document.getElementById('toggleEditBtn');
-    const saveProfileBtn = document.getElementById('saveProfileBtn');
-    const mcInput = document.getElementById('mcNumberInput');
-    const docInput = document.getElementById('mcDocInput');
-    const nameInput = document.getElementById('userFullNameInput');
-    const emailInput = document.getElementById('userEmailInput');
-    const companyInput = document.getElementById('userCompanyInput');
-
-    const profileInputs = [nameInput, emailInput, companyInput, mcInput, docInput];
-
-    if (localStorage.getItem('loadagent_user_verified') === 'true') {
-        if (mcInput) mcInput.value = localStorage.getItem('loadagent_user_mc') || '';
-        if (nameInput) nameInput.value = localStorage.getItem('loadagent_user_name') || '';
-        if (emailInput) emailInput.value = localStorage.getItem('loadagent_user_email') || '';
-        if (companyInput) companyInput.value = localStorage.getItem('loadagent_user_company') || '';
-        applyVerifiedUI();
-    }
-
-    if (toggleEditBtn) {
-        toggleEditBtn.addEventListener('click', () => {
-            const isDisabled = nameInput ? nameInput.disabled : true;
-            profileInputs.forEach(input => { if (input) input.disabled = !isDisabled; });
-
-            if (isDisabled) {
-                toggleEditBtn.textContent = "Cancel";
-                toggleEditBtn.className = "px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold rounded-lg";
-                if (saveProfileBtn) saveProfileBtn.classList.remove('hidden');
-            } else {
-                toggleEditBtn.textContent = "Edit Profile";
-                toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-lg";
-                if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
-            }
-        });
-    }
-
-    if (saveProfileBtn) {
-        saveProfileBtn.addEventListener('click', () => {
-            const nameVal = nameInput ? nameInput.value.trim() : '';
-            const emailVal = emailInput ? emailInput.value.trim() : '';
-
-            if (!nameVal || !emailVal) {
-                alert("Please enter your Full Name and Email Address.");
-                return;
-            }
-
-            localStorage.setItem('loadagent_user_verified', 'true');
-            if (nameInput) localStorage.setItem('loadagent_user_name', nameVal);
-            if (emailInput) localStorage.setItem('loadagent_user_email', emailVal);
-            if (companyInput) localStorage.setItem('loadagent_user_company', companyInput.value.trim());
-
-            profileInputs.forEach(input => { if (input) input.disabled = true; });
-            if (toggleEditBtn) {
-                toggleEditBtn.textContent = "Edit Profile";
-                toggleEditBtn.className = "px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-lg";
-            }
-            if (saveProfileBtn) saveProfileBtn.classList.add('hidden');
-            applyVerifiedUI();
-            alert("Profile updated & verified successfully!");
-        });
-    }
-});
-
-function applyVerifiedUI() {
-    const mcStatusBadge = document.getElementById('mcStatusBadge');
-    const docStatusBadge = document.getElementById('docStatusBadge');
-    const emailStatusBadge = document.getElementById('emailStatusBadge');
-    const identityStatusBadge = document.getElementById('identityStatusBadge');
-    const profileStatusText = document.getElementById('profileStatusText');
-    const profileStatusDot = document.getElementById('profileStatusDot');
-
-    if (mcStatusBadge) {
-        mcStatusBadge.textContent = "Active";
-        mcStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md font-medium";
-    }
-    if (docStatusBadge) {
-        docStatusBadge.textContent = "Uploaded & Verified";
-        docStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-lg font-medium";
-    }
-    if (emailStatusBadge) {
-        emailStatusBadge.textContent = "Verified";
-        emailStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md font-medium";
-    }
-    if (identityStatusBadge) {
-        identityStatusBadge.textContent = "Secured";
-        identityStatusBadge.className = "text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md font-medium";
-    }
-    if (profileStatusText && profileStatusDot) {
-        profileStatusText.textContent = "Account Status: Active & Verified";
-        profileStatusText.className = "text-xs font-medium text-emerald-400";
-        profileStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
-    }
-    }
-// Standalone Logout Fix
-document.addEventListener('click', function(e) {
-    const logoutTarget = e.target.closest('#logout-btn');
-    const isLogoutText = e.target.textContent && e.target.textContent.trim() === 'Logout';
-
-    if (logoutTarget || isLogoutText) {
-        e.preventDefault();
-        localStorage.removeItem('isLoggedIn');
-        window.location.reload();
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Sidebar Link Fix (#counter) aur Dashboard Green Button Fix
-    const sidebarCounterBtn = document.querySelector('a[href="#counter"]');
-    const counterSection = document.getElementById('counter');
-
-    function openCounterOfferPage(e) {
-        if (e) e.preventDefault();
-        setActiveView('sigend-in');
-        if (counterSection) {
-            window.location.hash = 'counter';
-        }
-    }
-
-    // Sidebar button listener
-    if (sidebarCounterBtn) {
-        sidebarCounterBtn.addEventListener('click', openCounterOfferProvider => {
-            openCounterOfferPage(openCounterOfferProvider);
-        });
-    }
-
-    // Dashboard green button listener
-    const greenTriggerBtn = document.getElementById('generateCounterBtn') || document.querySelector('button[style*="background"]');
-    if (greenTriggerBtn) {
-        greenTriggerBtn.addEventListener('click', function(e) {
-            setActiveView('sigend-in');
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        const counterLink = e.target.closest('a[href="#counter"], .counter-nav-btn, [data-action="counter"]');
-        if (counterLink) {
-            e.preventDefault();
-            setActiveView('signed-in');
-        }
-    });
-});
 </script>
 </body>
 </html>
