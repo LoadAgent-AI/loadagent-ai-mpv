@@ -520,44 +520,51 @@
       const mcDocInput = document.getElementById('mcDocInput');
       const existingMcNumbers = ["MC-1234567", "MC-9876543", "MC-5554433"];
 
-      toggleEditBtn.addEventListener('click', () => {
-        const isCurrentlyDisabled = profileInputs[0].disabled;
-        profileInputs.forEach(inp => inp.disabled = !isCurrentlyDisabled);
-        if (mcDocInput) mcDocInput.disabled = !isCurrentlyDisabled;
+      if (toggleEditBtn) {
+        toggleEditBtn.addEventListener('click', () => {
+          const isCurrentlyDisabled = profileInputs[0].disabled;
+          profileInputs.forEach(inp => inp.disabled = !isCurrentlyDisabled);
+          if (mcDocInput) mcDocInput.disabled = !isCurrentlyDisabled;
 
-        if (isCurrentlyDisabled) {
-          toggleEditBtn.textContent = "Cancel";
-          saveProfileBtn.classList.remove('hidden');
-        } else {
+          if (isCurrentlyDisabled) {
+            toggleEditBtn.textContent = "Cancel";
+            saveProfileBtn.classList.remove('hidden');
+          } else {
+            toggleEditBtn.textContent = "Edit Profile";
+            saveProfileBtn.classList.add('hidden');
+          }
+        });
+      }
+
+      if (saveProfileBtn) {
+        saveProfileBtn.addEventListener('click', () => {
+          const mcInputVal = document.getElementById('mcNumberInput').value.trim();
+
+          if (existingMcNumbers.includes(mcInputVal)) {
+            alert("⚠️ Duplicate Error: This MC / DOT number is already registered in the system by another carrier!");
+            return;
+          }
+
+          if (mcDocInput && mcDocInput.files.length === 0) {
+            alert("⚠️ Verification Required: Please upload your MC Certificate or Authority document.");
+            return;
+          }
+
+          profileInputs.forEach(inp => inp.disabled = true);
+          if (mcDocInput) mcDocInput.disabled = true;
+
           toggleEditBtn.textContent = "Edit Profile";
           saveProfileBtn.classList.add('hidden');
-        }
-      });
-
-      saveProfileBtn.addEventListener('click', () => {
-        const mcInputVal = document.getElementById('mcNumberInput').value.trim();
-
-        if (existingMcNumbers.includes(mcInputVal)) {
-          alert("⚠️ Duplicate Error: This MC / DOT number is already registered in the system by another carrier!");
-          return;
-        }
-
-        if (mcDocInput && mcDocInput.files.length === 0) {
-          alert("⚠️ Verification Required: Please upload your MC Certificate or Authority document.");
-          return;
-        }
-
-        profileInputs.forEach(inp => inp.disabled = true);
-        if (mcDocInput) mcDocInput.disabled = true;
-
-        toggleEditBtn.textContent = "Edit Profile";
-        saveProfileBtn.classList.add('hidden');
-        
-        document.getElementById('profileStatusText').textContent = "Account Status: Verified & Approved ✓";
-        document.getElementById('profileStatusTextclassName', "text-xs text-emerald-400 mt-0.5 font-medium");
-        
-        alert("✅ Profile updated successfully! MC document uploaded and verified.");
-      }
+          
+          const statusEl = document.getElementById('profileStatusText');
+          if (statusEl) {
+            statusEl.textContent = "Account Status: Verified & Approved ✓";
+            statusEl.className = "text-xs text-emerald-400 mt-0.5 font-medium";
+          }
+          
+          alert("✅ Profile updated successfully! MC document uploaded and verified.");
+        });
+                                       }
       });
 </script>
 </body>
