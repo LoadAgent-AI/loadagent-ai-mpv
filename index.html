@@ -341,7 +341,71 @@
           </button>
         </div>
       </section>
+<!-- ========================================== -->
+        <!-- VIEW D: PROFIT CALCULATION                 -->
+        <!-- ========================================== -->
+        <section id="view-profit" class="hidden space-y-4">
+          <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
+            <div class="border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-bold text-white">💰 Smart Profit Calculator</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Calculate real net profit, RPM, and expenses before booking</p>
+            </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Gross Load Rate ($)</label>
+                <input id="prof-rate" type="number" placeholder="e.g. 2200" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Total Miles (Loaded + Deadhead)</label>
+                <input id="prof-miles" type="number" placeholder="e.g. 850" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Estimated Fuel Cost ($)</label>
+                <input id="prof-fuel" type="number" placeholder="e.g. 520" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Driver Pay / Dispatch Fee ($)</label>
+                <input id="prof-driver" type="number" placeholder="e.g. 600" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-xs text-slate-400 mb-1">Tolls, Lumper & Other Expenses ($)</label>
+                <input id="prof-other" type="number" placeholder="e.g. 80" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+              </div>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+              <button id="calc-profit-btn" type="button" class="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-sm transition">
+                Calculate Net Profit
+              </button>
+              <button id="sample-profit-btn" type="button" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl text-xs transition">
+                Sample
+              </button>
+            </div>
+
+            <!-- Results Box -->
+            <div id="profit-result-box" class="hidden bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 mt-4">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <span class="text-xs text-slate-400">Net Take-Home Profit</span>
+                <span id="res-net-profit" class="text-xl font-bold text-emerald-400">$0.00</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-800/80">
+                  <span class="block text-[10px] text-slate-400">Gross RPM</span>
+                  <span id="res-gross-rpm" class="text-sm font-bold text-white">$0.00</span>
+                </div>
+                <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-800/80">
+                  <span class="block text-[10px] text-slate-400">Net RPM</span>
+                  <span id="res-net-rpm" class="text-sm font-bold text-emerald-400">$0.00</span>
+                </div>
+                <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-800/80">
+                  <span class="block text-[10px] text-slate-400">Profit Margin</span>
+                  <span id="res-margin" class="text-sm font-bold text-amber-400">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
     </main>
   </div>
 
@@ -367,7 +431,8 @@
       const views = {
         dashboard: document.getElementById('view-dashboard'),
         counter: document.getElementById('view-counter'),
-        profile: document.getElementById('view-profile')
+        profile: document.getElementById('view-profile'),
+        profit: document.getElementById('view-profit')
       };
 
       // 1. Enter Dashboard from Welcome Screen
@@ -564,8 +629,52 @@
           
           alert("✅ Profile updated successfully! MC document uploaded and verified.");
         });
-                                       }
-      });
+
+        // 8. Profit Calculation Logic
+      const calcProfitBtn = document.getElementById('calc-profit-btn');
+      const sampleProfitBtn = document.getElementById('sample-profit-btn');
+
+      if (sampleProfitBtn) {
+        sampleProfitBtn.addEventListener('click', () => {
+          document.getElementById('prof-rate').value = 2400;
+          document.getElementById('prof-miles').value = 800;
+          document.getElementById('prof-fuel').value = 480;
+          document.getElementById('prof-driver').value = 650;
+          document.getElementById('prof-other').value = 70;
+          calcProfitBtn.click();
+        });
+      }
+
+      if (calcProfitBtn) {
+        calcProfitBtn.addEventListener('click', () => {
+          const rate = parseFloat(document.getElementById('prof-rate').value) || 0;
+          const miles = parseFloat(document.getElementById('prof-miles').value) || 0;
+          const fuel = parseFloat(document.getElementById('prof-fuel').value) || 0;
+          const driver = parseFloat(document.getElementById('prof-driver').value) || 0;
+          const other = parseFloat(document.getElementById('prof-other').value) || 0;
+
+          if (rate <= 0 || miles <= 0) {
+            alert("⚠️ Please enter valid Gross Load Rate and Total Miles!");
+            return;
+          }
+
+          const totalExpenses = fuel + driver + other;
+          const netProfit = rate - totalExpenses;
+          const grossRpm = (rate / miles).toFixed(2);
+          const netRpm = (netProfit / miles).toFixed(2);
+          const margin = ((netProfit / rate) * 100).toFixed(1);
+
+          const netProfitEl = document.getElementById('res-net-profit');
+          netProfitEl.textContent = `$${netProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+          netProfitEl.className = netProfit >= 0 ? "text-xl font-bold text-emerald-400" : "text-xl font-bold text-rose-500";
+
+          document.getElementById('res-gross-rpm').textContent = `$${grossRpm}`;
+          document.getElementById('res-net-rpm').textContent = `$${netRpm}`;
+          document.getElementById('res-margin').textContent = `${margin}%`;
+
+          document.getElementById('profit-result-box').classList.remove('hidden');
+        });
+      }
 </script>
 </body>
 </html>
