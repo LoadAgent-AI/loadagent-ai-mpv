@@ -113,7 +113,7 @@
           <span>Diesel Rates</span>
         </button> 
 
-        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+        <button type="button" data-nav="profit" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
           <span class="text-base">💰</span>
           <span>Profit Calculation</span>
         </button>
@@ -646,8 +646,8 @@
           calcProfitBtn.click();
         });
       }
-
-      if (calcProfitBtn) {
+  
+    if (calcProfitBtn) {
         calcProfitBtn.addEventListener('click', () => {
           const rate = parseFloat(document.getElementById('prof-rate').value) || 0;
           const miles = parseFloat(document.getElementById('prof-miles').value) || 0;
@@ -675,7 +675,7 @@
           document.getElementById('res-margin').textContent = `${margin}%`;
 
           document.getElementById('profit-result-box').classList.remove('hidden');
-        });
+        }); 
       }
 </script>
 </body>
