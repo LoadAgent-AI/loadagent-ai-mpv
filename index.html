@@ -103,12 +103,12 @@
           <span>Pricing & Subscriptions</span>
         </button>
 
-        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+        <button type="button" data-nav="live" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
           <span class="text-base">📍</span>
           <span>Live Location</span>
         </button>
 
-        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+        <button type="button" data-nav="diesel" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
           <span class="text-base">⛽</span>
           <span>Diesel Rates</span>
         </button> 
@@ -406,6 +406,76 @@
             </div>
           </div>
         </section>
+      <!-- DIESEL RATES & STATE FUEL FINDER VIEW -->
+<section id="view-diesel" class="hidden space-y-5">
+  <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+    
+    <!-- Header -->
+    <div class="border-b border-slate-800 pb-4 flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>⛽</span> US State Diesel Rates
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Regional average retail diesel prices & trip fuel estimator</p>
+      </div>
+      <span id="detected-badge" class="text-[11px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full font-medium">
+        📍 Auto-Detecting...
+      </span>
+    </div>
+
+    <!-- State Selector -->
+    <div>
+      <label class="block text-xs font-medium text-slate-300 mb-1.5">Select US State</label>
+      <select id="diesel-state-select" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-3 text-sm text-white outline-none transition">
+        <!-- Populated automatically via JS -->
+      </select>
+    </div>
+
+    <!-- Selected State Rate Card -->
+    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+      <div>
+        <p class="text-xs text-slate-400">Current Average Price in <span id="selected-state-name" class="text-white font-semibold">California</span></p>
+        <p id="selected-state-region" class="text-[11px] text-slate-500 mt-0.5">PADD 5 • West Coast Region</p>
+      </div>
+      <div class="text-right">
+        <span id="selected-state-price" class="text-2xl font-bold text-emerald-400">$4.89</span>
+        <span class="block text-[11px] text-slate-400">per gallon</span>
+      </div>
+    </div>
+
+    <!-- Quick Trip Fuel Cost Estimator -->
+    <div class="pt-2 border-t border-slate-800/80 space-y-3">
+      <p class="text-xs font-semibold text-slate-300">🚛 Quick Trip Fuel Estimator</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Trip Miles</label>
+          <input type="number" id="diesel-trip-miles" placeholder="e.g. 650" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Truck MPG (Avg 6.5)</label>
+          <input type="number" id="diesel-truck-mpg" value="6.5" step="0.1" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+      </div>
+
+      <button type="button" id="calc-diesel-trip-btn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition">
+        Estimate Fuel Cost
+      </button>
+
+      <!-- Trip Estimate Result -->
+      <div id="diesel-trip-result" class="hidden bg-slate-950/90 border border-emerald-500/30 rounded-xl p-3.5 flex items-center justify-between">
+        <div>
+          <span class="text-xs text-slate-400 block">Estimated Gallons Needed</span>
+          <span id="res-gallons-needed" class="text-sm font-bold text-white">0 gal</span>
+        </div>
+        <div class="text-right">
+          <span class="text-xs text-slate-400 block">Total Fuel Cost</span>
+          <span id="res-total-fuel-cost" class="text-lg font-bold text-emerald-400">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
     </main>
   </div>
 
@@ -432,7 +502,8 @@
         dashboard: document.getElementById('view-dashboard'),
         counter: document.getElementById('view-counter'),
         profile: document.getElementById('view-profile'),
-        profit: document.getElementById('view-profit')
+        profit: document.getElementById('view-profit'),
+        diesel: document.getElementById('view-diesel')
       };
 
       // 1. Enter Dashboard from Welcome Screen
@@ -676,6 +747,123 @@
 
           document.getElementById('profit-result-box').classList.remove('hidden');
         }); 
+      }
+    // 9. Diesel Rates & Auto-Region Detection Logic
+      const usDieselData = {
+        "Alabama": { price: 3.48, region: "PADD 3 • Gulf Coast" },
+        "Arizona": { price: 3.92, region: "PADD 5 • West Coast" },
+        "Arkansas": { price: 3.45, region: "PADD 3 • Gulf Coast" },
+        "California": { price: 4.89, region: "PADD 5 • West Coast" },
+        "Colorado": { price: 3.68, region: "PADD 4 • Rocky Mountain" },
+        "Connecticut": { price: 3.98, region: "PADD 1A • New England" },
+        "Delaware": { price: 3.74, region: "PADD 1B • Central Atlantic" },
+        "Florida": { price: 3.65, region: "PADD 1C • Lower Atlantic" },
+        "Georgia": { price: 3.56, region: "PADD 1C • Lower Atlantic" },
+        "Idaho": { price: 3.85, region: "PADD 4 • Rocky Mountain" },
+        "Illinois": { price: 3.79, region: "PADD 2 • Midwest" },
+        "Indiana": { price: 3.75, region: "PADD 2 • Midwest" },
+        "Iowa": { price: 3.58, region: "PADD 2 • Midwest" },
+        "Kansas": { price: 3.52, region: "PADD 2 • Midwest" },
+        "Kentucky": { price: 3.61, region: "PADD 2 • Midwest" },
+        "Louisiana": { price: 3.42, region: "PADD 3 • Gulf Coast" },
+        "Maine": { price: 3.95, region: "PADD 1A • New England" },
+        "Maryland": { price: 3.78, region: "PADD 1B • Central Atlantic" },
+        "Massachusetts": { price: 3.99, region: "PADD 1A • New England" },
+        "Michigan": { price: 3.76, region: "PADD 2 • Midwest" },
+        "Minnesota": { price: 3.67, region: "PADD 2 • Midwest" },
+        "Mississippi": { price: 3.41, region: "PADD 3 • Gulf Coast" },
+        "Missouri": { price: 3.49, region: "PADD 2 • Midwest" },
+        "Montana": { price: 3.74, region: "PADD 4 • Rocky Mountain" },
+        "Nebraska": { price: 3.55, region: "PADD 2 • Midwest" },
+        "Nevada": { price: 4.15, region: "PADD 5 • West Coast" },
+        "New Hampshire": { price: 3.92, region: "PADD 1A • New England" },
+        "New Jersey": { price: 3.82, region: "PADD 1B • Central Atlantic" },
+        "New Mexico": { price: 3.62, region: "PADD 3 • Gulf Coast" },
+        "New York": { price: 4.05, region: "PADD 1B • Central Atlantic" },
+        "North Carolina": { price: 3.63, region: "PADD 1C • Lower Atlantic" },
+        "North Dakota": { price: 3.64, region: "PADD 2 • Midwest" },
+        "Ohio": { price: 3.72, region: "PADD 2 • Midwest" },
+        "Oklahoma": { price: 3.44, region: "PADD 2 • Midwest" },
+        "Oregon": { price: 4.18, region: "PADD 5 • West Coast" },
+        "Pennsylvania": { price: 3.96, region: "PADD 1B • Central Atlantic" },
+        "Rhode Island": { price: 3.94, region: "PADD 1A • New England" },
+        "South Carolina": { price: 3.54, region: "PADD 1C • Lower Atlantic" },
+        "South Dakota": { price: 3.59, region: "PADD 2 • Midwest" },
+        "Tennessee": { price: 3.53, region: "PADD 2 • Midwest" },
+        "Texas": { price: 3.38, region: "PADD 3 • Gulf Coast" },
+        "Utah": { price: 3.79, region: "PADD 4 • Rocky Mountain" },
+        "Vermont": { price: 3.93, region: "PADD 1A • New England" },
+        "Virginia": { price: 3.66, region: "PADD 1C • Lower Atlantic" },
+        "Washington": { price: 4.45, region: "PADD 5 • West Coast" },
+        "West Virginia": { price: 3.71, region: "PADD 1C • Lower Atlantic" },
+        "Wisconsin": { price: 3.65, region: "PADD 2 • Midwest" },
+        "Wyoming": { price: 3.72, region: "PADD 4 • Rocky Mountain" }
+      };
+
+      const stateSelect = document.getElementById('diesel-state-select');
+      const stateNameEl = document.getElementById('selected-state-name');
+      const stateRegionEl = document.getElementById('selected-state-region');
+      const statePriceEl = document.getElementById('selected-state-price');
+      const detectedBadge = document.getElementById('detected-badge');
+
+      function updateDieselDisplay(stateName) {
+        const info = usDieselData[stateName] || usDieselData["Texas"];
+        if (stateNameEl) stateNameEl.textContent = stateName;
+        if (stateRegionEl) stateRegionEl.textContent = info.region;
+        if (statePriceEl) statePriceEl.textContent = `$${info.price.toFixed(2)}`;
+        if (stateSelect) stateSelect.value = stateName;
+      }
+
+      if (stateSelect) {
+        Object.keys(usDieselData).forEach(state => {
+          const opt = document.createElement('option');
+          opt.value = state;
+          opt.textContent = `${state} — $${usDieselData[state].price.toFixed(2)}/gal`;
+          stateSelect.appendChild(opt);
+        });
+
+        stateSelect.addEventListener('change', (e) => {
+          updateDieselDisplay(e.target.value);
+          if (detectedBadge) detectedBadge.textContent = "📍 Manual Selection";
+        });
+
+        // Default fallback & Auto-location detection
+        updateDieselDisplay("Texas");
+        fetch('https://ipapi.co/json/')
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.country_code === 'US' && data.region && usDieselData[data.region]) {
+              updateDieselDisplay(data.region);
+              if (detectedBadge) detectedBadge.textContent = `📍 Detected: ${data.region}`;
+            } else {
+              if (detectedBadge) detectedBadge.textContent = "🇺🇸 US National View";
+            }
+          })
+          .catch(() => {
+            if (detectedBadge) detectedBadge.textContent = "🇺🇸 US State Rates";
+          });
+      }
+
+      const calcDieselTripBtn = document.getElementById('calc-diesel-trip-btn');
+      if (calcDieselTripBtn) {
+        calcDieselTripBtn.addEventListener('click', () => {
+          const miles = parseFloat(document.getElementById('diesel-trip-miles').value) || 0;
+          const mpg = parseFloat(document.getElementById('diesel-truck-mpg').value) || 6.5;
+          const currentState = stateSelect ? stateSelect.value : "Texas";
+          const pricePerGal = usDieselData[currentState].price;
+
+          if (miles <= 0 || mpg <= 0) {
+            alert("⚠️ Please enter valid Trip Miles and Truck MPG!");
+            return;
+          }
+
+          const gallons = miles / mpg;
+          const totalCost = gallons * pricePerGal;
+
+          document.getElementById('res-gallons-needed').textContent = `${gallons.toFixed(1)} gal`;
+          document.getElementById('res-total-fuel-cost').textContent = `$${totalCost.toFixed(2)}`;
+          document.getElementById('diesel-trip-result').classList.remove('hidden');
+        });
       }
 </script>
 </body>
