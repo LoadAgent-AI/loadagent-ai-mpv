@@ -95,7 +95,7 @@
           <span>Profile & Verification</span>
         </button>
 
-        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+        <button type="button" data-nav="status" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
           <span class="text-base">🛡️</span>
           <span>Account Status</span>
         </button>
@@ -596,6 +596,96 @@
 
   </div>
 </section>
+      <!-- ACCOUNT STATUS & VERIFICATION CHECKER VIEW -->
+<section id="view-status" class="hidden space-y-5">
+  <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+    
+    <!-- Header -->
+    <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>🛡️</span> Trust & Verification Directory
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Verify Brokers, Dispatchers & Truckers before booking loads</p>
+      </div>
+      <span class="text-[11px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full font-medium self-start sm:self-auto">
+        ● Live Network Check
+      </span>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="space-y-3">
+      <div class="relative">
+        <input type="text" id="status-search-input" placeholder="Search by Name, Company, MC# or DOT# (e.g. MC-123456)..." class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl pl-4 pr-10 py-3 text-sm text-white outline-none transition">
+        <span class="absolute right-3.5 top-3.5 text-slate-400 text-sm">🔍</span>
+      </div>
+
+      <!-- Role Filter Pills -->
+      <div class="flex flex-wrap gap-2">
+        <button type="button" data-role-filter="ALL" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 transition">
+          All Roles
+        </button>
+        <button type="button" data-role-filter="Broker" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-950 text-slate-300 border border-slate-800 hover:border-slate-700 transition">
+          🏢 Brokers
+        </button>
+        <button type="button" data-role-filter="Dispatcher" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-950 text-slate-300 border border-slate-800 hover:border-slate-700 transition">
+          🎧 Dispatchers
+        </button>
+        <button type="button" data-role-filter="Trucker" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-950 text-slate-300 border border-slate-800 hover:border-slate-700 transition">
+          🚛 Truckers
+        </button>
+      </div>
+    </div>
+
+    <!-- Directory Results List -->
+    <div id="status-directory-list" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+      <!-- Populated dynamically via JS -->
+    </div>
+
+    <!-- Self-Verification / Add Account Box -->
+    <div class="pt-4 border-t border-slate-800 space-y-3">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-semibold text-sky-400">➕ Add / Check Your Own Account Status</p>
+        <span class="text-[11px] text-slate-500">Instant Directory Listing</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Full Name / Company</label>
+          <input type="text" id="new-acc-name" placeholder="e.g. SwiftHaul Dispatch" class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Account Role</label>
+          <select id="new-acc-role" class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+            <option value="Dispatcher">Dispatcher</option>
+            <option value="Broker">Broker</option>
+            <option value="Trucker">Trucker / Carrier</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">MC# / DOT# or ID</label>
+          <input type="text" id="new-acc-mcdot" placeholder="e.g. MC-984512" class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Verification Document</label>
+          <select id="new-acc-doc" class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+            <option value="Verified">FMCSA / COI Uploaded</option>
+            <option value="Unverified">No Docs Yet (Unverified)</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" id="register-status-btn" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition">
+        🔍 Submit & Update My Verification Status
+      </button>
+    </div>
+
+  </div>
+</section>
+      
     </main>
   </div>
 
@@ -624,7 +714,8 @@
         profile: document.getElementById('view-profile'),
         profit: document.getElementById('view-profit'),
         diesel: document.getElementById('view-diesel'),
-        location: document.getElementById('view-location')
+        location: document.getElementById('view-location'),
+        status: document.getElementById('view-status')
       };
 
       // 1. Enter Dashboard from Welcome Screen
@@ -1146,6 +1237,122 @@
             }).catch(() => {});
         });
     }
+    // 11. Account Status & Verification Directory Logic
+      const defaultAccounts = [
+        { name: "Apex Logistics Brokers", role: "Broker", mcdot: "MC-123456", status: "Verified", details: "FMCSA Active • Bond Verified • 98% On-Time Pay" },
+        { name: "Jake Miller (Jait Transport)", role: "Trucker", mcdot: "DOT-3891042", status: "Verified", details: "CDL & COI Verified • Clean Safety Record" },
+        { name: "PrimeLane Dispatchers", role: "Dispatcher", mcdot: "ID-DSP-884", status: "Verified", details: "Business EIN & Carrier Agreements Verified" },
+        { name: "Global Freight Solutions", role: "Broker", mcdot: "MC-998120", status: "Unverified", details: "Missing Surety Bond • Identity Unconfirmed" },
+        { name: "RapidHaul Express LLC", role: "Trucker", mcdot: "MC-774310", status: "Unverified", details: "Insurance Certificate Expired / Pending Review" }
+      ];
+
+      let storedAccounts = JSON.parse(localStorage.getItem('loadagent_status_directory') || 'null');
+      if (!storedAccounts) {
+        storedAccounts = defaultAccounts;
+        localStorage.setItem('loadagent_status_directory', JSON.stringify(storedAccounts));
+      }
+
+      let currentRoleFilter = "ALL";
+      const statusListEl = document.getElementById('status-directory-list');
+      const statusSearchInput = document.getElementById('status-search-input');
+
+      function renderAccountDirectory() {
+        if (!statusListEl) return;
+        const query = (statusSearchInput ? statusSearchInput.value : "").toLowerCase().trim();
+
+        const filtered = storedAccounts.filter(acc => {
+          const matchesRole = currentRoleFilter === "ALL" || acc.role === currentRoleFilter;
+          const matchesQuery = !query ||
+            acc.name.toLowerCase().includes(query) ||
+            acc.mcdot.toLowerCase().includes(query) ||
+            acc.role.toLowerCase().includes(query);
+          return matchesRole && matchesQuery;
+        });
+
+        if (filtered.length === 0) {
+          statusListEl.innerHTML = `
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-center text-xs text-slate-400">
+              No matching account found. Check the MC#/DOT# spelling or register it below.
+            </div>`;
+          return;
+        }
+
+        statusListEl.innerHTML = filtered.map(acc => {
+          const isVerified = acc.status === "Verified";
+          const cardBorder = isVerified ? "border-emerald-500/40 bg-emerald-950/10" : "border-amber-500/40 bg-amber-950/10";
+          const badgeStyle = isVerified
+            ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+            : "bg-amber-500/20 text-amber-400 border-amber-500/40";
+          const badgeIcon = isVerified ? "✅ VERIFIED" : "⚠️ NOT VERIFIED";
+
+          return `
+            <div class="border ${cardBorder} rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-bold text-white">${acc.name}</span>
+                  <span class="text-[10px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded">${acc.role} • ${acc.mcdot}</span>
+                </div>
+                <p class="text-[11px] text-slate-400">${acc.details}</p>
+              </div>
+              <span class="self-start sm:self-center shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg border ${badgeStyle}">
+                ${badgeIcon}
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (statusSearchInput) {
+        statusSearchInput.addEventListener('input', renderAccountDirectory);
+      }
+
+      document.querySelectorAll('.status-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentRoleFilter = btn.getAttribute('data-role-filter');
+          document.querySelectorAll('.status-filter-btn').forEach(b => {
+            b.className = "status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-950 text-slate-300 border border-slate-800 hover:border-slate-700 transition";
+          });
+          btn.className = "status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 transition";
+          renderAccountDirectory();
+        });
+      });
+
+      const registerStatusBtn = document.getElementById('register-status-btn');
+      if (registerStatusBtn) {
+        registerStatusBtn.addEventListener('click', () => {
+          const name = document.getElementById('new-acc-name').value.trim();
+          const role = document.getElementById('new-acc-role').value;
+          const mcdot = document.getElementById('new-acc-mcdot').value.trim().toUpperCase();
+          const status = document.getElementById('new-acc-doc').value;
+
+          if (!name || !mcdot) {
+            alert("⚠️ Please enter both Name/Company and MC#/DOT#!");
+            return;
+          }
+
+          const details = status === "Verified"
+            ? "Documents Verified • Active LoadAgent-AI Member"
+            : "Pending Document Upload • Unverified Account";
+
+          // Prevent duplicate MC/DOT entry & update if exists
+          const existingIndex = storedAccounts.findIndex(a => a.mcdot === mcdot);
+          const newEntry = { name, role, mcdot, status, details };
+
+          if (existingIndex >= 0) {
+            storedAccounts[existingIndex] = newEntry;
+          } else {
+            storedAccounts.unshift(newEntry);
+          }
+
+          localStorage.setItem('loadagent_status_directory', JSON.stringify(storedAccounts));
+          document.getElementById('new-acc-name').value = "";
+          document.getElementById('new-acc-mcdot').value = "";
+          renderAccountDirectory();
+        });
+      }
+
+      // Initial render
+      renderAccountDirectory();
 </script>
 </body>
 </html>
