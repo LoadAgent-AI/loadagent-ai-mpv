@@ -8,6 +8,8 @@
   <title>LoadAgent AI - Autonomous Dispatcher</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
 
@@ -103,7 +105,7 @@
           <span>Pricing & Subscriptions</span>
         </button>
 
-        <button type="button" data-nav="live" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+        <button type="button" data-nav="location" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
           <span class="text-base">📍</span>
           <span>Live Location</span>
         </button>
@@ -476,6 +478,124 @@
 
   </div>
 </section>
+      <!-- LIVE LOCATION & LOAD TRACKING VIEW -->
+<section id="view-location" class="hidden space-y-5">
+  <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+    
+    <!-- Header & Role Switcher -->
+    <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>📍</span> Live Load & Trucker Tracking
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Dispatch finalized loads & track real-time trucker locations</p>
+      </div>
+      
+      <!-- Mode Toggle -->
+      <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+        <button type="button" id="tab-dispatcher-btn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 transition">
+          Dispatcher
+        </button>
+        <button type="button" id="tab-trucker-btn" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+          Trucker / Driver
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive Map Container -->
+    <div class="space-y-2">
+      <div class="flex items-center justify-between text-xs">
+        <span class="text-slate-300 font-medium">🗺️ Live Route & Truck Pin</span>
+        <span id="map-status-text" class="text-emerald-400 font-medium">● Ready to Track</span>
+      </div>
+      <div id="live-tracking-map" class="w-full h-64 rounded-xl border border-slate-700 z-0"></div>
+    </div>
+
+    <!-- PANEL 1: DISPATCHER (FINALIZE DEAL & SEND MESSAGE) -->
+    <div id="panel-dispatcher" class="space-y-4 pt-2 border-t border-slate-800">
+      <p class="text-xs font-semibold text-emerald-400">🤝 Finalize Deal & Notify Trucker</p>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Load ID / Reference</label>
+          <input type="text" id="track-load-id" placeholder="e.g. L-10555" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Driver Name</label>
+          <input type="text" id="track-driver-name" placeholder="e.g. Mike Ross" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Pickup City, State</label>
+          <input type="text" id="track-pickup" placeholder="e.g. Dallas, TX" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Dropoff City, State</label>
+          <input type="text" id="track-dropoff" placeholder="e.g. Atlanta, GA" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] text-slate-400 mb-1">Driver Phone / WhatsApp (with country code)</label>
+        <input type="tel" id="track-driver-phone" placeholder="e.g. +12145550199" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+      </div>
+
+      <button type="button" id="finalize-dispatch-btn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition">
+        ✅ Finalize Deal & Activate Tracking
+      </button>
+
+      <!-- Dispatch Confirmation & Instant Message Box -->
+      <div id="dispatch-confirmed-box" class="hidden bg-slate-950 border border-emerald-500/40 rounded-xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-emerald-400">✔ Deal Confirmed & Active!</span>
+          <span id="active-load-badge" class="text-[11px] bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded-md font-mono">L-10555</span>
+        </div>
+        <p id="dispatch-summary-text" class="text-xs text-slate-300 leading-relaxed"></p>
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+          <a id="send-whatsapp-btn" href="#" target="_blank" class="text-center bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg text-xs transition">
+            📲 Send via WhatsApp
+          </a>
+          <a id="send-sms-btn" href="#" class="text-center bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2 rounded-lg text-xs border border-slate-700 transition">
+            💬 Send via SMS
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 2: TRUCKER / DRIVER (UPDATE LIVE LOCATION) -->
+    <div id="panel-trucker" class="hidden space-y-4 pt-2 border-t border-slate-800">
+      <p class="text-xs font-semibold text-sky-400">🚛 Driver Location Check-In</p>
+      
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-300">
+        Active Load: <span id="trucker-active-load" class="font-bold text-white">No active load assigned yet</span>
+      </div>
+
+      <!-- One-Click GPS Share -->
+      <button type="button" id="share-gps-btn" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+        <span>📡</span> Share My Live GPS Location
+      </button>
+
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-slate-800"></div>
+        <span class="flex-shrink mx-3 text-[11px] text-slate-500">OR ENTER MANUALLY</span>
+        <div class="flex-grow border-t border-slate-800"></div>
+      </div>
+
+      <!-- Manual City / Highway Entry -->
+      <div class="flex gap-2">
+        <input type="text" id="manual-location-input" placeholder="e.g. I-20 East, Shreveport, LA" class="flex-1 bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        <button type="button" id="update-manual-loc-btn" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-4 py-2 rounded-xl text-xs border border-slate-700 transition">
+          Update Pin
+        </button>
+      </div>
+
+      <p id="trucker-last-updated" class="text-[11px] text-slate-400 text-center"></p>
+    </div>
+
+  </div>
+</section>
     </main>
   </div>
 
@@ -503,7 +623,8 @@
         counter: document.getElementById('view-counter'),
         profile: document.getElementById('view-profile'),
         profit: document.getElementById('view-profit'),
-        diesel: document.getElementById('view-diesel')
+        diesel: document.getElementById('view-diesel'),
+        location: document.getElementById('view-location')
       };
 
       // 1. Enter Dashboard from Welcome Screen
@@ -865,6 +986,165 @@
           document.getElementById('diesel-trip-result').classList.remove('hidden');
         });
       }
+    // 10. Live Location & Load Tracking Logic
+      let trackingMap = null;
+      let truckMarker = null;
+
+      function initTrackingMap() {
+        const mapEl = document.getElementById('live-tracking-map');
+        if (!mapEl || typeof L === 'undefined') return;
+
+        if (!trackingMap) {
+          // Default center: USA (Dallas, TX area)
+          trackingMap = L.map('live-tracking-map').setView([32.7767, -96.7970], 5);
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap'
+          }).addTo(trackingMap);
+
+          truckMarker = L.marker([32.7767, -96.7970]).addTo(trackingMap)
+            .bindPopup('🚛 Truck Ready • Waiting for Dispatch')
+            .openPopup();
+        }
+        setTimeout(() => trackingMap.invalidateSize(), 200);
+      }
+
+      // Initialize map whenever Live Location tab is clicked
+      document.querySelectorAll('[data-nav="location"]').forEach(btn => {
+        btn.addEventListener('click', initTrackingMap);
+      });
+
+      // Role Tabs Switching (Dispatcher vs Trucker)
+      const tabDispatcherBtn = document.getElementById('tab-dispatcher-btn');
+      const tabTruckerBtn = document.getElementById('tab-trucker-btn');
+      const panelDispatcher = document.getElementById('panel-dispatcher');
+      const panelTrucker = document.getElementById('panel-trucker');
+
+      if (tabDispatcherBtn && tabTruckerBtn) {
+        tabDispatcherBtn.addEventListener('click', () => {
+          panelDispatcher.classList.remove('hidden');
+          panelTrucker.classList.add('hidden');
+          tabDispatcherBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 transition";
+          tabTruckerBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+        });
+
+        tabTruckerBtn.addEventListener('click', () => {
+          panelTrucker.classList.remove('hidden');
+          panelDispatcher.classList.add('hidden');
+          tabTruckerBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950 transition";
+          tabDispatcherBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+        });
+      }
+
+      // Finalize Deal & Generate Trucker Notification
+      const finalizeDispatchBtn = document.getElementById('finalize-dispatch-btn');
+      if (finalizeDispatchBtn) {
+        finalizeDispatchBtn.addEventListener('click', () => {
+          const loadId = document.getElementById('track-load-id').value.trim() || "L-10555";
+          const driverName = document.getElementById('track-driver-name').value.trim() || "Driver";
+          const pickup = document.getElementById('track-pickup').value.trim();
+          const dropoff = document.getElementById('track-dropoff').value.trim();
+          const phone = document.getElementById('track-driver-phone').value.trim().replace(/[^0-9+]/g, '');
+
+          if (!pickup || !dropoff) {
+            alert("⚠️ Please enter both Pickup and Dropoff locations!");
+            return;
+          }
+
+          const loadSummary = `Load ${loadId}: ${pickup} ➔ ${dropoff} (Driver: ${driverName})`;
+          localStorage.setItem('loadagent_active_load', JSON.stringify({ loadId, driverName, pickup, dropoff }));
+
+          document.getElementById('active-load-badge').textContent = loadId;
+          document.getElementById('dispatch-summary-text').textContent = `Confirmed! ${loadSummary}. Tracking is now active.`;
+          document.getElementById('trucker-active-load').textContent = loadSummary;
+          document.getElementById('dispatch-confirmed-box').classList.remove('hidden');
+          document.getElementById('map-status-text').textContent = `● Tracking ${loadId}`;
+
+          const msgText = encodeURIComponent(
+            `LoadAgent-AI Dispatch Confirmed! 🚛\nLoad ID: ${loadId}\nPickup: ${pickup}\nDropoff: ${dropoff}\nPlease open LoadAgent-AI Live Location to share your check-in.`
+          );
+
+          document.getElementById('send-whatsapp-btn').href = phone
+            ? `https://wa.me/${phone.replace('+', '')}?text=${msgText}`
+            : `https://wa.me/?text=${msgText}`;
+          document.getElementById('send-sms-btn').href = phone
+            ? `sms:${phone}?body=${msgText}`
+            : `sms:?body=${msgText}`;
+
+          // Geocode pickup city on map using free Nominatim API
+          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pickup)}`)
+            .then(r => r.json())
+            .then(data => {
+              if (data && data[0] && trackingMap) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                trackingMap.setView([lat, lon], 8);
+                truckMarker.setLatLng([lat, lon])
+                  .setPopupContent(`🚛 <b>${loadId}</b> (${driverName})<br>Origin: ${pickup}`)
+                  .openPopup();
+              }
+            }).catch(() => {});
+        });
+      }
+
+      // Trucker Live GPS Location Update
+      const shareGpsBtn = document.getElementById('share-gps-btn');
+      if (shareGpsBtn) {
+        shareGpsBtn.addEventListener('click', () => {
+          if (!navigator.geolocation) {
+            alert("GPS not supported on this browser. Please enter your city manually.");
+            return;
+          }
+          shareGpsBtn.textContent = "📡 Fetching GPS Coordinates...";
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const lat = pos.coords.latitude;
+              const lon = pos.coords.longitude;
+              const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+              if (trackingMap) {
+                trackingMap.setView([lat, lon], 11);
+                truckMarker.setLatLng([lat, lon])
+                  .setPopupContent(`📍 <b>Live GPS Pin</b><br>Updated at ${timeStr}`)
+                  .openPopup();
+              }
+              document.getElementById('trucker-last-updated').textContent = `✅ Live GPS updated at ${timeStr}`;
+              document.getElementById('map-status-text').textContent = `● Live GPS (${timeStr})`;
+              shareGpsBtn.innerHTML = `<span>📡</span> Share My Live GPS Location`;
+            },
+            () => {
+              alert("⚠️ Location permission denied. Use manual city entry below.");
+              shareGpsBtn.innerHTML = `<span>📡</span> Share My Live GPS Location`;
+            }
+          );
+        });
+      }
+
+      // Trucker Manual City / Highway Location Update
+      const updateManualLocBtn = document.getElementById('update-manual-loc-btn');
+      if (updateManualLocBtn) {
+        updateManualLocBtn.addEventListener('click', () => {
+          const locText = document.getElementById('manual-location-input').value.trim();
+          if (!locText) return;
+
+          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locText)}`)
+            .then(r => r.json())
+            .then(data => {
+              if (data && data[0] && trackingMap) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                trackingMap.setView([lat, lon], 9);
+                truckMarker.setLatLng([lat, lon])
+                  .setPopupContent(`🚛 <b>Truck Check-In:</b> ${locText}<br>Time: ${timeStr}`)
+                  .openPopup();
+                document.getElementById('trucker-last-updated').textContent = `✅ Pin moved to ${locText} (${timeStr})`;
+                document.getElementById('map-status-text').textContent = `● Updated: ${locText}`;
+              } else {
+                alert("Location not found. Try entering City, State (e.g. Shreveport, LA).");
+              }
+            }).catch(() => {});
+        });
+    }
 </script>
 </body>
 </html>
