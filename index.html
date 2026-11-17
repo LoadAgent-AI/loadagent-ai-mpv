@@ -882,6 +882,81 @@
 
   </div>
 </section>
+      
+      <!-- FAQ VIEW -->
+<section id="view-faq" class="hidden space-y-5">
+  <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+    
+    <!-- Header -->
+    <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>❓</span> Frequently Asked Questions
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Everything you need to know about LoadAgent-AI features and operations</p>
+      </div>
+      <span class="text-[11px] bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2.5 py-1 rounded-full font-medium self-start sm:self-auto">
+        ● Knowledge Base
+      </span>
+    </div>
+
+    <!-- FAQ Items List -->
+    <div class="space-y-3">
+      
+      <!-- FAQ 1 -->
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-1.5">
+        <h3 class="text-xs font-bold text-white flex items-center gap-2">
+          <span class="text-sky-400">Q.</span> What is LoadAgent-AI and who is it built for?
+        </h3>
+        <p class="text-[11px] text-slate-400 leading-relaxed pl-4">
+          LoadAgent-AI is a mobile-first, zero-friction dispatching suite built specifically for independent freight dispatchers, freight brokers, and owner-operator truckers to manage loads, calculate profits, track drivers live, and verify credentials instantly[cite: 1].
+        </p>
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-1.5">
+        <h3 class="text-xs font-bold text-white flex items-center gap-2">
+          <span class="text-sky-400">Q.</span> Do I need an API key or desktop software to run it?
+        </h3>
+        <p class="text-[11px] text-slate-400 leading-relaxed pl-4">
+          Not at all! LoadAgent-AI is completely web-based and optimized for mobile phones[cite: 1]. It requires zero complex API setup or installations, allowing you to run your entire dispatch workflow directly from your browser.
+        </p>
+      </div>
+
+      <!-- FAQ 3 -->
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-1.5">
+        <h3 class="text-xs font-bold text-white flex items-center gap-2">
+          <span class="text-sky-400">Q.</span> How does live truck tracking work without complex hardware?
+        </h3>
+        <p class="text-[11px] text-slate-400 leading-relaxed pl-4">
+          Dispatchers can finalize a load and instantly send structured check-in links to drivers via WhatsApp or SMS. Drivers can click and share their live GPS or drop manual city/highway check-ins that update the interactive map in real time.
+        </p>
+      </div>
+
+      <!-- FAQ 4 -->
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-1.5">
+        <h3 class="text-xs font-bold text-white flex items-center gap-2">
+          <span class="text-sky-400">Q.</span> How does the Trust & Verification Directory work?
+        </h3>
+        <p class="text-[11px] text-slate-400 leading-relaxed pl-4">
+          The directory allows dispatchers, brokers, and truckers to search company names, MC numbers, or DOT numbers to check compliance status and avoid fraudulent entities before booking loads[cite: 1].
+        </p>
+      </div>
+
+      <!-- FAQ 5 -->
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-1.5">
+        <h3 class="text-xs font-bold text-white flex items-center gap-2">
+          <span class="text-sky-400">Q.</span> Is my data safe while testing on the platform?
+        </h3>
+        <p class="text-[11px] text-slate-400 leading-relaxed pl-4">
+          Yes. All active states, profiles, and configurations are securely cached in your browser's local storage for lightning-fast responsiveness, with options to export or reset your data anytime from settings.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+</section>
     </main>
   </div>
 
@@ -913,7 +988,8 @@
         location: document.getElementById('view-location'),
         status: document.getElementById('view-status'),
         settings: document.getElementById('view-settings'),
-        help: document.getElementById('view-help')
+        help: document.getElementById('view-help'),
+        faq: document.getElementById('view-faq')
       };
 
       // 1. Enter Dashboard from Welcome Screen
