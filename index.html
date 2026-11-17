@@ -125,12 +125,12 @@
           <span>Settings</span>
         </button>
 
-        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+        <button type="button" data-nav="help" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
           <span class="text-base">💬</span>
           <span>Help & Support</span>
         </button>
 
-        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+        <button type="button" data-nav="faq" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
           <span class="text-base">❓</span>
           <span>FAQ</span>
         </button>
@@ -799,6 +799,89 @@
     
   </div>
 </section>
+
+      <!-- HELP & SUPPORT VIEW -->
+<section id="view-help" class="hidden space-y-5">
+  <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+    
+    <!-- Header -->
+    <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>💬</span> Help & Support Center
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Get assistance, view tutorials, or reach out to the LoadAgent-AI team</p>
+      </div>
+      <span class="text-[11px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full font-medium self-start sm:self-auto">
+        ● 24/7 Support Ready
+      </span>
+    </div>
+
+    <!-- Quick Action Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      
+      <!-- WhatsApp Support Card -->
+      <a href="https://wa.me/?text=Hello%20LoadAgent-AI%20Support,%20I%20need%20help%20with:" target="_blank" class="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 rounded-xl p-4 flex items-start gap-3 transition group">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 text-base group-hover:bg-emerald-500 group-hover:text-slate-950 transition">
+          💬
+        </div>
+        <div>
+          <h3 class="text-xs font-bold text-white">Chat on WhatsApp</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">Instant assistance for dispatchers & truckers on the move.</p>
+        </div>
+      </a>
+
+      <!-- Founder / Email Contact Card -->
+      <a href="mailto:support@loadagent-ai.com" class="bg-slate-950 border border-slate-800 hover:border-sky-500/50 rounded-xl p-4 flex items-start gap-3 transition group">
+        <div class="w-9 h-9 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center shrink-0 text-base group-hover:bg-sky-500 group-hover:text-slate-950 transition">
+          ✉️
+        </div>
+        <div>
+          <h3 class="text-xs font-bold text-white">Email Founder / Support</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">For business inquiries, partnerships, or bug reports.</p>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Common Guides Accordion / List -->
+    <div class="space-y-3 pt-2">
+      <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">📚 Quick Start Guides</h3>
+      
+      <div class="space-y-2">
+        
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-1">
+          <h4 class="text-xs font-bold text-white flex items-center gap-2">
+            <span>🚀</span> How to use Live Load Tracking?
+          </h4>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Go to the <strong class="text-slate-300">Live Location</strong> tab, enter your Load ID, pickup/dropoff cities, and driver's WhatsApp number. Click <strong class="text-emerald-400">Finalize Deal & Activate Tracking</strong> to instantly dispatch confirmation details via WhatsApp.
+          </p>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-1">
+          <h4 class="text-xs font-bold text-white flex items-center gap-2">
+            <span>🛡️</span> How to verify Brokers or Truckers?
+          </h4>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Open the <strong class="text-slate-300">Account Status</strong> directory. Type any company name, MC number, or DOT number in the search bar to instantly check their verification status, insurance standing, and safety records.
+          </p>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-1">
+          <h4 class="text-xs font-bold text-white flex items-center gap-2">
+            <span>💰</span> How does the Profit Calculator work?
+          </h4>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Input your total trip miles, offered broker rate, and diesel price. The system automatically computes your net profit, fuel expenses, and Rate Per Mile (RPM) instantly.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
     </main>
   </div>
 
@@ -829,7 +912,8 @@
         diesel: document.getElementById('view-diesel'),
         location: document.getElementById('view-location'),
         status: document.getElementById('view-status'),
-        settings: document.getElementById('view-settings')
+        settings: document.getElementById('view-settings'),
+        help: document.getElementById('view-help')
       };
 
       // 1. Enter Dashboard from Welcome Screen
@@ -1572,6 +1656,20 @@
 
       // Initial load check
       loadSettingsToForm();
+    
+const views = {
+  dashboard: document.getElementById('view-dashboard'),
+  counter: document.getElementById('view-counter'),
+  profile: document.getElementById('view-profile'),
+  status: document.getElementById('view-status'),
+  pricing: document.getElementById('view-pricing'),
+  location: document.getElementById('view-location'),
+  diesel: document.getElementById('view-diesel'),
+  profit: document.getElementById('view-profit'),
+  settings: document.getElementById('view-settings'),
+  help: document.getElementById('view-help')
+};
+    
 </script>
 </body>
 </html>
