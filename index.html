@@ -120,7 +120,7 @@
           <span>Profit Calculation</span>
         </button>
 
-        <button type="button" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
+        <button type="button" data-nav="settings" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white text-left transition">
           <span class="text-base">⚙️</span>
           <span>Settings</span>
         </button>
@@ -685,7 +685,104 @@
 
   </div>
 </section>
+      <!-- SETTINGS & PREFERENCES VIEW -->
+<section id="view-settings" class="hidden space-y-5">
+  <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-6">
+    
+    <!-- Header -->
+    <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>⚙️</span> App & Account Settings
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Customize your dispatcher profile, preferences, and data storage</p>
+      </div>
+      <span class="text-[11px] bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2.5 py-1 rounded-full font-medium self-start sm:self-auto">
+        ● Live Local Storage
+      </span>
+    </div>
+
+    <!-- Section 1: Dispatcher / Company Profile Settings -->
+    <div class="space-y-3">
+      <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">🏢 Dispatcher & Company Profile</h3>
       
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Your Full Name</label>
+          <input type="text" id="set-user-name" placeholder="e.g. Zain Ul Abdin" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Company / Dispatch Agency</label>
+          <input type="text" id="set-company-name" placeholder="e.g. LoadAgent AI Dispatch" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Business Phone / WhatsApp</label>
+          <input type="tel" id="set-user-phone" placeholder="e.g. +12145550199" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">MC# / DOT# Reference</label>
+          <input type="text" id="set-user-mcdot" placeholder="e.g. MC-984512" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+      </div>
+
+      <button type="button" id="save-profile-settings-btn" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition">
+        💾 Save Profile Details
+      </button>
+    </div>
+
+    <!-- Section 2: App Preferences & Operational Defaults -->
+    <div class="pt-4 border-t border-slate-800 space-y-3">
+      <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider">🎛️ Operational Preferences</h3>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Default Minimum RPM ($ per mile)</label>
+          <input type="number" id="pref-min-rpm" value="2.50" step="0.10" class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Default Truck MPG (Miles Per Gallon)</label>
+          <input type="number" id="pref-truck-mpg" value="6.5" step="0.1" class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+        </div>
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <label class="flex items-center gap-3 cursor-pointer select-none">
+          <input type="checkbox" id="pref-sound-alerts" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-emerald-500 focus:ring-0">
+          <span class="text-xs text-slate-300">Enable audio/visual dispatch confirmation prompts</span>
+        </label>
+        <label class="flex items-center gap-3 cursor-pointer select-none">
+          <input type="checkbox" id="pref-auto-save" checked class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-emerald-500 focus:ring-0">
+          <span class="text-xs text-slate-300">Auto-save calculator and tracking state in browser</span>
+        </label>
+      </div>
+
+      <button type="button" id="save-preferences-btn" class="bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition">
+        ⚡ Update Preferences
+      </button>
+    </div>
+
+    <!-- Section 3: Data Management & Reset -->
+    <div class="pt-4 border-t border-slate-800 space-y-3">
+      <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">💾 Data & Storage Management</h3>
+      <p class="text-[11px] text-slate-400 leading-relaxed">
+        Your data is safely cached in your browser storage for instant testing with YC reviewers and live users. You can export a backup or reset data anytime.
+      </p>
+
+      <div class="flex flex-wrap gap-2 pt-1">
+        <button type="button" id="export-data-btn" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-3.5 py-2 rounded-xl text-xs border border-slate-700 transition">
+          📤 Export Backup (JSON)
+        </button>
+        <button type="button" id="reset-storage-btn" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold px-3.5 py-2 rounded-xl text-xs border border-rose-500/30 transition">
+          ⚠️ Reset All App Data
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>
     </main>
   </div>
 
@@ -715,7 +812,8 @@
         profit: document.getElementById('view-profit'),
         diesel: document.getElementById('view-diesel'),
         location: document.getElementById('view-location'),
-        status: document.getElementById('view-status')
+        status: document.getElementById('view-status'),
+        settings: document.getElementById('view-settings')
       };
 
       // 1. Enter Dashboard from Welcome Screen
@@ -1353,6 +1451,111 @@
 
       // Initial render
       renderAccountDirectory();
+
+    // Add settings to views object
+      const views = {
+        dashboard: document.getElementById('view-dashboard'),
+        counter: document.getElementById('view-counter'),
+        profile: document.getElementById('view-profile'),
+        status: document.getElementById('view-status'),
+        pricing: document.getElementById('view-pricing'),
+        location: document.getElementById('view-location'),
+        diesel: document.getElementById('view-diesel'),
+        profit: document.getElementById('view-profit'),
+        settings: document.getElementById('view-settings'),
+        help: document.getElementById('view-help'),
+        faq: document.getElementById('view-faq')
+      };
+
+      // 12. Settings & Preferences Logic
+      function loadSettingsToForm() {
+        const profile = JSON.parse(localStorage.getItem('loadagent_user_profile') || '{}');
+        if (profile.name) document.getElementById('set-user-name').value = profile.name;
+        if (profile.company) document.getElementById('set-company-name').value = profile.company;
+        if (profile.phone) document.getElementById('set-user-phone').value = profile.phone;
+        if (profile.mcdot) document.getElementById('set-user-mcdot').value = profile.mcdot;
+
+        const prefs = JSON.parse(localStorage.getItem('loadagent_preferences') || '{}');
+        if (prefs.minRpm) document.getElementById('pref-min-rpm').value = prefs.minRpm;
+        if (prefs.truckMpg) document.getElementById('pref-truck-mpg').value = prefs.truckMpg;
+        if (prefs.soundAlerts !== undefined) document.getElementById('pref-sound-alerts').checked = prefs.soundAlerts;
+        if (prefs.autoSave !== undefined) document.getElementById('pref-auto-save').checked = prefs.autoSave;
+      }
+
+      // Save Profile Button
+      const saveProfileBtn = document.getElementById('save-profile-settings-btn');
+      if (saveProfileBtn) {
+        saveProfileBtn.addEventListener('click', () => {
+          const profile = {
+            name: document.getElementById('set-user-name').value.trim(),
+            company: document.getElementById('set-company-name').value.trim(),
+            phone: document.getElementById('set-user-phone').value.trim(),
+            mcdot: document.getElementById('set-user-mcdot').value.trim().toUpperCase()
+          };
+          localStorage.setItem('loadagent_user_profile', JSON.stringify(profile));
+          alert("✅ Dispatcher Profile settings saved successfully!");
+        });
+      }
+
+      // Save Preferences Button
+      const savePrefsBtn = document.getElementById('save-preferences-btn');
+      if (savePrefsBtn) {
+        savePrefsBtn.addEventListener('click', () => {
+          const prefs = {
+            minRpm: document.getElementById('pref-min-rpm').value,
+            truckMpg: document.getElementById('pref-truck-mpg').value,
+            soundAlerts: document.getElementById('pref-sound-alerts').checked,
+            autoSave: document.getElementById('pref-auto-save').checked
+          };
+          localStorage.setItem('loadagent_preferences', JSON.stringify(prefs));
+          alert("⚡ Operational preferences updated!");
+        });
+      }
+
+      // Export JSON Backup
+      const exportBtn = document.getElementById('export-data-btn');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          const data = {};
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('loadagent_')) {
+              data[key] = JSON.parse(localStorage.getItem(key));
+            }
+          }
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'LoadAgent-AI-Backup.json';
+          a.click();
+        });
+      }
+
+      // Reset Storage Button
+      const resetBtn = document.getElementById('reset-storage-btn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          if (confirm("⚠️ Are you sure you want to reset all app data? This will clear active loads and customized directory items.")) {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key.startsWith('loadagent_')) keysToRemove.push(key);
+            }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+            alert("🔄 App data reset to defaults. Reloading page...");
+            location.reload();
+          }
+        });
+      }
+
+      // Load settings when navigating to settings view
+      document.querySelectorAll('[data-nav="settings"]').forEach(btn => {
+        btn.addEventListener('click', loadSettingsToForm);
+      });
+
+      // Initial load check
+      loadSettingsToForm();
 </script>
 </body>
 </html>
