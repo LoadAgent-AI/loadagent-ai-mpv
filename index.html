@@ -1097,13 +1097,10 @@
         switchSubView('dashboard');
       });
 
-      // 2. Logout back to Welcome Screen
-      logoutBtn.addEventListener('click', () => {
-        closeSidebar();
-        appShell.classList.add('hidden');
-        appShell.classList.remove('flex');
-        welcomeScreen.classList.remove('hidden');
-      });
+      function logoutUser() {
+  localStorage.removeItem('loadagent_session');
+  window.location.href = "login.html";
+      }
 
       // 3. Sidebar Open / Close Controls
       function openSidebar() {
