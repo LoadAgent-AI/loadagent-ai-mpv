@@ -123,6 +123,56 @@
       localStorage.setItem('loadagent_session', JSON.stringify(demoSession));
       window.location.href = "index.html";
     }
+    const GOOGLE_CLIENT_ID = "447380316463-hc9hadn3fdkko7our9f3mi7um1minaps.apps.googleusercontent.com";
+
+function decodeJwtPayload(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+      .join('')
+  );
+  return JSON.parse(jsonPayload);
+}
+
+function handleGoogleCredentialResponse(response) {
+  try {
+    const payload = decodeJwtPayload(response.credential);
+    localStorage.setItem('loadagent_session', JSON.stringify({
+      isLoggedIn: true,
+      provider: 'google',
+      name: payload.name || 'Google User',
+      email: payload.email || '',
+      picture: payload.picture || '',
+      ts: Date.now()
+    }));
+    window.location.href = "index.html";
+  } catch (err) {
+    console.error("Google login error:", err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.google && google.accounts && google.accounts.id) {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredentialResponse
+    });
+  }
+
+  const googleBtn = document.getElementById('google-auth-btn');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', () => {
+      if (window.google && google.accounts && google.accounts.id) {
+        google.accounts.id.prompt();
+      } else {
+        alert("Google sign-in script is still loading. Please try again.");
+      }
+    });
+  }
+});
   </script>
 </body>
   </html>
