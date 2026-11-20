@@ -1102,6 +1102,15 @@ function logoutUser() {
   localStorage.removeItem('loadagent_session');
   window.location.href = "login.html";
 }
+
+// Button element ko select karke us par Event Listener lagayein
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', function(e) {
+    e.preventDefault(); // Kisi standard anchor crash se bachaaye
+    logoutUser();
+  });
+}
       
       // 3. Sidebar Open / Close Controls
       function openSidebar() {
