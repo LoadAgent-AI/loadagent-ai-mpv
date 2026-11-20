@@ -1,25 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-    <script>
-  (function() {
-    try {
-      const currentSession = JSON.parse(localStorage.getItem('loadagent_session'));
-      // Agar session valid na ho ya logged-in state false ho, toh redirect karein
-      if (!currentSession || !currentSession.isLoggedIn) {
-        // Fallback checks for precise file access or path
-        const target = window.location.pathname.includes('/loadagent-ai-mpv') 
-          ? '/loadagent-ai-mpv/login.html' 
-          : 'login.html';
-        window.location.href = target;
-      }
-    } catch(e) {
-      // JSON crash handling se bachein (agar value blank ho)
-      window.location.href = "login.html";
-    }
-  })();
-    </script>
+  <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/jpeg" href="Gemini_Generated_Image_3793ee3793ee3793.jpeg">
   <link rel="apple-touch-icon" href="Gemini_Generated_Image_3793ee3793ee3793.jpeg">
@@ -1120,16 +1102,7 @@ function logoutUser() {
   localStorage.removeItem('loadagent_session');
   window.location.href = "login.html";
 }
-
-// Button element ko select karke us par Event Listener lagayein
-const logoutBtn = document.getElementById('logout-btn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', function(e) {
-    e.preventDefault(); // Kisi standard anchor crash se bachaaye
-    logoutUser();
-  });
-}
-
+      
       // 3. Sidebar Open / Close Controls
       function openSidebar() {
         sidebarDrawer.classList.remove('-translate-x-full');
