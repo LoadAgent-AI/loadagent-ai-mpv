@@ -350,57 +350,81 @@
       <!-- VIEW B: COUNTER OFFER & EXTENSION (Hidden until selected) -->
       <!-- ========================================================= -->
       <section id="view-counter" class="hidden space-y-4">
+        <!-- Top Chrome Extension Bar (Wiring at the end) -->
+        <div id="counter-extension-bar" class="bg-slate-900/90 p-3.5 rounded-2xl border border-emerald-500/30 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <div>
+              <p class="text-xs font-bold text-white">Chrome Extension Bridge</p>
+              <p id="ext-bridge-status" class="text-[11px] text-slate-400">Ready for final extension sync</p>
+            </div>
+          </div>
+          <button id="ext-sync-btn" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 text-xs font-semibold transition shrink-0">
+            Extension Ready
+          </button>
+        </div>
+
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
           <div class="border-b border-slate-800 pb-3">
             <h2 class="text-lg font-bold text-white">AI Counter-Offer Generator</h2>
-            <p class="text-xs text-slate-400 mt-1">Paste the broker's email load details below to generate an optimized response.</p>
+            <p class="text-xs text-slate-400 mt-1">Checks miles, per-mile or flat offer, regional diesel cost, and target profit to decide Done vs Counter-Offer.</p>
           </div>
 
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label class="text-xs font-medium text-slate-300">Broker Email Load Details</label>
+              <label class="text-xs font-medium text-slate-300">Broker Email / Load Offer Details</label>
               <button id="counter-sample-btn" type="button" class="text-xs text-emerald-400 hover:underline">Insert Sample Email</button>
             </div>
-            <textarea id="email-text" rows="7" placeholder="Paste raw broker email here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500"></textarea>
+            <textarea id="email-text" rows="6" placeholder="Paste broker email or load details here (any miles, $/mi, or flat rate)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono placeholder:text-slate-600"></textarea>
           </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1.5">Target Rate ($):</label>
-            <input id="custom-target-input" type="number" placeholder="e.g. 1800" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">Miles (Optional if in text)</label>
+              <input id="counter-miles-input" type="number" placeholder="e.g. 650" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">Target Rate ($ Total)</label>
+              <input id="custom-target-input" type="number" placeholder="Auto from diesel + profit" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" />
+            </div>
           </div>
 
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1.5">Tone / Style:</label>
-            <select id="tone-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+            <select id="tone-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
               <option value="Professional & Firm">Professional & Firm</option>
               <option value="Polite & Collaborative">Polite & Collaborative</option>
               <option value="Urgent / Ready to Book">Urgent / Ready to Book</option>
             </select>
           </div>
 
-          <button id="parse-btn" type="button" class="w-full py-3.5 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg shadow-amber-500/20 transition">
-            Generate Counter-Offer
+          <button id="parse-btn" type="button" class="w-full py-3.5 px-4 bg-amber-500 hover:bg-amber-400 transition text-slate-950 font-extrabold rounded-xl text-sm">
+            Analyze Rate & Generate Reply
           </button>
 
           <!-- Generated Output Container -->
           <div id="output-container" class="hidden pt-3 border-t border-slate-800 space-y-3">
+            <div id="deal-verdict-banner" class="p-3 rounded-xl border text-xs font-semibold"></div>
+
             <div class="grid grid-cols-2 gap-3">
               <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <span class="text-xs text-slate-400 block">Broker Offered</span>
+                <span class="text-xs text-slate-400 block">Broker Offer</span>
                 <span id="offered-rate" class="text-base font-bold text-white">$0</span>
               </div>
               <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <span class="text-xs text-slate-400 block">Recommended Counter</span>
+                <span class="text-xs text-slate-400 block">Recommended Target</span>
                 <span id="target-rate" class="text-base font-bold text-emerald-400">$0</span>
               </div>
             </div>
 
+            <div id="profit-breakdown-box" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1"></div>
+
             <div>
               <div class="flex items-center justify-between mb-1.5">
-                <span class="text-xs font-medium text-slate-400">Generated Reply Draft</span>
+                <label class="text-xs font-medium text-slate-400">Editable Reply Draft (Humanized)</label>
                 <button id="copy-btn" type="button" class="text-xs text-emerald-400 hover:underline font-medium">Copy Draft</button>
               </div>
-              <pre id="generated-email-draft" class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 whitespace-pre-wrap font-sans leading-relaxed"></pre>
+              <textarea id="generated-email-draft" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 leading-relaxed"></textarea>
             </div>
           </div>
         </div>
