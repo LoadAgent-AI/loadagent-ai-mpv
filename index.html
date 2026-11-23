@@ -2096,6 +2096,166 @@ function logoutUser() {
       });
     }
   });
+
+    const FREE_COUNTEROFFER_LIMIT = 5;
+
+function getDashboardStats() {
+  try {
+    return JSON.parse(localStorage.getItem("loadagent_dashboard_stats")) || {
+      counteroffersUsed: 0
+    };
+  } catch (_) {
+    return { counteroffersUsed: 0 };
+  }
+}
+
+function saveDashboardStats(stats) {
+  localStorage.setItem("loadagent_dashboard_stats", JSON.stringify(stats));
+}
+
+function syncDashboardRealState() {
+  const session = typeof getLoadAgentSession === "function" ? getLoadAgentSession() : null;
+  const isDemo = session && session.provider === "demo";
+
+  let activeLoad = null;
+  try {
+    activeLoad = JSON.parse(localStorage.getItem("loadagent_active_load") || "null");
+  } catch (_) {
+    activeLoad = null;
+  }
+
+  let prefs = {};
+  try {
+    prefs = JSON.parse(localStorage.getItem("loadagent_preferences") || "{}");
+  } catch (_) {
+    prefs = {};
+  }
+
+  const stats = getDashboardStats();
+  const usedCount = Number(stats.counteroffersUsed || 0);
+  const remainingFree = Math.max(0, FREE_COUNTEROFFER_LIMIT - usedCount);
+
+  // 1. Active Loads Card
+  const activeLoadsEl = document.getElementById("dash-active-loads");
+  if (activeLoadsEl) {
+    if (activeLoad && activeLoad.loadId) {
+      activeLoadsEl.textContent = "1 Active";
+    } else if (isDemo) {
+      activeLoadsEl.textContent = "14 Active";
+    } else {
+      activeLoadsEl.textContent = "0 Active";
+    }
+  }
+
+  // 2. Target RPM Card (Settings pref -> fallback)
+  const targetRpmEl = document.getElementById("dash-target-rpm");
+  if (targetRpmEl) {
+    const rpmVal = parseFloat(prefs.minRpm);
+    targetRpmEl.textContent = !isNaN(rpmVal) && rpmVal > 0
+      ? `$${rpmVal.toFixed(2)} / mi`
+      : "$3.42 / mi";
+  }
+
+  // 3. Saved Hours Card
+  const savedHoursEl = document.getElementById("dash-saved-hours");
+  if (savedHoursEl) {
+    if (isDemo && usedCount === 0) {
+      savedHoursEl.textContent = "4.8 Hrs";
+    } else {
+      const hours = (usedCount * 0.35).toFixed(1);
+      savedHoursEl.textContent = `${hours} Hrs`;
+    }
+  }
+
+  // 4. Extension & Free Counteroffer Credits Badge
+  const extStatusEl = document.getElementById("dash-ext-status");
+  const planBadgeEl = document.getElementById("dash-plan-badge");
+  if (extStatusEl) {
+    extStatusEl.textContent = session ? "Connected" : "Guest";
+  }
+  if (planBadgeEl) {
+    if (isDemo) {
+      planBadgeEl.textContent = "Demo Mode";
+    } else {
+      planBadgeEl.textContent = `${remainingFree}/${FREE_COUNTEROFFER_LIMIT} Free Left`;
+    }
+  }
+
+  // 5. Live Fleet Status Card
+  const fleetTitle = document.getElementById("dash-fleet-title");
+  const fleetRoute = document.getElementById("dash-fleet-route");
+  const fleetEta = document.getElementById("dash-fleet-eta");
+  const fleetBadge = document.getElementById("dash-fleet-badge");
+
+  if (fleetTitle && fleetRoute && fleetEta && fleetBadge) {
+    if (activeLoad && activeLoad.pickup && activeLoad.dropoff) {
+      fleetTitle.textContent = `Load #${activeLoad.loadId || "ACTIVE"} (${activeLoad.driverName || "Driver"})`;
+      fleetRoute.textContent = `Route: ${activeLoad.pickup} -> ${activeLoad.dropoff}`;
+      fleetEta.textContent = "Status: Active Dispatch";
+      fleetBadge.textContent = "Live Load";
+    } else if (isDemo) {
+      fleetTitle.textContent = "Truck #104 (Alex)";
+      fleetRoute.textContent = "Route: Chicago, IL -> Omaha, NE";
+      fleetEta.textContent = "ETA: 5:30 PM Today";
+      fleetBadge.textContent = ">65 MPH";
+    } else {
+      fleetTitle.textContent = "No Active Load Yet";
+      fleetRoute.textContent = "Route: Add load in Live Location";
+      fleetEta.textContent = "Waiting for dispatch";
+      fleetBadge.textContent = "Open Map";
+    }
+  }
+
+  // 6. Sync Regional Diesel Card with statePriceEl / stateNameEl if available
+  const dashRegion = document.getElementById("dash-diesel-region");
+  const dashMeta = document.getElementById("dash-diesel-meta");
+  const dashPrice = document.getElementById("dash-diesel-price");
+  const stateName = document.getElementById("selected-state-name")?.textContent?.trim();
+  const stateRegion = document.getElementById("selected-state-region")?.textContent?.trim();
+  const statePrice = document.getElementById("selected-state-price")?.textContent?.trim();
+
+  if (dashRegion && dashMeta && dashPrice && stateName && statePrice) {
+    dashRegion.textContent = stateRegion ? `${stateName} · ${stateRegion}` : stateName;
+    dashMeta.textContent = "Synced with Diesel Rates";
+    dashPrice.textContent = `${statePrice} / gal`;
+  }
+}
+
+// Counteroffer generate honay par stats barhayein
+document.addEventListener("click", (e) => {
+  const targetBtn = e.target.closest("#parse-btn");
+  if (!targetBtn) return;
+
+  const session = typeof getLoadAgentSession === "function" ? getLoadAgentSession() : null;
+  const isDemo = session && session.provider === "demo";
+  const stats = getDashboardStats();
+  const used = Number(stats.counteroffersUsed || 0);
+
+  if (!isDemo && used >= FREE_COUNTEROFFER_LIMIT) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    alert("You have used all 5 free counteroffers. Open Pricing & Subscriptions to upgrade.");
+    document.querySelector('[data-nav="pricing"]')?.click();
+    return;
+  }
+
+  setTimeout(() => {
+    const emailVal = document.getElementById("email-text")?.value?.trim();
+    if (emailVal) {
+      stats.counteroffersUsed = used + 1;
+      saveDashboardStats(stats);
+      syncDashboardRealState();
+    }
+  }, 50);
+}, true);
+
+// Sync on load, auth change, and navigation
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(syncDashboardRealState, 250);
+  document.querySelectorAll('[data-nav="dashboard"]').forEach((btn) => {
+    btn.addEventListener("click", syncDashboardRealState);
+  });
+});
   </script>
 </body>
 </html>
