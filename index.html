@@ -1306,57 +1306,306 @@ function logoutUser() {
         document.getElementById('parse-btn').click();
       });
 
-      // 6. Dedicated Counter-Offer Generator Logic
+      // ==================================================
+      // 6. UNIVERSAL SMART RATE, DIESEL & PROFIT COUNTER-OFFER ENGINE
+      // ==================================================
       const counterSampleBtn = document.getElementById('counter-sample-btn');
       const emailText = document.getElementById('email-text');
+      const milesInput = document.getElementById('counter-miles-input');
       const customTargetInput = document.getElementById('custom-target-input');
       const toneSelect = document.getElementById('tone-select');
       const parseBtn = document.getElementById('parse-btn');
       const outputContainer = document.getElementById('output-container');
+      const verdictBanner = document.getElementById('deal-verdict-banner');
       const offeredRateEl = document.getElementById('offered-rate');
       const targetRateEl = document.getElementById('target-rate');
-      const generatedDraftEl = document.getElementById('generated-email-draft');
+      const breakdownBox = document.getElementById('profit-breakdown-box');
+      const generatedEmailDraft = document.getElementById('generated-email-draft');
       const copyBtn = document.getElementById('copy-btn');
+      const extSyncBtn = document.getElementById('ext-sync-btn');
 
-      counterSampleBtn.addEventListener('click', () => {
-        emailText.value = "Subject: Urgent Load Available - Dry Van from Chicago, IL to Dallas, TX\n\nHi Team,\nWe have a 53' Dry Van load picking up today in Chicago, IL delivering to Dallas, TX. Weight 42,000 lbs. Rate: $1450. Let me know if you can cover.";
-      });
+      const stateCodeMap = {
+        AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+        CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
+        HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
+        KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+        MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri",
+        MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
+        NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio",
+        OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+        SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont",
+        VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming"
+      };
 
-      parseBtn.addEventListener('click', () => {
-        const text = emailText.value.trim();
-        if (!text) {
-          alert("Please paste broker email text first!");
-          return;
+      const cityStateMap = {
+        chicago: "Illinois", dallas: "Texas", houston: "Texas", austin: "Texas",
+        "san antonio": "Texas", atlanta: "Georgia", miami: "Florida", orlando: "Florida",
+        tampa: "Florida", "los angeles": "California", fresno: "California",
+        phoenix: "Arizona", denver: "Colorado", seattle: "Washington", portland: "Oregon",
+        nashville: "Tennessee", memphis: "Tennessee", columbus: "Ohio",
+        indianapolis: "Indiana", detroit: "Michigan", charlotte: "North Carolina",
+        "new york": "New York", newark: "New Jersey", philadelphia: "Pennsylvania",
+        omaha: "Nebraska", "kansas city": "Missouri", "st louis": "Missouri"
+      };
+
+      if (extSyncBtn) {
+        extSyncBtn.addEventListener('click', () => {
+          const statusEl = document.getElementById('ext-bridge-status');
+          if (statusEl) {
+            statusEl.textContent = "Extension hook ready — will wire at final step";
+          }
+        });
+      }
+
+      if (counterSampleBtn && emailText) {
+        counterSampleBtn.addEventListener('click', () => {
+          emailText.value = "Hi dispatch, we have a 680 mile load from Chicago, IL to Atlanta, GA paying $1,650 all in. Can your truck cover this today?";
+          if (milesInput) milesInput.value = "";
+          if (customTargetInput) customTargetInput.value = "";
+        });
+      }
+
+      function detectDieselForText(rawText) {
+        const text = rawText || "";
+        const lower = text.toLowerCase();
+        let matchedState = null;
+
+        if (typeof usDieselData !== "undefined" && usDieselData) {
+          for (const stateName of Object.keys(usDieselData)) {
+            if (lower.includes(stateName.toLowerCase())) {
+              matchedState = stateName;
+              break;
+            }
+          }
+          if (!matchedState) {
+            for (const [city, st] of Object.entries(cityStateMap)) {
+              if (lower.includes(city) && usDieselData[st]) {
+                matchedState = st;
+                break;
+              }
+            }
+          }
+          if (!matchedState) {
+            const codeMatches = text.match(/\b([A-Z]{2})\b/g) || [];
+            for (const code of codeMatches) {
+              const st = stateCodeMap[code];
+              if (st && usDieselData[st]) {
+                matchedState = st;
+                break;
+              }
+            }
+          }
+          if (!matchedState) {
+            const activeState = document.getElementById('diesel-state-select')?.value;
+            if (activeState && usDieselData[activeState]) matchedState = activeState;
+          }
+
+          if (matchedState && usDieselData[matchedState]) {
+            return {
+              state: matchedState,
+              price: Number(usDieselData[matchedState].price) || 3.84,
+              region: usDieselData[matchedState].region || "US Region"
+            };
+          }
+        }
+        return { state: "Texas", price: 3.38, region: "PADD 3 · Gulf Coast" };
+      }
+
+      function parseOfferDetails(rawText, manualMiles) {
+        const clean = (rawText || "").replace(/,/g, "");
+
+        let miles = parseFloat(manualMiles);
+        if (!miles || miles <= 0) {
+          const milesMatch =
+            clean.match(/(\d+(?:\.\d+)?)\s*(?:loaded\s*)?(?:miles?|mi\b)/i) ||
+            clean.match(/(?:distance|miles?|mi)\s*[:=-]?\s*(\d+(?:\.\d+)?)/i);
+          if (milesMatch) miles = parseFloat(milesMatch[1]);
         }
 
-        let rate = 0;
-        const dollarMatch = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
-        if (dollarMatch) {
-          rate = Math.round(parseFloat(dollarMatch[1]));
-        } else {
-          const numMatch = text.match(/\b([0-9]{3,5})\b/);
-          if (numMatch) rate = parseInt(numMatch[1], 10);
+        let perMileRate = 0;
+        const rpmMatch =
+          clean.match(/\$\s*(\d+(?:\.\d+)?)\s*(?:per\s*mile|a\s*mile|\/\s*mi(?:le)?|\bpm\b|\brpm\b)/i) ||
+          clean.match(/(\d+(?:\.\d+)?)\s*\$?\s*(?:per\s*mile|a\s*mile|\/\s*mi(?:le)?|\brpm\b)/i);
+        if (rpmMatch) {
+          perMileRate = parseFloat(rpmMatch[1]);
         }
 
-        const customTarget = parseFloat(customTargetInput.value);
-        const finalTarget = customTarget > 0 ? Math.round(customTarget) : (rate > 0 ? Math.round(rate * 1.15) : 1800);
-        const displayOffered = rate > 0 ? `$${rate.toLocaleString()}` : "Not Specified";
-        const tone = toneSelect.value;
+        let flatAmount = 0;
+        const allDollarMatches = [...clean.matchAll(/\$\s*(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s*\$/g)];
+        for (const m of allDollarMatches) {
+          const val = parseFloat(m[1] || m[2]);
+          if (val > 0 && val !== perMileRate) {
+            flatAmount = val;
+            break;
+          }
+        }
+        if (!flatAmount && !perMileRate) {
+          const keywordAmount = clean.match(/(?:pay|paying|offer|offering|rate|budget|total|all[\s-]*in)\s*(?:is|of|at)?\s*\$?\s*(\d{2,6}(?:\.\d+)?)/i);
+          if (keywordAmount) flatAmount = parseFloat(keywordAmount[1]);
+        }
 
-        offeredRateEl.textContent = displayOffered;
-        targetRateEl.textContent = `$${finalTarget.toLocaleString()}`;
+        let totalOffered = 0;
+        if (perMileRate > 0 && miles > 0) {
+          totalOffered = Math.round(perMileRate * miles);
+        } else if (flatAmount > 0) {
+          totalOffered = Math.round(flatAmount);
+        } else if (perMileRate > 0) {
+          totalOffered = Math.round(perMileRate);
+        }
 
-        generatedDraftEl.textContent = `Hi Team,\n\nThanks for reaching out regarding this load. Given current market capacity, fuel costs, and deadhead positioning, we can cover this run reliably for $${finalTarget.toLocaleString()} all-in (${tone}).\n\nOur driver is empty and ready for immediate dispatch. Send over the rate confirmation if that works on your end.\n\nBest regards,\nDispatch Team | LoadAgent-AI`;
+        const effectiveRpm = (totalOffered > 0 && miles > 0)
+          ? (totalOffered / miles)
+          : (perMileRate > 0 ? perMileRate : 0);
 
-        outputContainer.classList.remove('hidden');
-      });
+        return { miles: miles || 0, totalOffered, effectiveRpm, perMileRate };
+      }
 
-      copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(generatedDraftEl.textContent);
-        const orig = copyBtn.textContent;
-        copyBtn.textContent = "✓ Copied!";
-        setTimeout(() => copyBtn.textContent = orig, 2000);
-      });
+      function buildHumanizedReply({ isGoodDeal, tone, miles, offered, target, netProfit, dieselInfo }) {
+        const hasMiles = miles > 0;
+        const routeLine = hasMiles ? ` for this ${miles}-mile run` : " for this load";
+        const offerStr = offered > 0 ? `$${Number(offered).toLocaleString()}` : "your offered rate";
+        const targetStr = `$${Number(target).toLocaleString()}`;
+        const profitLine = hasMiles ? ` and target margin (~$${Math.max(0, Math.round(netProfit)).toLocaleString()} net)` : "";
+
+        if (isGoodDeal) {
+          if (tone === "Urgent / Ready to Book") {
+            return `Hey, ${offerStr}${routeLine} works on our end—we're ready to lock this in right now. Send over the rate con when ready and I'll get the driver details over to you.`;
+          }
+          if (tone === "Polite & Collaborative") {
+            return `Thanks for sending this over! ${offerStr}${routeLine} lines up well with our current lane numbers and fuel costs (${dieselInfo.state} diesel around $${dieselInfo.price.toFixed(2)}/gal). Count us in—please send over the rate confirmation so we can get rolling.`;
+          }
+          return `Hi, ${offerStr}${routeLine} works for us. Go ahead and send over the rate con and we'll get this booked and moving.`;
+        }
+
+        if (tone === "Urgent / Ready to Book") {
+          return `Hey, with ${dieselInfo.state} diesel at $${dieselInfo.price.toFixed(2)}/gal${routeLine}, ${offerStr} is a bit tight on our side. If you can bump it to ${targetStr}, we can book it immediately—let me know right away.`;
+        }
+        if (tone === "Polite & Collaborative") {
+          return `Appreciate you reaching out on this! Looking at${hasMiles ? ` the ${miles} miles and` : ""} current ${dieselInfo.state} fuel around $${dieselInfo.price.toFixed(2)}/gal, ${offerStr} leaves very little room. Could you get closer to ${targetStr} so we can make the numbers work and run it cleanly?`;
+        }
+        return `Hi, ${offerStr}${routeLine} is below what we need given current fuel costs in ${dieselInfo.state} (~$${dieselInfo.price.toFixed(2)}/gal)${profitLine}. We can run this load at ${targetStr}—let me know if that works on your end.`;
+      }
+
+      if (parseBtn) {
+        parseBtn.addEventListener('click', () => {
+          const text = (emailText?.value || "").trim();
+          const manualMilesVal = milesInput?.value;
+
+          if (!text && !manualMilesVal) {
+            alert("Please paste broker load details or enter miles first.");
+            return;
+          }
+
+          let prefs = {};
+          try {
+            prefs = JSON.parse(localStorage.getItem('loadagent_preferences') || '{}');
+          } catch (_) {
+            prefs = {};
+          }
+
+          const mpg = parseFloat(prefs.truckMpg) > 0 ? parseFloat(prefs.truckMpg) : 6.5;
+          const minRpm = parseFloat(prefs.minRpm) > 0 ? parseFloat(prefs.minRpm) : 3.42;
+
+          const dieselInfo = detectDieselForText(text);
+          const parsed = parseOfferDetails(text, manualMilesVal);
+
+          const hasMiles = parsed.miles > 0;
+          const offeredTotal = parsed.totalOffered > 0 ? parsed.totalOffered : 0;
+
+          let fuelCost = 0;
+          let baseOperatingCost = 0;
+          let healthyTargetTotal = 0;
+          let gallonsNeeded = 0;
+
+          if (hasMiles) {
+            gallonsNeeded = parsed.miles / mpg;
+            fuelCost = gallonsNeeded * dieselInfo.price;
+            baseOperatingCost = fuelCost + (parsed.miles * 0.95);
+            healthyTargetTotal = Math.max(
+              Math.round(parsed.miles * Math.max(minRpm, 2.65)),
+              Math.round(baseOperatingCost * 1.35)
+            );
+          } else {
+            healthyTargetTotal = offeredTotal > 0 ? Math.round(offeredTotal * 1.18) : 1800;
+          }
+
+          const customTargetVal = parseFloat(customTargetInput?.value);
+          const targetTotal = (!isNaN(customTargetVal) && customTargetVal > 0)
+            ? Math.round(customTargetVal)
+            : healthyTargetTotal;
+
+          const offeredRpm = (offeredTotal > 0 && hasMiles) ? (offeredTotal / parsed.miles) : 0;
+          const offeredNetProfit = hasMiles ? (offeredTotal - baseOperatingCost) : 0;
+
+          const isGoodDeal = offeredTotal > 0 && (
+            offeredTotal >= targetTotal ||
+            (hasMiles && offeredRpm >= Math.max(minRpm, 2.85) && offeredNetProfit >= Math.max(350, fuelCost * 0.55))
+          );
+
+          const finalRecommended = isGoodDeal ? offeredTotal : targetTotal;
+          const estNetAfterTarget = hasMiles ? (finalRecommended - baseOperatingCost) : 0;
+
+          if (offeredRateEl) {
+            offeredRateEl.textContent = offeredTotal > 0
+              ? `$${offeredTotal.toLocaleString()}${hasMiles ? ` ($${offeredRpm.toFixed(2)}/mi)` : ""}`
+              : "Not Specified";
+          }
+          if (targetRateEl) {
+            const targetRpmText = hasMiles ? ` ($${(finalRecommended / parsed.miles).toFixed(2)}/mi)` : "";
+            targetRateEl.textContent = `$${finalRecommended.toLocaleString()}${targetRpmText}`;
+          }
+
+          if (verdictBanner) {
+            if (isGoodDeal) {
+              verdictBanner.className = "p-3 rounded-xl border text-xs font-semibold bg-emerald-500/10 border-emerald-500/40 text-emerald-300";
+              verdictBanner.textContent = "✅ Profitable Rate — Ready to Book (Done Reply Generated)";
+            } else {
+              verdictBanner.className = "p-3 rounded-xl border text-xs font-semibold bg-amber-500/10 border-amber-500/40 text-amber-300";
+              verdictBanner.textContent = "⚡ Rate Below Target — Smart Counter-Offer Generated";
+            }
+          }
+
+          if (breakdownBox) {
+            if (hasMiles) {
+              breakdownBox.innerHTML = `
+                <div class="flex justify-between"><span>Distance & Diesel (${dieselInfo.state}):</span><span class="font-semibold text-white">${parsed.miles.toLocaleString()} mi · $${dieselInfo.price.toFixed(2)}/gal</span></div>
+                <div class="flex justify-between"><span>Est. Fuel (${gallonsNeeded.toFixed(1)} gal @ ${mpg} MPG):</span><span class="font-semibold text-white">$${Math.round(fuelCost).toLocaleString()}</span></div>
+                <div class="flex justify-between"><span>Est. Net Profit at ${isGoodDeal ? "Offer" : "Target"}:</span><span class="font-semibold ${estNetAfterTarget >= 0 ? "text-emerald-400" : "text-rose-400"}">$${Math.round(estNetAfterTarget).toLocaleString()}</span></div>
+              `;
+            } else {
+              breakdownBox.innerHTML = `
+                <div class="flex justify-between"><span>Detected Area Diesel (${dieselInfo.state}):</span><span class="font-semibold text-white">$${dieselInfo.price.toFixed(2)}/gal</span></div>
+                <div class="flex justify-between"><span>Miles Status:</span><span class="font-semibold text-slate-300">Not in text (Add miles above for exact fuel/profit)</span></div>
+              `;
+            }
+          }
+
+          if (generatedEmailDraft) {
+            generatedEmailDraft.value = buildHumanizedReply({
+              isGoodDeal,
+              tone: toneSelect?.value || "Professional & Firm",
+              miles: parsed.miles,
+              offered: offeredTotal,
+              target: finalRecommended,
+              netProfit: estNetAfterTarget,
+              dieselInfo
+            });
+          }
+
+          if (outputContainer) {
+            outputContainer.classList.remove('hidden');
+          }
+        });
+      }
+
+      if (copyBtn && generatedEmailDraft) {
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(generatedEmailDraft.value);
+          const orig = copyBtn.textContent;
+          copyBtn.textContent = "✓ Copied!";
+          setTimeout(() => { copyBtn.textContent = orig; }, 2000);
+        });
+          }
       
       // 7. Profile Edit & Save Logic
       const toggleEditBtn = document.getElementById('toggleEditBtn');
