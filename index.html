@@ -430,54 +430,72 @@
         </div>
       </section>
 
-      <!-- ========================================================= -->
-      <!-- VIEW C: PROFILE & VERIFICATION (Hidden until selected)    -->
-      <!-- ========================================================= -->
-      <section id="view-profile" class="hidden space-y-4">
-        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div>
-              <h2 class="text-lg font-bold text-white">Carrier Profile & Verification</h2>
-              <p id="profileStatusText" class="text-xs text-amber-400 mt-0.5">Account Status: Pending Verification</p>
-            </div>
-            <button id="toggleEditBtn" type="button" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700">
-              Edit Profile
-            </button>
-          </div>
+         <!-- ========================================================== -->
+          <!-- VIEW C: PROFILE & VERIFICATION (Hidden until selected) -->
+          <!-- ========================================================== -->
+          <section id="view-profile" class="hidden space-y-4">
+            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                  <h2 class="text-lg font-bold text-white">Carrier Profile &amp; Verification</h2>
+                  <p id="profileStatusText" class="text-xs text-amber-400 mt-0.5">Account Status: Pending Verification</p>
+                </div>
+                <button id="toggleEditBtn" type="button" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg transition">
+                  Edit Profile
+                </button>
+              </div>
 
-          <div class="space-y-3">
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Full Name</label>
-              <input id="userFullNameInput" type="text" disabled placeholder="Zain Ul Abdin" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-60">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Email Address</label>
-              <input id="userEmailInput" type="email" disabled placeholder="dispatch@loadagent-ai.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-60">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Company / Dispatch Name</label>
-              <input id="userCompanyInput" type="text" disabled placeholder="LoadAgent Logistics LLC" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-60">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">MC / DOT Number</label>
-              <input id="mcNumberInput" type="text" disabled placeholder="MC-1234567" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-60">
-            </div>
-            <!-- MC Document Upload Field -->
-        <div class="space-y-1.5 mt-4">
-          <label class="block text-xs font-medium text-slate-400">Upload MC Certificate / Authority Letter (PDF/Image)</label>
-          <div class="flex items-center gap-2">
-            <input type="file" id="mcDocInput" accept=".pdf,image/*" disabled class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-500/10 file:text-emerald-400 hover:file:bg-emerald-500/20 bg-slate-900/50 border border-slate-800 rounded-xl px-3 py-2 cursor-pointer disabled:opacity-50">
-          </div>
-          <p class="text-[10px] text-slate-500">Upload official FMCSA / MC document to verify authenticity.</p>
-        </div>
-          </div>
+              <!-- Access Rule Notice -->
+              <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-300 leading-relaxed">
+                <span class="font-semibold text-emerald-400">Account Access Rule:</span> Demo and your <span class="font-semibold text-white">5 free counteroffers</span> work right away. Full account &amp; paid plans remain locked until your profile is verified.
+              </div>
 
-          <button id="saveProfileBtn" type="button" class="hidden w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm">
-            Save & Verify Profile
-          </button>
-        </div>
-      </section>
-<!-- ========================================== -->
+              <!-- Validation / Rejection Alert -->
+              <div id="profileErrorBox" class="hidden bg-red-950/60 border border-red-800/70 text-red-300 text-xs rounded-xl p-3"></div>
+
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">Full Name</label>
+                  <input id="userFullNameInput" type="text" disabled placeholder="Zain Ul Abdin" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-70 outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">Email Address</label>
+                  <input id="userEmailInput" type="email" disabled placeholder="dispatch@loadagent-ai.com" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-70 outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">Company / Dispatch Name</label>
+                  <input id="userCompanyInput" type="text" disabled placeholder="LoadAgent Logistics LLC" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-70 outline-none" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs text-slate-400 mb-1">MC Number</label>
+                    <input id="mcNumberInput" type="text" disabled placeholder="MC-1234567" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-70 outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-slate-400 mb-1">DOT Number</label>
+                    <input id="dotNumberInput" type="text" disabled placeholder="DOT-7654321" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white disabled:opacity-70 outline-none" />
+                  </div>
+                </div>
+                <p class="text-[10px] text-slate-500 -mt-1">Provide both if available, or enter at least one (MC or DOT number is required).</p>
+
+                <!-- MC Document Upload Field -->
+                <div class="space-y-1.5 mt-4">
+                  <label class="block text-xs font-medium text-slate-400">Upload MC Certificate / Authority Letter (PDF/Image)</label>
+                  <div class="flex items-center gap-2">
+                    <input type="file" id="mcDocInput" accept=".pdf,image/*" disabled class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-500/15 file:text-emerald-400 hover:file:bg-emerald-500/25 disabled:opacity-60" />
+                  </div>
+                  <p id="mcDocStatusText" class="text-[10px] text-slate-500">Upload authority/carrier document to verify authenticity. Repeated MC/DOT numbers or duplicate files are auto-rejected.</p>
+                </div>
+              </div>
+
+              <button id="saveProfileBtn" type="button" class="hidden w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm rounded-xl transition">
+                Save &amp; Verify Profile
+              </button>
+            </div>
+          </section>
+      
+        <!-- ========================================== -->
         <!-- VIEW D: PROFIT CALCULATION                 -->
         <!-- ========================================== -->
         <section id="view-profit" class="hidden space-y-4">
