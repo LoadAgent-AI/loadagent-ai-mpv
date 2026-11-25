@@ -1625,65 +1625,250 @@ function logoutUser() {
         });
           }
       
-      // 7. Profile Edit & Save Logic
-      const toggleEditBtn = document.getElementById('toggleEditBtn');
-      const saveProfileBtn = document.getElementById('saveProfileBtn');
-      const profileInputs = [
-        document.getElementById('userFullNameInput'),
-        document.getElementById('userEmailInput'),
-        document.getElementById('userCompanyInput'),
-        document.getElementById('mcNumberInput')
-      ];
-      
-      const mcDocInput = document.getElementById('mcDocInput');
-      const existingMcNumbers = ["MC-1234567", "MC-9876543", "MC-5554433"];
+ // 7. Profile Edit & Save Logic
+        const toggleEditBtn = document.getElementById('toggleEditBtn');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const profileStatusEl = document.getElementById('profileStatusText');
+        const profileErrorEl = document.getElementById('profileErrorBox');
+        const mcDocStatusEl = document.getElementById('mcDocStatusText');
 
-      if (toggleEditBtn) {
-        toggleEditBtn.addEventListener('click', () => {
-          const isCurrentlyDisabled = profileInputs[0].disabled;
-          profileInputs.forEach(inp => inp.disabled = !isCurrentlyDisabled);
-          if (mcDocInput) mcDocInput.disabled = !isCurrentlyDisabled;
+        const mcNumberInput = document.getElementById('mcNumberInput');
+        const dotNumberInput = document.getElementById('dotNumberInput');
+        const mcDocInput = document.getElementById('mcDocInput');
 
-          if (isCurrentlyDisabled) {
-            toggleEditBtn.textContent = "Cancel";
-            saveProfileBtn.classList.remove('hidden');
-          } else {
-            toggleEditBtn.textContent = "Edit Profile";
-            saveProfileBtn.classList.add('hidden');
-          }
-        });
-      }
+        const profileInputs = [
+          document.getElementById('userFullNameInput'),
+          document.getElementById('userEmailInput'),
+          document.getElementById('userCompanyInput'),
+          mcNumberInput,
+          dotNumberInput
+        ].filter(Boolean);
 
-      if (saveProfileBtn) {
-        saveProfileBtn.addEventListener('click', () => {
-          const mcInputVal = document.getElementById('mcNumberInput').value.trim();
+        const VERIFICATION_STORAGE_KEY = 'loadagent_verification_state_v1';
 
-          if (existingMcNumbers.includes(mcInputVal)) {
-            alert("⚠️ Duplicate Error: This MC / DOT number is already registered in the system by another carrier!");
+        function normalizeCarrierId(val) {
+          return (val || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        }
+
+        async function getDocumentSha256(file) {
+          const buffer = await file.arrayBuffer();
+          const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+          return Array.from(new Uint8Array(hashBuffer))
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join('');
+        }
+
+        function loadVerificationState() {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(VERIFICATION_STORAGE_KEY) || 'null');
+            if (parsed && typeof parsed === 'object') {
+              return {
+                isVerified: Boolean(parsed.isVerified),
+                status: parsed.status || 'Pending Verification',
+                freeCounteroffersUsed: Number(parsed.freeCounteroffersUsed || 0),
+                usedIds: Array.isArray(parsed.usedIds) ? parsed.usedIds : [],
+                usedFileHashes: Array.isArray(parsed.usedFileHashes) ? parsed.usedFileHashes : [],
+                record: parsed.record || null
+              };
+            }
+          } catch (_) {}
+
+          return {
+            isVerified: false,
+            status: 'Pending Verification',
+            freeCounteroffersUsed: 0,
+            usedIds: [],
+            usedFileHashes: [],
+            record: null
+          };
+        }
+
+        function saveVerificationState(state) {
+          localStorage.setItem(VERIFICATION_STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function showProfileError(message) {
+          if (!profileErrorEl) {
+            alert(message);
             return;
           }
+          profileErrorEl.textContent = message;
+          profileErrorEl.classList.remove('hidden');
+        }
 
-          if (mcDocInput && mcDocInput.files.length === 0) {
-            alert("⚠️ Verification Required: Please upload your MC Certificate or Authority document.");
-            return;
+        function clearProfileError() {
+          if (!profileErrorEl) return;
+          profileErrorEl.textContent = '';
+          profileErrorEl.classList.add('hidden');
+        }
+
+        function setProfileEditState(isEditing) {
+          profileInputs.forEach((inp) => {
+            inp.disabled = !isEditing;
+          });
+          if (mcDocInput) {
+            mcDocInput.disabled = !isEditing;
+          }
+          if (toggleEditBtn) {
+            toggleEditBtn.textContent = isEditing ? 'Cancel' : 'Edit Profile';
+          }
+          if (saveProfileBtn) {
+            saveProfileBtn.classList.toggle('hidden', !isEditing);
+          }
+        }
+
+        function renderVerificationUI(state) {
+          if (profileStatusEl) {
+            profileStatusEl.textContent = `Account Status: ${state.status}`;
+            profileStatusEl.className =
+              'text-xs mt-0.5 font-medium ' +
+              (state.isVerified
+                ? 'text-emerald-400'
+                : state.status.startsWith('Rejected')
+                ? 'text-red-400'
+                : 'text-amber-400');
           }
 
-          profileInputs.forEach(inp => inp.disabled = true);
-          if (mcDocInput) mcDocInput.disabled = true;
-
-          toggleEditBtn.textContent = "Edit Profile";
-          saveProfileBtn.classList.add('hidden');
-          
-          const statusEl = document.getElementById('profileStatusText');
-          if (statusEl) {
-            statusEl.textContent = "Account Status: Verified & Approved ✓";
-            statusEl.className = "text-xs text-emerald-400 mt-0.5 font-medium";
+          if (state.record) {
+            const fullNameEl = document.getElementById('userFullNameInput');
+            const emailEl = document.getElementById('userEmailInput');
+            const companyEl = document.getElementById('userCompanyInput');
+            if (fullNameEl && state.record.fullName) fullNameEl.value = state.record.fullName;
+            if (emailEl && state.record.email) emailEl.value = state.record.email;
+            if (companyEl && state.record.company) companyEl.value = state.record.company;
+            if (mcNumberInput && state.record.mcNumber !== undefined) mcNumberInput.value = state.record.mcNumber || '';
+            if (dotNumberInput && state.record.dotNumber !== undefined) dotNumberInput.value = state.record.dotNumber || '';
+            if (mcDocStatusEl && state.record.fileName) {
+              mcDocStatusEl.textContent = `Uploaded: ${state.record.fileName} • Free counteroffers used: ${state.freeCounteroffersUsed}/5`;
+            }
           }
-          
-          alert("✅ Profile updated successfully! MC document uploaded and verified.");
-        });
-                          }
-    });
+        }
+
+        // Access helper for paid features vs 5 free counteroffers + demo
+        window.LoadAgentAccess = {
+          canAccessPaidFeatures: function () {
+            return Boolean(loadVerificationState().isVerified);
+          },
+          canUseFreeCounteroffer: function () {
+            return loadVerificationState().freeCounteroffersUsed < 5;
+          },
+          consumeFreeCounteroffer: function () {
+            const state = loadVerificationState();
+            if (state.freeCounteroffersUsed >= 5) return false;
+            state.freeCounteroffersUsed += 1;
+            saveVerificationState(state);
+            renderVerificationUI(state);
+            return true;
+          }
+        };
+
+        const initialVerState = loadVerificationState();
+        renderVerificationUI(initialVerState);
+        setProfileEditState(false);
+
+        if (toggleEditBtn) {
+          toggleEditBtn.addEventListener('click', () => {
+            clearProfileError();
+            const isCurrentlyDisabled = profileInputs[0] ? profileInputs[0].disabled : true;
+            setProfileEditState(isCurrentlyDisabled);
+          });
+        }
+
+        if (saveProfileBtn) {
+          saveProfileBtn.addEventListener('click', async () => {
+            clearProfileError();
+            const state = loadVerificationState();
+
+            const fullNameVal = (document.getElementById('userFullNameInput')?.value || '').trim();
+            const emailVal = (document.getElementById('userEmailInput')?.value || '').trim();
+            const companyVal = (document.getElementById('userCompanyInput')?.value || '').trim();
+            const mcVal = (mcNumberInput?.value || '').trim();
+            const dotVal = (dotNumberInput?.value || '').trim();
+
+            const normMc = normalizeCarrierId(mcVal);
+            const normDot = normalizeCarrierId(dotVal);
+
+            if (!fullNameVal || !emailVal || !companyVal) {
+              return showProfileError('Please fill in Full Name, Email Address, and Company / Dispatch Name.');
+            }
+
+            // At least one of MC or DOT is required; if both provided, both are accepted
+            if (!normMc && !normDot) {
+              return showProfileError('Please enter at least an MC Number or a DOT Number (both are also allowed).');
+            }
+
+            const hasNewFile = Boolean(mcDocInput && mcDocInput.files && mcDocInput.files.length > 0);
+            if (!hasNewFile && !state.record?.fileHash) {
+              return showProfileError('Verification Required: Please upload your MC Certificate or Authority document.');
+            }
+
+            // Check duplicate MC/DOT numbers against previously recorded IDs (excluding current user's own saved IDs)
+            const ownIds = [
+              normalizeCarrierId(state.record?.mcNumber),
+              normalizeCarrierId(state.record?.dotNumber)
+            ].filter(Boolean);
+
+            const submittedIds = [normMc, normDot].filter(Boolean);
+            const duplicateId = submittedIds.find(
+              (id) => state.usedIds.includes(id) && !ownIds.includes(id)
+            );
+
+            if (duplicateId) {
+              state.status = 'Rejected (Duplicate MC/DOT)';
+              state.isVerified = false;
+              saveVerificationState(state);
+              renderVerificationUI(state);
+              return showProfileError(`Duplicate Error: "${duplicateId}" is already registered in the system.`);
+            }
+
+            let fileName = state.record?.fileName || '';
+            let fileHash = state.record?.fileHash || '';
+
+            if (hasNewFile) {
+              const file = mcDocInput.files[0];
+              fileName = file.name;
+              fileHash = await getDocumentSha256(file);
+
+              if (state.usedFileHashes.includes(fileHash) && fileHash !== state.record?.fileHash) {
+                state.status = 'Rejected (Duplicate File)';
+                state.isVerified = false;
+                saveVerificationState(state);
+                renderVerificationUI(state);
+                return showProfileError('Duplicate Error: This document has already been uploaded previously.');
+              }
+
+              if (!state.usedFileHashes.includes(fileHash)) {
+                state.usedFileHashes.push(fileHash);
+              }
+            }
+
+            submittedIds.forEach((id) => {
+              if (!state.usedIds.includes(id)) {
+                state.usedIds.push(id);
+              }
+            });
+
+            state.record = {
+              fullName: fullNameVal,
+              email: emailVal,
+              company: companyVal,
+              mcNumber: mcVal,
+              dotNumber: dotVal,
+              fileName,
+              fileHash
+            };
+
+            // Remains unverified until approved; demo + 5 free counteroffers still work
+            state.isVerified = false;
+            state.status = 'Pending Verification';
+
+            saveVerificationState(state);
+            renderVerificationUI(state);
+            setProfileEditState(false);
+
+            alert('Submitted for review! Status is Pending Verification. You can still use the demo and up to 5 free counteroffers; full/paid access unlocks after verification.');
+          });
+                }
 
         // 8. Profit Calculation Logic
       const calcProfitBtn = document.getElementById('calc-profit-btn');
