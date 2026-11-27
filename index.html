@@ -493,6 +493,40 @@
                 Save &amp; Verify Profile
               </button>
             </div>
+
+            <!-- System Verification Status & Blocked Account Lock (Keep existing controls intact) -->
+<div id="verification-system-box" class="space-y-2 pt-2">
+  <span
+    id="profile-verification-badge"
+    data-profile-status-badge
+    class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30"
+  >
+    ⏳ Account Status: Pending Verification
+  </span>
+  <p id="verification-system-feedback" class="text-[11px] text-slate-400">
+    System will verify your submitted details &amp; document before marking Verified.
+  </p>
+</div>
+
+<!-- Blocked / Banned Email Lock Overlay -->
+<div
+  id="blocked-email-lock-screen"
+  class="hidden fixed inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-4"
+>
+  <div class="max-w-md w-full bg-slate-900 border border-rose-500/40 rounded-2xl p-5 space-y-3 text-center">
+    <p class="text-base font-bold text-rose-400">🚫 Account Blocked — Verification Failed</p>
+    <p id="blocked-email-reason" class="text-xs text-slate-300">
+      This email has been blocked because verification failed system checks. Access is disabled for this email.
+    </p>
+    <button
+      type="button"
+      id="blocked-signout-btn"
+      class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-xl text-xs"
+    >
+      Sign Out &amp; Switch Account
+    </button>
+  </div>
+</div>
           </section>
       
         <!-- ========================================== -->
@@ -2602,6 +2636,304 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", syncDashboardRealState);
   });
 });
+
+    // System Verification Check, Directory Auto-Sync & Email Ban Enforcement
+(function () {
+  const BLOCKED_EMAILS_KEY = 'loadagent_blocked_emails';
+  const VERIFIED_PROFILE_KEY = 'loadagent_verified_profile';
+
+  function getSb() {
+    if (window.supabaseClient) return window.supabaseClient;
+    if (window.sb) return window.sb;
+    if (typeof supabase !== 'undefined' && supabase && typeof supabase.from === 'function') {
+      return supabase;
+    }
+    return null;
+  }
+
+  function normalizeEmail(email = '') {
+    return String(email || '').trim().toLowerCase();
+  }
+
+  function getBlockedEmails() {
+    try {
+      const list = JSON.parse(localStorage.getItem(BLOCKED_EMAILS_KEY) || '[]');
+      return Array.isArray(list) ? list : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function saveBlockedEmail(email, reason) {
+    const cleanEmail = normalizeEmail(email);
+    if (!cleanEmail) return;
+    const list = getBlockedEmails();
+    if (!list.some((item) => normalizeEmail(item.email) === cleanEmail)) {
+      list.push({ email: cleanEmail, reason, blocked_at: new Date().toISOString() });
+      try {
+        localStorage.setItem(BLOCKED_EMAILS_KEY, JSON.stringify(list));
+      } catch (_) {}
+    }
+  }
+
+  function getActiveEmail() {
+    const inputEl = document.querySelector(
+      '#profile-email, #carrier-email, input[type="email"], #set-user-email'
+    );
+    if (inputEl && inputEl.value && inputEl.value.trim()) {
+      return normalizeEmail(inputEl.value);
+    }
+    const sessionEmail =
+      window.currentUser?.email ||
+      window.currentProfile?.email ||
+      window.loadAgentSession?.user?.email ||
+      '';
+    return normalizeEmail(sessionEmail);
+  }
+
+  async function enforceEmailBlockIfNeeded(emailOverride = '') {
+    const email = normalizeEmail(emailOverride || getActiveEmail());
+    if (!email) return false;
+
+    let isBlocked = getBlockedEmails().some((x) => normalizeEmail(x.email) === email);
+    let reason = 'Verification failed system checks. This email is blocked from accessing LoadAgent AI.';
+
+    const sb = getSb();
+    if (sb && !isBlocked) {
+      try {
+        const { data } = await sb
+          .from('carrier_profiles')
+          .select('is_blocked, verification_status, block_reason')
+          .eq('email', email)
+          .limit(1);
+
+        if (Array.isArray(data) && data.length > 0) {
+          const row = data[0];
+          if (row.is_blocked === true || row.verification_status === 'blocked') {
+            isBlocked = true;
+            if (row.block_reason) reason = row.block_reason;
+            saveBlockedEmail(email, reason);
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (!isBlocked) return false;
+
+    const lockScreen = document.getElementById('blocked-email-lock-screen');
+    const reasonEl = document.getElementById('blocked-email-reason');
+    if (reasonEl) reasonEl.textContent = `${reason} (${email})`;
+    if (lockScreen) lockScreen.classList.remove('hidden');
+
+    // Disable interactive forms/actions
+    document.querySelectorAll('button, input, select, textarea').forEach((el) => {
+      if (el.id !== 'blocked-signout-btn') {
+        el.setAttribute('disabled', 'true');
+      }
+    });
+
+    return true;
+  }
+
+  function readSubmissionFields() {
+    const pick = (selectors) => {
+      for (const s of selectors) {
+        const el = document.querySelector(s);
+        if (el && typeof el.value === 'string' && el.value.trim()) return el.value.trim();
+      }
+      return '';
+    };
+
+    const fullName = pick(['#profile-full-name', '#carrier-full-name', 'input[name="full_name"]']);
+    const email = getActiveEmail();
+    const companyName = pick(['#profile-company', '#carrier-company', 'input[name="company_name"]']);
+    const mcRaw = pick(['#profile-mc', '#carrier-mc', 'input[name="mc_number"]']).toUpperCase();
+    const dotRaw = pick(['#profile-dot', '#carrier-dot', 'input[name="dot_number"]']).toUpperCase();
+    const fileInput = document.querySelector('#view-profile input[type="file"]');
+    const fileName = fileInput?.files?.[0]?.name || '';
+
+    return { fullName, email, companyName, mcRaw, dotRaw, fileName };
+  }
+
+  // System verification evaluation:
+  // - 'verified': valid MC/DOT format + company/name + document
+  // - 'failed': fake/invalid/test/fraudulent input or invalid MC/DOT format -> bans email
+  // - 'pending': incomplete info so far (not verified yet, not banned yet)
+  function runSystemVerificationCheck(data) {
+    const combinedId = data.mcRaw || data.dotRaw || '';
+    const lowerCombined = `${data.fullName} ${data.companyName} ${combinedId} ${data.fileName}`.toLowerCase();
+
+    const suspiciousWords = ['fake', 'fraud', 'scam', 'invalid', 'test123', 'xxxx', '000000'];
+    const hasSuspicious = suspiciousWords.some((w) => lowerCombined.includes(w));
+
+    const validMc = /^MC-?\d{5,8}$/i.test(data.mcRaw);
+    const validDot = /^DOT-?\d{5,8}$/i.test(data.dotRaw);
+    const hasValidAuthority = validMc || validDot;
+
+    if (hasSuspicious || (combinedId && !hasValidAuthority && combinedId.length >= 4)) {
+      return {
+        outcome: 'failed',
+        reason: 'System rejected verification: invalid authority number or flagged submission.'
+      };
+    }
+
+    if (data.companyName && hasValidAuthority && data.fileName) {
+      return {
+        outcome: 'verified',
+        reason: 'Verified by LoadAgent AI system.'
+      };
+    }
+
+    return {
+      outcome: 'pending',
+      reason: 'Awaiting complete company name, valid MC/DOT number, and verification document.'
+    };
+  }
+
+  function updateStatusBadgeUI(state, text) {
+    const badge = document.querySelector(
+      '[data-profile-status-badge], #profile-verification-badge, #account-status-badge'
+    );
+    const feedback = document.getElementById('verification-system-feedback');
+
+    if (badge) {
+      if (state === 'verified') {
+        badge.textContent = text || '✅ Account Status: Verified';
+        badge.className =
+          'inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/40';
+      } else if (state === 'failed') {
+        badge.textContent = text || '🚫 Account Status: Blocked (Verification Failed)';
+        badge.className =
+          'inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/40';
+      } else {
+        badge.textContent = text || '⏳ Account Status: Pending Verification';
+        badge.className =
+          'inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30';
+      }
+    }
+
+    if (feedback && text) {
+      feedback.textContent = text;
+    }
+  }
+
+  async function processSystemVerification() {
+    const data = readSubmissionFields();
+    if (await enforceEmailBlockIfNeeded(data.email)) return;
+
+    const result = runSystemVerificationCheck(data);
+    const sb = getSb();
+    const mcDot = (data.mcRaw || data.dotRaw || '').toUpperCase();
+
+    if (result.outcome === 'failed') {
+      updateStatusBadgeUI('failed', `🚫 Blocked: ${result.reason}`);
+      if (data.email) {
+        saveBlockedEmail(data.email, result.reason);
+      }
+
+      if (sb) {
+        try {
+          await sb.from('carrier_profiles').upsert(
+            [
+              {
+                email: data.email || null,
+                full_name: data.fullName || null,
+                company_name: data.companyName || null,
+                mc_dot_number: mcDot || null,
+                is_verified: false,
+                is_blocked: true,
+                verification_status: 'blocked',
+                block_reason: result.reason
+              }
+            ],
+            { onConflict: 'mc_dot_number' }
+          );
+        } catch (_) {}
+      }
+
+      await enforceEmailBlockIfNeeded(data.email);
+      return;
+    }
+
+    if (result.outcome === 'verified') {
+      const verifiedPayload = {
+        full_name: data.fullName || data.companyName,
+        email: data.email || null,
+        company_name: data.companyName,
+        mc_dot_number: mcDot,
+        role: 'Dispatcher',
+        is_verified: true,
+        is_blocked: false,
+        verification_status: 'verified',
+        verified_at: new Date().toISOString()
+      };
+
+      try {
+        localStorage.setItem(VERIFIED_PROFILE_KEY, JSON.stringify(verifiedPayload));
+      } catch (_) {}
+
+      window.verifiedProfile = verifiedPayload;
+      updateStatusBadgeUI('verified', '✅ Account Status: Verified');
+
+      if (sb) {
+        try {
+          await sb.from('carrier_profiles').upsert([verifiedPayload], { onConflict: 'mc_dot_number' });
+        } catch (_) {}
+      }
+
+      window.dispatchEvent(new CustomEvent('loadagent:verification-updated', { detail: verifiedPayload }));
+      if (typeof loadStatusFromCarrierProfiles === 'function') {
+        await loadStatusFromCarrierProfiles();
+      }
+      return;
+    }
+
+    // Still pending -> DO NOT mark Verified or sync as verified
+    updateStatusBadgeUI('pending', `⏳ Pending Verification: ${result.reason}`);
+  }
+
+  window.processSystemVerification = processSystemVerification;
+
+  // Trigger system verification only when user submits/verifies inside #view-profile
+  document.addEventListener('submit', (e) => {
+    if (e.target && e.target.closest('#view-profile')) {
+      setTimeout(() => processSystemVerification(), 100);
+    }
+  });
+
+  document.addEventListener('click', async (e) => {
+    const signOutBtn = e.target.closest('#blocked-signout-btn');
+    if (signOutBtn) {
+      const sb = getSb();
+      if (sb?.auth?.signOut) {
+        try { await sb.auth.signOut(); } catch (_) {}
+      }
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const trigger = e.target.closest(
+      '#view-profile button[type="submit"], #view-profile [data-verify-submit], #submit-verification-btn, #verify-profile-btn'
+    );
+    if (trigger) {
+      setTimeout(() => processSystemVerification(), 150);
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (await enforceEmailBlockIfNeeded()) return;
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(VERIFIED_PROFILE_KEY) || 'null');
+      if (saved && saved.is_verified === true) {
+        window.verifiedProfile = saved;
+        updateStatusBadgeUI('verified', '✅ Account Status: Verified');
+      } else {
+        updateStatusBadgeUI('pending', '⏳ Account Status: Pending Verification');
+      }
+    } catch (_) {}
+  });
+})();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./carrier-verification-global.js"></script>
