@@ -2075,166 +2075,470 @@ function logoutUser() {
     });
   }
 })();
-    // 10. Live Location & Load Tracking Logic
-      let trackingMap = null;
-      let truckMarker = null;
+  // 10. Live Location & Load Tracking Logic (Real Cross-Device Sync + WhatsApp/SMS Deep Link)
+(function () {
+  let trackingMap = null;
+  let truckMarker = null;
+  let pickupMarker = null;
+  let dropoffMarker = null;
+  let routePolyline = null;
+  let livePollTimer = null;
+  let currentLoadData = null;
 
-      function initTrackingMap() {
-        const mapEl = document.getElementById('live-tracking-map');
-        if (!mapEl || typeof L === 'undefined') return;
+  const mapStatusEl = document.getElementById('map-status-text');
+  const tabDispatcherBtn = document.getElementById('tab-dispatcher-btn');
+  const tabTruckerBtn = document.getElementById('tab-trucker-btn');
+  const panelDispatcher = document.getElementById('panel-dispatcher');
+  const panelTrucker = document.getElementById('panel-trucker');
 
-        if (!trackingMap) {
-          // Default center: USA (Dallas, TX area)
-          trackingMap = L.map('live-tracking-map').setView([32.7767, -96.7970], 5);
-          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
-          }).addTo(trackingMap);
+  // Helper: Get active Supabase client if initialized in page
+  function getSbClient() {
+    if (window.supabaseClient) return window.supabaseClient;
+    if (window._supabase) return window._supabase;
+    if (typeof sb !== 'undefined') return sb;
+    if (typeof supabaseClient !== 'undefined') return supabaseClient;
+    return null;
+  }
 
-          truckMarker = L.marker([32.7767, -96.7970]).addTo(trackingMap)
-            .bindPopup('🚛 Truck Ready • Waiting for Dispatch')
-            .openPopup();
-        }
-        setTimeout(() => trackingMap.invalidateSize(), 200);
-      }
-
-      // Initialize map whenever Live Location tab is clicked
-      document.querySelectorAll('[data-nav="location"]').forEach(btn => {
-        btn.addEventListener('click', initTrackingMap);
-      });
-
-      // Role Tabs Switching (Dispatcher vs Trucker)
-      const tabDispatcherBtn = document.getElementById('tab-dispatcher-btn');
-      const tabTruckerBtn = document.getElementById('tab-trucker-btn');
-      const panelDispatcher = document.getElementById('panel-dispatcher');
-      const panelTrucker = document.getElementById('panel-trucker');
-
-      if (tabDispatcherBtn && tabTruckerBtn) {
-        tabDispatcherBtn.addEventListener('click', () => {
-          panelDispatcher.classList.remove('hidden');
-          panelTrucker.classList.add('hidden');
-          tabDispatcherBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 transition";
-          tabTruckerBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
-        });
-
-        tabTruckerBtn.addEventListener('click', () => {
-          panelTrucker.classList.remove('hidden');
-          panelDispatcher.classList.add('hidden');
-          tabTruckerBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950 transition";
-          tabDispatcherBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
-        });
-      }
-
-      // Finalize Deal & Generate Trucker Notification
-      const finalizeDispatchBtn = document.getElementById('finalize-dispatch-btn');
-      if (finalizeDispatchBtn) {
-        finalizeDispatchBtn.addEventListener('click', () => {
-          const loadId = document.getElementById('track-load-id').value.trim() || "L-10555";
-          const driverName = document.getElementById('track-driver-name').value.trim() || "Driver";
-          const pickup = document.getElementById('track-pickup').value.trim();
-          const dropoff = document.getElementById('track-dropoff').value.trim();
-          const phone = document.getElementById('track-driver-phone').value.trim().replace(/[^0-9+]/g, '');
-
-          if (!pickup || !dropoff) {
-            alert("⚠️ Please enter both Pickup and Dropoff locations!");
-            return;
-          }
-
-          const loadSummary = `Load ${loadId}: ${pickup} ➔ ${dropoff} (Driver: ${driverName})`;
-          localStorage.setItem('loadagent_active_load', JSON.stringify({ loadId, driverName, pickup, dropoff }));
-
-          document.getElementById('active-load-badge').textContent = loadId;
-          document.getElementById('dispatch-summary-text').textContent = `Confirmed! ${loadSummary}. Tracking is now active.`;
-          document.getElementById('trucker-active-load').textContent = loadSummary;
-          document.getElementById('dispatch-confirmed-box').classList.remove('hidden');
-          document.getElementById('map-status-text').textContent = `● Tracking ${loadId}`;
-
-          const msgText = encodeURIComponent(
-            `LoadAgent-AI Dispatch Confirmed! 🚛\nLoad ID: ${loadId}\nPickup: ${pickup}\nDropoff: ${dropoff}\nPlease open LoadAgent-AI Live Location to share your check-in.`
-          );
-
-          document.getElementById('send-whatsapp-btn').href = phone
-            ? `https://wa.me/${phone.replace('+', '')}?text=${msgText}`
-            : `https://wa.me/?text=${msgText}`;
-          document.getElementById('send-sms-btn').href = phone
-            ? `sms:${phone}?body=${msgText}`
-            : `sms:?body=${msgText}`;
-
-          // Geocode pickup city on map using free Nominatim API
-          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pickup)}`)
-            .then(r => r.json())
-            .then(data => {
-              if (data && data[0] && trackingMap) {
-                const lat = parseFloat(data[0].lat);
-                const lon = parseFloat(data[0].lon);
-                trackingMap.setView([lat, lon], 8);
-                truckMarker.setLatLng([lat, lon])
-                  .setPopupContent(`🚛 <b>${loadId}</b> (${driverName})<br>Origin: ${pickup}`)
-                  .openPopup();
-              }
-            }).catch(() => {});
-        });
-      }
-
-      // Trucker Live GPS Location Update
-      const shareGpsBtn = document.getElementById('share-gps-btn');
-      if (shareGpsBtn) {
-        shareGpsBtn.addEventListener('click', () => {
-          if (!navigator.geolocation) {
-            alert("GPS not supported on this browser. Please enter your city manually.");
-            return;
-          }
-          shareGpsBtn.textContent = "📡 Fetching GPS Coordinates...";
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              const lat = pos.coords.latitude;
-              const lon = pos.coords.longitude;
-              const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-              if (trackingMap) {
-                trackingMap.setView([lat, lon], 11);
-                truckMarker.setLatLng([lat, lon])
-                  .setPopupContent(`📍 <b>Live GPS Pin</b><br>Updated at ${timeStr}`)
-                  .openPopup();
-              }
-              document.getElementById('trucker-last-updated').textContent = `✅ Live GPS updated at ${timeStr}`;
-              document.getElementById('map-status-text').textContent = `● Live GPS (${timeStr})`;
-              shareGpsBtn.innerHTML = `<span>📡</span> Share My Live GPS Location`;
-            },
-            () => {
-              alert("⚠️ Location permission denied. Use manual city entry below.");
-              shareGpsBtn.innerHTML = `<span>📡</span> Share My Live GPS Location`;
-            }
-          );
-        });
-      }
-
-      // Trucker Manual City / Highway Location Update
-      const updateManualLocBtn = document.getElementById('update-manual-loc-btn');
-      if (updateManualLocBtn) {
-        updateManualLocBtn.addEventListener('click', () => {
-          const locText = document.getElementById('manual-location-input').value.trim();
-          if (!locText) return;
-
-          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locText)}`)
-            .then(r => r.json())
-            .then(data => {
-              if (data && data[0] && trackingMap) {
-                const lat = parseFloat(data[0].lat);
-                const lon = parseFloat(data[0].lon);
-                trackingMap.setView([lat, lon], 9);
-                truckMarker.setLatLng([lat, lon])
-                  .setPopupContent(`🚛 <b>Truck Check-In:</b> ${locText}<br>Time: ${timeStr}`)
-                  .openPopup();
-                document.getElementById('trucker-last-updated').textContent = `✅ Pin moved to ${locText} (${timeStr})`;
-                document.getElementById('map-status-text').textContent = `● Updated: ${locText}`;
-              } else {
-                alert("Location not found. Try entering City, State (e.g. Shreveport, LA).");
-              }
-            }).catch(() => {});
-        });
+  function switchTrackingRole(role) {
+    if (!tabDispatcherBtn || !tabTruckerBtn || !panelDispatcher || !panelTrucker) return;
+    if (role === 'trucker') {
+      panelTrucker.classList.remove('hidden');
+      panelDispatcher.classList.add('hidden');
+      tabTruckerBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950 transition";
+      tabDispatcherBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+    } else {
+      panelDispatcher.classList.remove('hidden');
+      panelTrucker.classList.add('hidden');
+      tabDispatcherBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 transition";
+      tabTruckerBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
     }
+  }
+
+  if (tabDispatcherBtn) tabDispatcherBtn.addEventListener('click', () => switchTrackingRole('dispatcher'));
+  if (tabTruckerBtn) tabTruckerBtn.addEventListener('click', () => switchTrackingRole('trucker'));
+
+  // Inject Status Selector inside Trucker Panel dynamically (keeps HTML file clean)
+  function ensureTruckerStatusControl() {
+    if (!panelTrucker || document.getElementById('trucker-trip-status')) return;
+    const activeLoadBox = document.getElementById('trucker-active-load')?.parentElement;
+    if (!activeLoadBox) return;
+
+    const statusWrap = document.createElement('div');
+    statusWrap.className = 'space-y-1.5';
+    statusWrap.innerHTML = `
+      <label class="block text-[11px] text-slate-400">Current Trip Status</label>
+      <select id="trucker-trip-status" class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-xs text-white">
+        <option value="Picked Up · En Route">🚛 Picked Up · En Route to Dropoff</option>
+        <option value="In Transit · On Schedule">🛣️ In Transit · On Schedule</option>
+        <option value="Fuel / Rest Stop">⛽ Fuel / Rest Stop</option>
+        <option value="Arrived at Dropoff">📍 Arrived at Dropoff</option>
+        <option value="Delivered · Load Complete">✅ Delivered · Load Complete</option>
+      </select>
+    `;
+    activeLoadBox.insertAdjacentElement('afterend', statusWrap);
+  }
+  ensureTruckerStatusControl();
+
+  function initTrackingMap() {
+    const mapEl = document.getElementById('live-tracking-map');
+    if (!mapEl || typeof L === 'undefined') return;
+
+    if (!trackingMap) {
+      trackingMap = L.map('live-tracking-map').setView([32.7767, -96.7970], 5);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(trackingMap);
+
+      truckMarker = L.marker([32.7767, -96.7970])
+        .addTo(trackingMap)
+        .bindPopup('🚛 Truck Ready · Waiting for Dispatch')
+        .openPopup();
+    }
+
+    setTimeout(() => {
+      if (trackingMap) trackingMap.invalidateSize();
+      if (currentLoadData) renderLoadOnMap(currentLoadData);
+    }, 200);
+  }
+
+  document.querySelectorAll('[data-nav="location"]').forEach((btn) => {
+    btn.addEventListener('click', initTrackingMap);
+  });
+
+  // Geocode helper using OpenStreetMap Nominatim
+  async function geocodePlace(query) {
+    if (!query) return null;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      if (data && data[0]) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lon: parseFloat(data[0].lon),
+          displayName: data[0].display_name
+        };
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  // Reverse Geocode coordinates to readable City/Highway name
+  async function reverseGeocode(lat, lon) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+      const data = await res.json();
+      const addr = data?.address || {};
+      const city = addr.city || addr.town || addr.village || addr.county || '';
+      const state = addr.state || '';
+      const road = addr.road || '';
+      return [road, city, state].filter(Boolean).join(', ') || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    } catch (_) {
+      return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    }
+  }
+
+  function renderLoadOnMap(payload) {
+    if (!payload) return;
+    currentLoadData = payload;
+
+    const loadSummary = `Load #${payload.loadId}: ${payload.pickup || 'Origin'} → ${payload.dropoff || 'Destination'} (${payload.driverName || 'Driver'})`;
+    const truckerActiveEl = document.getElementById('trucker-active-load');
+    if (truckerActiveEl) truckerActiveEl.textContent = loadSummary;
+
+    if (mapStatusEl) {
+      const statusBadge = payload.status || 'Tracking Active';
+      mapStatusEl.textContent = `● ${payload.loadId} · ${statusBadge}`;
+    }
+
+    if (!trackingMap) return;
+
+    const points = [];
+
+    if (Number.isFinite(payload.pickupLat) && Number.isFinite(payload.pickupLon)) {
+      points.push([payload.pickupLat, payload.pickupLon]);
+      if (pickupMarker) trackingMap.removeLayer(pickupMarker);
+      pickupMarker = L.circleMarker([payload.pickupLat, payload.pickupLon], {
+        radius: 7,
+        color: '#10b981',
+        fillColor: '#10b981',
+        fillOpacity: 0.9
+      }).addTo(trackingMap).bindPopup(`📦 <b>Pickup:</b> ${payload.pickup}`);
+    }
+
+    if (Number.isFinite(payload.dropoffLat) && Number.isFinite(payload.dropoffLon)) {
+      points.push([payload.dropoffLat, payload.dropoffLon]);
+      if (dropoffMarker) trackingMap.removeLayer(dropoffMarker);
+      dropoffMarker = L.circleMarker([payload.dropoffLat, payload.dropoffLon], {
+        radius: 7,
+        color: '#f59e0b',
+        fillColor: '#f59e0b',
+        fillOpacity: 0.9
+      }).addTo(trackingMap).bindPopup(`🏁 <b>Dropoff:</b> ${payload.dropoff}`);
+    }
+
+    if (Number.isFinite(payload.truckLat) && Number.isFinite(payload.truckLon)) {
+      const truckPos = [payload.truckLat, payload.truckLon];
+      points.push(truckPos);
+      if (truckMarker) {
+        truckMarker.setLatLng(truckPos)
+          .setPopupContent(
+            `🚛 <b>${payload.loadId}</b> (${payload.driverName || 'Driver'})<br>` +
+            `<b>Status:</b> ${payload.status || 'Active'}<br>` +
+            `<b>Location:</b> ${payload.locationLabel || 'Live GPS'}<br>` +
+            `<small>Updated: ${payload.updatedAt || 'Just now'}</small>`
+          )
+          .openPopup();
+      }
+    }
+
+    if (routePolyline) trackingMap.removeLayer(routePolyline);
+    if (points.length >= 2) {
+      routePolyline = L.polyline(points, { color: '#38bdf8', weight: 3, dashArray: '6, 6' }).addTo(trackingMap);
+      trackingMap.fitBounds(routePolyline.getBounds(), { padding: [35, 35] });
+    } else if (points.length === 1) {
+      trackingMap.setView(points[0], 10);
+    }
+  }
+
+  // Save & Sync Tracking State (Local + Supabase Realtime/Storage without new tables)
+  async function syncTrackingState(payload) {
+    if (!payload || !payload.loadId) return;
+    const storageKey = `loadagent_track_${payload.loadId.toUpperCase()}`;
+    localStorage.setItem('loadagent_active_load', JSON.stringify(payload));
+    localStorage.setItem(storageKey, JSON.stringify(payload));
+
+    const client = getSbClient();
+    if (client && typeof client.channel === 'function') {
+      try {
+        const ch = client.channel(`track-room-${payload.loadId.toUpperCase()}`);
+        await ch.send({
+          type: 'broadcast',
+          event: 'location_update',
+          payload
+        });
+      } catch (_) {}
+    }
+
+    // Also persist inside Supabase Auth user_metadata if logged in (zero new tables needed)
+    if (client && client.auth && typeof client.auth.updateUser === 'function') {
+      try {
+        await client.auth.updateUser({
+          data: { active_tracking: payload }
+        });
+      } catch (_) {}
+    }
+  }
+
+  function subscribeToLoadChannel(loadId) {
+    if (!loadId) return;
+    const cleanId = loadId.toUpperCase();
+    const client = getSbClient();
+
+    if (client && typeof client.channel === 'function') {
+      const ch = client.channel(`track-room-${cleanId}`);
+      ch.on('broadcast', { event: 'location_update' }, (msg) => {
+        if (msg && msg.payload) {
+          localStorage.setItem(`loadagent_track_${cleanId}`, JSON.stringify(msg.payload));
+          renderLoadOnMap(msg.payload);
+        }
+      }).subscribe();
+    }
+
+    if (livePollTimer) clearInterval(livePollTimer);
+    livePollTimer = setInterval(async () => {
+      try {
+        const localRaw = localStorage.getItem(`loadagent_track_${cleanId}`);
+        if (localRaw) {
+          const parsed = JSON.parse(localRaw);
+          if (parsed && parsed.updatedAt !== currentLoadData?.updatedAt) {
+            renderLoadOnMap(parsed);
+          }
+        }
+        if (client && client.auth && typeof client.auth.getUser === 'function') {
+          const { data } = await client.auth.getUser();
+          const remoteTrack = data?.user?.user_metadata?.active_tracking;
+          if (remoteTrack && remoteTrack.loadId?.toUpperCase() === cleanId && remoteTrack.updatedAt !== currentLoadData?.updatedAt) {
+            renderLoadOnMap(remoteTrack);
+          }
+        }
+      } catch (_) {}
+    }, 5000);
+  }
+
+  // 1. Finalize Deal & Build Direct Clickable WhatsApp + SMS Links
+  const finalizeDispatchBtn = document.getElementById('finalize-dispatch-btn');
+  if (finalizeDispatchBtn) {
+    finalizeDispatchBtn.addEventListener('click', async () => {
+      const loadId = (document.getElementById('track-load-id')?.value.trim() || 'L-10555').toUpperCase();
+      const driverName = document.getElementById('track-driver-name')?.value.trim() || 'Driver';
+      const pickup = document.getElementById('track-pickup')?.value.trim();
+      const dropoff = document.getElementById('track-dropoff')?.value.trim();
+      const rawPhone = document.getElementById('track-driver-phone')?.value.trim() || '';
+      const cleanPhone = rawPhone.replace(/[^0-9+]/g, '');
+
+      if (!pickup || !dropoff) {
+        alert('⚠️ Please enter both Pickup and Dropoff locations!');
+        return;
+      }
+
+      finalizeDispatchBtn.disabled = true;
+      finalizeDispatchBtn.textContent = '⏳ Preparing Live Route & Link...';
+
+      const [pickupGeo, dropoffGeo] = await Promise.all([
+        geocodePlace(pickup),
+        geocodePlace(dropoff)
+      ]);
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const payload = {
+        loadId,
+        driverName,
+        pickup,
+        dropoff,
+        pickupLat: pickupGeo?.lat ?? null,
+        pickupLon: pickupGeo?.lon ?? null,
+        dropoffLat: dropoffGeo?.lat ?? null,
+        dropoffLon: dropoffGeo?.lon ?? null,
+        truckLat: pickupGeo?.lat ?? 32.7767,
+        truckLon: pickupGeo?.lon ?? -96.7970,
+        locationLabel: pickup,
+        status: 'Dispatched · Waiting for Pickup',
+        updatedAt: timeStr
+      };
+
+      await syncTrackingState(payload);
+      subscribeToLoadChannel(loadId);
+      initTrackingMap();
+      renderLoadOnMap(payload);
+
+      // Build clickable live tracking link for Driver
+      const baseUrl = window.location.origin + window.location.pathname;
+      const trackUrl = `${baseUrl}?track=1&load=${encodeURIComponent(loadId)}&driver=${encodeURIComponent(driverName)}&pickup=${encodeURIComponent(pickup)}&dropoff=${encodeURIComponent(dropoff)}`;
+
+      const rawMessage =
+        `LoadAgent-AI Dispatch Confirmed! 🚛\n` +
+        `Load ID: ${loadId}\n` +
+        `Driver: ${driverName}\n` +
+        `Pickup: ${pickup}\n` +
+        `Dropoff: ${dropoff}\n\n` +
+        `Tap below to share your live GPS & trip status:\n${trackUrl}`;
+
+      const encodedMsg = encodeURIComponent(rawMessage);
+      const waDigits = cleanPhone.replace(/\+/g, '');
+
+      const waBtn = document.getElementById('send-whatsapp-btn');
+      const smsBtn = document.getElementById('send-sms-btn');
+
+      if (waBtn) {
+        waBtn.href = waDigits ? `https://wa.me/${waDigits}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
+      }
+      if (smsBtn) {
+        smsBtn.href = cleanPhone ? `sms:${cleanPhone}?body=${encodedMsg}` : `sms:?body=${encodedMsg}`;
+      }
+
+      document.getElementById('active-load-badge').textContent = loadId;
+      document.getElementById('dispatch-summary-text').textContent =
+        `Confirmed! Load #${loadId} (${pickup} → ${dropoff}) assigned to ${driverName}. Send the live link via WhatsApp or SMS below.`;
+      document.getElementById('dispatch-confirmed-box').classList.remove('hidden');
+
+      finalizeDispatchBtn.disabled = false;
+      finalizeDispatchBtn.textContent = '✅ Finalize Deal & Activate Tracking';
+    });
+  }
+
+  // 2. Trucker One-Click Real GPS + Status Update
+  const shareGpsBtn = document.getElementById('share-gps-btn');
+  if (shareGpsBtn) {
+    shareGpsBtn.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('GPS not supported on this browser. Please enter your city manually below.');
+        return;
+      }
+      shareGpsBtn.textContent = '📡 Fetching Live GPS...';
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const readablePlace = await reverseGeocode(lat, lon);
+          const selectedStatus = document.getElementById('trucker-trip-status')?.value || 'In Transit · Live GPS';
+
+          const base = currentLoadData || JSON.parse(localStorage.getItem('loadagent_active_load') || '{}');
+          const updatedPayload = Object.assign({}, base, {
+            loadId: base.loadId || 'L-10555',
+            driverName: base.driverName || 'Driver',
+            truckLat: lat,
+            truckLon: lon,
+            locationLabel: readablePlace,
+            status: selectedStatus,
+            updatedAt: timeStr
+          });
+
+          await syncTrackingState(updatedPayload);
+          initTrackingMap();
+          renderLoadOnMap(updatedPayload);
+
+          const lastUpdEl = document.getElementById('trucker-last-updated');
+          if (lastUpdEl) lastUpdEl.textContent = `✅ Live GPS Shared: ${readablePlace} (${timeStr})`;
+          shareGpsBtn.innerHTML = '<span>📡</span> Share My Live GPS Location';
+        },
+        () => {
+          alert('⚠️ Location permission denied. Please allow GPS or enter your City/Highway below.');
+          shareGpsBtn.innerHTML = '<span>📡</span> Share My Live GPS Location';
+        },
+        { enableHighAccuracy: true, timeout: 12000 }
+      );
+    });
+  }
+
+  // 3. Trucker Manual City / Highway Check-In + Status Update
+  const updateManualLocBtn = document.getElementById('update-manual-loc-btn');
+  if (updateManualLocBtn) {
+    updateManualLocBtn.addEventListener('click', async () => {
+      const locText = document.getElementById('manual-location-input')?.value.trim();
+      if (!locText) return;
+
+      updateManualLocBtn.disabled = true;
+      updateManualLocBtn.textContent = '...';
+
+      const geo = await geocodePlace(locText);
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const selectedStatus = document.getElementById('trucker-trip-status')?.value || 'In Transit';
+
+      if (geo) {
+        const base = currentLoadData || JSON.parse(localStorage.getItem('loadagent_active_load') || '{}');
+        const updatedPayload = Object.assign({}, base, {
+          loadId: base.loadId || 'L-10555',
+          driverName: base.driverName || 'Driver',
+          truckLat: geo.lat,
+          truckLon: geo.lon,
+          locationLabel: locText,
+          status: selectedStatus,
+          updatedAt: timeStr
+        });
+
+        await syncTrackingState(updatedPayload);
+        initTrackingMap();
+        renderLoadOnMap(updatedPayload);
+
+        const lastUpdEl = document.getElementById('trucker-last-updated');
+        if (lastUpdEl) lastUpdEl.textContent = `✅ Checked in at ${locText} (${selectedStatus} · ${timeStr})`;
+      } else {
+        alert('Location not found. Try entering City, State (e.g. Shreveport, LA).');
+      }
+
+      updateManualLocBtn.disabled = false;
+      updateManualLocBtn.textContent = 'Update Pin';
+    });
+  }
+
+  // 4. Auto-Open Live Tracking & Driver Check-In when opened from WhatsApp/SMS Link
+  (function handleIncomingTrackUrl() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('track') === '1') {
+      const loadId = (params.get('load') || 'L-10555').toUpperCase();
+      const driverName = params.get('driver') || 'Driver';
+      const pickup = params.get('pickup') || '';
+      const dropoff = params.get('dropoff') || '';
+
+      // Open Live Location view automatically if section exists
+      const locationNavBtn = document.querySelector('[data-nav="location"]');
+      if (locationNavBtn) {
+        locationNavBtn.click();
+      } else {
+        document.querySelectorAll('section[id^="view-"]').forEach((sec) => sec.classList.add('hidden'));
+        document.getElementById('view-location')?.classList.remove('hidden');
+      }
+
+      switchTrackingRole('trucker');
+      initTrackingMap();
+
+      const incomingPayload = {
+        loadId,
+        driverName,
+        pickup,
+        dropoff,
+        status: 'Driver Link Opened · Ready to Share GPS',
+        updatedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      renderLoadOnMap(incomingPayload);
+      subscribeToLoadChannel(loadId);
+    } else {
+      // Restore last active load if available
+      try {
+        const saved = JSON.parse(localStorage.getItem('loadagent_active_load') || 'null');
+        if (saved && saved.loadId) {
+          currentLoadData = saved;
+          subscribeToLoadChannel(saved.loadId);
+        }
+      } catch (_) {}
+    }
+  })();
+})(); 
 
 // 11. Account Status Logic (Using Existing carrier_profiles Only)
 let statusAccounts = [];
